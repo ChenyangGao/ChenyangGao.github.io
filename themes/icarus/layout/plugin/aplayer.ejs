@@ -1,0 +1,16 @@
+<% if (head && get_config_from_obj(plugin, 'enable')) { %>
+<link rel="stylesheet" href="<%- theme.libs.css.aplayer %>">
+<script src="<%- theme.libs.js.aplayer %>"></script>
+
+<div id="aplayer" class="music"></div>
+
+<script>
+(function () {
+    new APlayer({
+        container: document.getElementById('aplayer'),
+        audio: JSON.parse('<%- JSON.stringify(site.data.musics) %>'),
+        ...<%- JSON.stringify(plugin.config) %>
+    });
+})();
+</script>
+<% } %>

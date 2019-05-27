@@ -1,0 +1,483 @@
+---
+title: CPython中函数的非本地变量
+date: 2019-04-30 22:36:10
+author: ChenyangGao
+top: true
+categories: 编程思想
+tags: Python
+summary: 本文讨论了CPython中函数的非本地变量的特点和应用，其中的思想可部分推广到其它的Python解释器和其它编程语言。特别说明了在函数的多次调用间持续引用某些对象，需利用非本地的容器进行缓存。
+thumbnail: https://cdn.pixabay.com/photo/2015/10/30/15/04/green-tree-python-1014229_960_720.jpg
+
+---
+
+## 函数对象的特殊属性
+
+> **NOTE** 当前测试的<kbd>CPython</kbd>解释器版本为
+
+```python
+>>> print(__import__('sys').version)
+3.7.3 (default, Mar 27 2019, 16:54:48)
+[Clang 4.0.1 (tags/RELEASE_401/final)]
+```
+
+<!--more-->
+
+以当前版本的解释器下执行下面的代码，可得到一个<kbd>Markdown</kbd>表格
+
+```python
+def outer(freevar=None):
+    def inner(a, b: int=1, *args, c: str='1', **kwds) -> tuple:
+        'a test function'
+        return freevar, a, b, args, c, kwds
+    return inner
+
+fn = outer()
+
+print('attribute', 'type', 'setable', 'reason', sep=' | ')
+print(*'-'*4, sep=' | ')
+for attr in dir(fn):
+    try:
+        obj = getattr(fn, attr)
+        setattr(fn, attr, obj)
+        print('`%s`'%attr, type(obj), True, '', sep=' | ')
+    except Exception as exc: 
+        print('`%s`'%attr, type(obj), False, '`%s`'%exc, sep=' | ')
+```
+
+attribute | type | setable | reason
+- | - | - | -
+`__annotations__` | <class 'dict'> | True |
+`__call__` | <class 'method-wrapper'> | True |
+`__class__` | <class 'type'> | False | `__class__ assignment only supported for heap types or ModuleType subclasses`
+`__closure__` | <class 'tuple'> | False | `readonly attribute`
+`__code__` | <class 'code'> | True |
+`__defaults__` | <class 'tuple'> | True |
+`__delattr__` | <class 'method-wrapper'> | True |
+`__dict__` | <class 'dict'> | True |
+`__dir__` | <class 'builtin_function_or_method'> | True |
+`__doc__` | <class 'str'> | True |
+`__eq__` | <class 'method-wrapper'> | True |
+`__format__` | <class 'builtin_function_or_method'> | True |
+`__ge__` | <class 'method-wrapper'> | True |
+`__get__` | <class 'method-wrapper'> | True |
+`__getattribute__` | <class 'method-wrapper'> | True |
+`__globals__` | <class 'dict'> | False | `readonly attribute`
+`__gt__` | <class 'method-wrapper'> | True |
+`__hash__` | <class 'method-wrapper'> | True |
+`__init__` | <class 'method-wrapper'> | True |
+`__init_subclass__` | <class 'builtin_function_or_method'> | True |
+`__kwdefaults__` | <class 'dict'> | True |
+`__le__` | <class 'method-wrapper'> | True |
+`__lt__` | <class 'method-wrapper'> | True |
+`__module__` | <class 'str'> | True |
+`__name__` | <class 'str'> | True |
+`__ne__` | <class 'method-wrapper'> | True |
+`__new__` | <class 'builtin_function_or_method'> | True |
+`__qualname__` | <class 'str'> | True |
+`__reduce__` | <class 'builtin_function_or_method'> | True |
+`__reduce_ex__` | <class 'builtin_function_or_method'> | True |
+`__repr__` | <class 'method-wrapper'> | True |
+`__setattr__` | <class 'method-wrapper'> | True |
+`__sizeof__` | <class 'builtin_function_or_method'> | True |
+`__str__` | <class 'method-wrapper'> | True |
+`__subclasshook__` | <class 'builtin_function_or_method'> | True |
+
+## 命名空间和作用域
+
+> **NOTE** 在传统的编程语言中，作用域（scope）就是一段程序代码中所用到的名字被限制的可用范围。本地（局部，local）作用域被限制在块或函数体内，而全局（global）作用域被限制在本地以上最长可达程序的生命周期结束。有些编程语言允许，在本地作用域内构建一个更低层次的本地作用域，低层作用域访问一个非本地的名字，它就会到较高层中寻找，逐层往上，直到找到或者最终不能找到。但是这会引出一个问题：定义在一个函数`outer`内的函数`inner`被作为返回值，`inner`中引用了`inner`中没有而在`outer`中有的名字，为了保证理论上的某些一致性，是否要求编译器提供一种被称为闭包（closure）的机制：`outer`中的这些名字及其引用应该继续保留在一个可被`inner`访问但对更高层作用域隐藏（并非指绝对不能被更高层发现）。
+程序执行过程中，必定会处于某个作用域中，作用域其实是在维护一些名字对一些资源的占用关系。一旦程序离开某个作用域，那么注销其中的名字和释放对相关资源的占用往往被认为是唯一正确的。
+在<kbd>CPython</kbd>中，命名空间（namespace）和作用域虽然联系紧密，但却是两个不同的概念。在传统的编程语言<kbd>C</kbd>中，全局作用域建立在堆上，而本地作用域建立在栈上，但是在<kbd>Python</kbd>中，命名空间实际上就是个字典，而回收资源又是另一回事了，不再是“销毁”，只是“解除”对资源的引用关系。对资源的管理基于另一套机制（引用计数和垃圾回收），它代理了资源的创建和销毁的操作，它依靠建立统计信息来实现有效的管理。
+相关的情况非常复杂，但简单来说：更新全局命名空间`globals()`，会改变模块级别作用域中相应变量的值，但是更新本地命名空间`locals()`，其实际效果视所处情况会有所不同。在函数内还可以有本地作用域一说，但模块级别还是低于传统的全局概念的，在其上尚有`builtins`一级，而且解除一个模块对资源的占用关系更是轻而易举。命名空间也存在低级对高级的遮盖，这在面向对象中甚至可用来实现多态（polymorphism）。
+
+> **NOTE** <kbd>CPython</kbd>中对名字的寻找顺序：`locals` > `closure` > `globals` > `builtins`
+
+
+### 1. 全局命名空间和模块作用域
+
+> 更新全局命名空间`globals()`，会同时更新模块作用域中的变量
+
+---
+
+```python
+>>> val = 0
+>>> globals()['val'] = 1
+>>> val
+1
+```
+
+---
+
+### 2. 模块作用域中的本地命名空间
+
+> 在模块作用域中，本地命名空间`locals()`等同于全局命名空间`globals()`
+
+---
+
+```python
+>>> locals() is globals()
+True
+>>> val = 0
+>>> locals()['val'] = 1
+>>> val
+1
+```
+
+---
+
+### 3.  函数本地作用域中的本地命名空间
+
+> 在本地作用域中，本地命名空间`locals()`的更新并不影响本地作用域中变量的值，反之不然
+
+---
+
+```python
+def fn():
+    val = 0
+    locals()['val'] = 1
+    return val
+```
+
+```python
+>>> fn()
+0
+```
+
+---
+
+```python
+def fn():
+    val = 0
+    print(locals()['val'])
+    val = 1
+    print(locals()['val'])
+```
+
+```python
+>>> fn()
+0
+1
+```
+
+---
+
+> 本地命名空间`locals()`包含本地作用域的名称和自由变量
+
+---
+
+```python
+def outer():
+    nval = 0
+    def inner():
+        global gval
+        nonlocal nval
+        lval = 1
+        return locals()
+    return inner
+```
+
+```python
+>>> gval = 0
+>>> outer()() # ⚠️ 注意结果的顺序
+{'lval': 1, 'nval': 0}
+```
+
+---
+
+### 4. 本地命名空间和本地作用域的更新对闭包的影响
+
+> 和在本地作用域的赋值不同，对本地命名空间`locals()`的更新，不能为闭包所侦测和使用
+
+---
+
+```python
+val = 0
+
+def outer(mapping):
+    locals().update(mapping)
+    def inner():
+        return val
+    return inner
+```
+
+```python
+>>> outer(dict(val=1))()
+0
+```
+
+---
+
+```python
+def outer(mapping):
+    val = 0
+    locals().update(mapping)
+    def inner():
+        return val
+    return inner
+```
+
+```python
+>>> outer(dict(val=1))()
+0
+```
+
+---
+
+> 并且在本地作用域的赋值，必须是显式的，使用`exec`和`eval`，同样只会更新相应的`gloabls`和`locals`
+
+---
+
+```python
+def outer(mapping):
+    for key in tuple(mapping):
+        exec(f'{key}={key}', mapping, locals())
+    def inner():
+        return val
+    return inner
+```
+
+```python
+>>> outer(dict(val=1))()
+NameError: name 'val' is not defined
+```
+
+---
+
+```python
+def outer(mapping):
+    for key in tuple(mapping):
+        eval(compile(f'{key}={key}', '', 'single'), mapping, locals())
+    def inner():
+        return val
+    return inner
+```
+
+```python
+>>> outer(dict(val=1))()
+NameError: name 'val' is not defined
+```
+
+---
+
+> 总而言之，编程语言作为编译器或解释器的配置文件，编程语言的行为会受到解释器或编译器实现方式的限制。在<kbd>CPython</kbd>的实现中，在一定程度上可认为，本地作用域是静态的，本地命名空间是动态的，对本地作用域更新的过程，在编译时就已经确定了，而在运行时更新本地命名空间和动态编译代码执行，只会影响一些动态的局面。
+
+## 函数利用缓存的研究
+
+> **NOTE** 一般地讲，系统`A`和系统`B`之间有通信，`B`可存储`A`发送过来的数据，并且当`A`索要时可原样返回，就能用`B`提供`A`的缓存需求。无论`A`用什么方式去访问`B`，它们之间的运作着怎样的通信协议，是本地还是通过网络。甚至`B`可以是`A`的一部分，或者`A`和`B`都是某个系统`C`的一部分，`A`借助了某些基础设施对`B`进行了操作，例如`B`是某个可读写存储器、它的驱动程序或者在存储器上构造的容器（container）数据结构和相关处理方法集合，就算这个存储器或数据结构在数据写入后就不可更改。
+一般的，当我们在说缓存时，其实是说：以任意方式，把数据存储在容器中，需要的时候就从容器中获取。虽然并不规定使用次数，但合理的策略是至少使用到1次，🚫 使用0次的不应缓存。
+实质上，缓存唯一问题是存储和访问，其它问题都是附加的。执行一次操作的结果被后续多次使用需求，就是业务问题对缓存的附加问题：把某个操作的结果存储起来，在以后需要用到时直接返回相应结果，而不是再次执行操作然后把结果返回。但一个操作，它可能：可进一步细分，操作的过程会改变一些对象的数据，多次执行的结果不同。缓存只是把结果存储起来，何时更新、何时失效取决于现实考虑和程序实现，如果需要使用缓存来自动处理其它问题，只要附加相关的处理逻辑即可。
+
+> **NOTE** 讨论一个特殊情形：假设函数`fn`需要引用某个数据，并且希望能在多次调用间持续。通常的做法是，在一个所属的高层命名空间或作用域中有名称绑定了这个引用或者这个名称所引用的容器直接或间接持有这个引用，然后在本地无冲突的策略下，使用名称和另外的间接操作去获取这个引用。使用名称去获取，并不保证每次获取的都是同一个引用，但在规则约束下，却是可以加以保证。
+
+### 1. 定义在函数体中
+
+```python
+def fn():
+    val = '<time-consuming>'
+    return val
+```
+
+> **NOTE** 如果`fn.__code__.co_consts`包含这项计算结果（解释器隐含地缓存了这项常量），那么意味着这项计算只在函数编译时执行一次，这个方案就是可取的
+> 1. 某些字面量的简单计算
+> 2. 函数(`def`和`lambda`)和类的定义（缓存的是code对象，⚠️在函数内定义的类，类似函数）
+
+> ⚠️ 缓存往往指的是一次操作的结果被多次使用，把数据保存在某个名称上，然后在需要使用的时间和地点，使用名称进行访问，那么广义上讲，保存在名称上的值，在其作用范围内，都是缓存的(cached)。
+> ```python
+> 
+> val = '<expr>'
+> ...
+> 
+> # 此处是`val`或者某个`val`的引用者的作用范围
+> # 并包括`val`作为参数传入这个作用范围的情况
+> use(val)
+> ```
+> ⚠️ 函数的基本信息在编译时就确定，在执行时又受到传入参数的影响。本地有哪些变量名，在编译时就确定，根据显式的赋值语句，以及函数和类的定义语句来判定。函数编译是一个多阶段的过程，如果函数`b`的定义嵌套在函数`a`的定义内，那么在`a`的本地变量名信息收集完成后，`b`才能被编译，但`b`的编译完成时间会早于`a`，`b`的某些上下文信息也会取自`a`，例如自由变量。
+> ⚠️ 本地作用域中变量的赋值（包括函数和类的定义）是一个复杂机制，远远不是修改本地命名空间的名称和值的映射关系那么简单。这类赋值，会去修改多个地方，栈、本地命名空间、闭包的自由变量对应`cell`对象的`cell_contents`等。这种复杂性也是有成本的，主要影响运行时的效率。
+
+
+### 2. 定义在函数所在的全局命名空间中
+
+```python
+val = '<time-consuming>'
+
+def fn():
+    return val
+```
+
+> **NOTE** 这意味着会在全局命名空间中建立一个名称，有时候我们会认为，这是对全局命名空间的污染，尤其是当这个名称只被某一个函数用到时。函数的`__globals__`属性引用的就是所在的全局命名空间，不过这并不意味着这个命名空间保留着对它的引用。函数的`__globals__`属性是只读的，不过`__code__`属性是可替换的，可以创建一个功能相同的新函数，引用某个`dict`对象，充当它的全局命名空间。
+
+```python
+import functools
+
+from typing import Optional, Type
+
+Function = Type[type(lambda:None)]
+
+def redirect_globals(
+    namespace: dict,
+    fn: Optional[Function] = None
+) -> Function:
+    '''
+    利用传入的命名空间`namespace`和函数`fn`，创建一个和`fn`功能和签名完全相同的函数，
+    但是__globals__属性为`namespace`的函数，要求`fn.__closure__`没有被设置
+
+    :param namespace: 作为新函数的全局命名空间
+    :param fn: 函数
+
+    :return: 和`fn`功能和签名完全相同，但全局命名空间为`namespace`的函数
+    '''
+    if fn is None:
+        return functools.partial(redirect_globals, namespace)
+    f = eval('lambda: None', namespace)
+    # `fn`的自由变量个数不为0时，会抛出`ValueError`，意味着它其实是一个闭包
+    # 可根据`fn.__closure__`或`fn.__code__.co_freevars`判断
+    f.__code__ = fn.__code__
+    return functools.update_wrapper(f, fn)
+```
+
+### 3. 在函数的定义头中定义默认参数
+
+```python
+def fn(val='<time-consuming>'):
+    return val
+```
+
+> **NOTE** 在定义头中定义，只在函数编译时执行一次，允许是任何表达式，无论它有多复杂。不过这种做法也会被认为污染了函数的签名，对使用者造成困惑，即便参数名以下划线开头。
+
+> **NOTE** 在函数头中定义默认参数，自动设置了它的`__defaults__`和`__kwdefaults__`的属性，它们都是可替换的，而且`__kwdefaults__`是一个普通的字典，本身就是可改的。在函数调用时，新传入的参数会遮盖这些默认参数，具体行为如下：
+```python
+>>> def fn(foo=1, bar=2, *, baz='0'): return foo, bar, baz
+>>> fn.__defaults__
+(1, 2)
+>>> fn.__kwdefaults__
+{'baz': '0'}
+>>> fn.__defaults__ = (1, 2, 3)
+>>> fn.__defaults__['baz'] = 'inf'
+>>> fn()
+(2, 3, 'inf')
+>>> fn(1, 2, baz=3)
+(1, 2, 3)
+>>> fn.__defaults__ = (0,)
+>>> fn()
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+TypeError: fn() missing 1 required positional argument: 'foo'
+```
+
+> ✍ 在定义头上的参数名称，是函数本地的，会计入`fn.__code__.co_nlocals`和`fn.__code__.co_varnames`中，但不会计入`fn.__code__.co_consts`中。位置参数计入`fn.__code__.co_argcount`，但可变长度参数不计入，例如`*args`。`__defaults__`和`__kwdefaults__`都是容器，这是解释器的自动缓存策略，编译函数除了生成机器（例如<kbd>PVM</kbd>）的字节码，还有收集上下文相关信息绑定到函数对象的过程。
+
+### 4. 闭包
+
+```python
+def outer():
+    val = '<time-consuming>'
+    def fn():
+        return val
+    return fn
+
+fn = outer()
+# del outer
+```
+
+> **NOTE** 如果使用闭包存粹是为了不污染全局命名空间，那么外层函数使用一次，把它的返回值绑定到一个变量后，就可以删除了。在<kbd>Python</kbd>中，使用`def`(也包括`async def`等`def`衍生)定义函数的构造被认为是语句而非表达式，用`lambda`定义函数的构造虽然是表达式，但是定义体中只允许用且只用1个表达式，运用这种技术就必须写一些**冗余**的代码。<kbd>JavaScript</kbd>的用户笑了😄，因为<kbd>JavaScript</kbd>中几乎所有结构都是表达式，意味着有返回值，这种性质可谓awesome。
+
+```javascript
+fn = (function(){
+    val = '<time-consuming>';
+    return () => val;
+})()
+```
+
+> Python的函数，也有一个设计问题，就是它们的`__closure__`属性是只读的。这可以理解，因为`__closure__`实际上和`__code__.co_freevars`存在关系，即便函数的`__code__`属性可被替换，但也要和`__closure__`属性协调，即并非所有的替换都能被接受。如果想构造一个只是`__closure__`属性不同，功能相同的函数，其实是比较麻烦的。
+
+```python
+import functools
+import inspect
+
+from typing import Optional, Type, Mapping
+
+Function = Type[type(lambda:None)]
+
+def use_closure(
+    namespace: Mapping,
+    fn: Optional[Function] = None
+) -> Function:
+    '''
+    利用传入的命名空间`namespace`和函数`fn`，创建一个和`fn`功能和签名完全相同的函数，
+    但是__closure__属性可能有所不同的函数
+
+    :param namespace: `fn`中的非本地变量会尝试从这个映射中提取
+    :param fn: 函数
+
+    :return: 和`fn`功能和签名完全相同，但尝试从`namespace`获取一些值来构建__closure__
+    '''
+    if fn is None:
+        return functools.partial(use_closure, mapping)
+    assign = '\n    '.join(map('{0} = __["{0}"]'.format, mapping))
+    # 获取的源代码，可能是不可用的，或者可能获取不到，对于lambda函数，这样的处理也是不适合的
+    source = '    '.join(inspect.getsourcelines(fn)[0])
+    exec(f'''
+def outer(__):
+    {assign}
+    {source}
+    return {fn.__name__}
+''', fn.__globals__, locals())
+    return functools.update_wrapper(locals()['outer'](mapping), fn)
+```
+
+> **NOTE** 虽然函数的`__closure__`属性不可更改，但是`__closure__`中所有`cell`对象的`cell_contents`是可更改的。完全可以精心设计函数定义，先占用几个`__closure__`位置，在以后需要的时候进行更改。
+
+```python
+def outer():
+    val: int = 1
+    def inner():
+        return val
+    return inner
+```
+
+```python
+>>> fn = outer()
+>>> fn.__closure__
+(<cell at 0x10e375d68: int object at 0x10e0105a0>,)
+>>> fn.__closure__[0].cell_contents = 'foo'
+>>> fn.__closure__
+(<cell at 0x10e375d68: str object at 0x10e3dd180>,)
+>>> fn()
+'foo'
+```
+
+> ✍ 但我建议一种更为集中的管理办法，把数据保存到映射容器里面，推荐`dict`
+
+```python
+def outer():
+    _closure_ns: dict = {}
+    def inner():
+        if 'val' not in _closure_ns:
+            _closure_ns['val'] = '<time-consuming>'
+        val = _closure_ns['val']
+        return i
+    return inner
+```
+
+### 5. nonlocal和global
+
+> **NOTE** `nonlocal`用于声明某个名称是自由变量（非本地和模块层次，属于闭包层次作用域），而`global`用于声明某个名称是全局变量（`globals()`，模块层次作用域）。当一个函数调用结束后，在本地作用域建立的所有名称都会被销毁（体现为它们所引用对象的引用计数自动减小相应数目），包括：
+>> 1. 本地赋值的名称
+>> 2. 定义头中的名称
+>> 3. `nonlocal`和`global`声明的名称
+> 
+> <kbd>2.</kbd>中的默认参数和<kbd>3.</kbd>都有自动缓存，但每次执行时都需要拿缓存执行赋值，并不等同于传统语言的静态变量。当在本地用赋值语句修改自由变量的值时，会自动更新函数的`__closure__`中相应`cell`对象的`cell_content`的值，修改全局变量则时更新对应的模块层次命名空间`globals()`中的名称和值的映射关系。
+
+### 6. 容器
+
+> **NOTE** 容器包括作用域、命名空间、物理存储区域在逻辑上的管理机制等。缓存只是容器的运用之一，容器主要的功能在于实现程序的动态和数据的集中（更一般的说，数据结构实现了数据的秩序，容器是一类数据结构）。
+
+> **NOTE** 在函数的多次调用间持续引用需利用**非本地的容器**缓存：
+> 1. 存储于比函数本地的更高层的作用域或命名空间者函数的默认参数中，一个<kbd>Python</kbd>函数会自动寻找未在本地声明而需要用到的名称；
+> 2. 或者存储于上述非本地名称所引用的容器中。
+
+> ✍ 如果把缓存的使用封装到一条指令中，例如函数，它以上述方式引用了一个外部容器，由此可实现惰性计算和缓存。对于纯函数，相同的参数传入返回相同的结果，那么把具体参数和相应返回值建立关联，存入一个映射型容器中，那么每个不同的参数传入只需要计算一次。
+如果让函数自动维护缓存，需要增加对容器的查询和写入的操作，查询是每次执行，写入执行一次（若有缓存删除则次数取决于算法和实际情况），这也是有成本的，需要和计算的成本进行权衡取舍。
+`functools.lru_cache`实现了 Least Recently Used 算法的缓存管理，缓存并非一直有效，当长时间不用的缓存将会被清理。这不是唯一的缓存管理算法，例如你还可以使用 LFU(Least Frequently Used) 等算法。
+
+> ✍ 命名空间（namespace）实际上是一个映射型的数据结构，尤其是散列表，被广泛用于充当命名空间。所谓名称定义在某个命名空间，实际上就是在命名空间有这个名称的名称-值对，访问某个命名空间中的某个名称，就是在这个命名空间中这个名称的名称-值对中的值。
+通过名称，访问作用域或命名空间这类容器中的值，只能确保名称是确定的，而值要取得后才能确定，或者说，如果值发生变更那么取得值也是不同的，这让情况变得相当灵活和复杂多变。
