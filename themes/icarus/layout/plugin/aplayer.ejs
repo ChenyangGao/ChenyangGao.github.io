@@ -1,15 +1,19 @@
 <% if (head && get_config_from_obj(plugin, 'enable')) { %>
-<link rel="stylesheet" href="<%- theme.libs.css.aplayer %>">
-<script src="<%- theme.libs.js.aplayer %>"></script>
-
+    <% if (get_config_from_obj(plugin, 'version')) { %>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@<%= plugin.version %>/dist/APlayer.min.css">
+<script src="https://cdn.jsdelivr.net/npm/aplayer@<%= plugin.version %>/dist/APlayer.min.js"></script>
+    <% } else { %>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.css">
+<script src="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.js"></script>
+    <% } %>
 <div id="aplayer" class="music"></div>
 
 <script>
 (function () {
     new APlayer({
-        container: document.getElementById('aplayer'),
+        container: document.querySelector("<%- plugin.cssSelector || '#aplayer' %>"),
         audio: JSON.parse('<%- JSON.stringify(site.data.musics) %>'),
-        ...<%- JSON.stringify(plugin.config) %>
+        ...<%- JSON.stringify(plugin.config || {}) %>
     });
 })();
 </script>

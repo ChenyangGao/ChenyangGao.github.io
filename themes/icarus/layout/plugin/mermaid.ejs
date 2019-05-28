@@ -1,7 +1,7 @@
 <% if (head && get_config_from_obj(plugin, 'enable')) { %>
 <style><%- plugin.cssSelector %> {background-color:white;}</style>
     <% if (get_config_from_obj(plugin, 'version')) { %>
-<script src="https://unpkg.com/mermaid@<%= plugin['version'] %>/dist/mermaid.min.js"></script>
+<script src="https://unpkg.com/mermaid@<%= plugin.version %>/dist/mermaid.min.js"></script>
     <% } else { %>
 <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
     <% } %>
