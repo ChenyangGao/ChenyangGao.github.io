@@ -660,21 +660,23 @@
     <div class="card-content">
         <h3 class="title is-5 has-text-weight-normal">评论</h3>
         
-<div id="comment-container"></div>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1.4.1/dist/gitalk.css">
-<script src="https://cdn.jsdelivr.net/npm/gitalk@1.4.1/dist/gitalk.min.js"></script>
 <script>
-    var gitalk = new Gitalk({
-        clientID: '0c4d63f8312662c8e0ef',
-        clientSecret: '85fac375ae5f908d13add1e7289e689b5cc905ec',
-        id: '59ef43ca8384b17523d20673e8bd2a8b',
-        repo: 'ChenyangGao.github.io',
-        owner: 'ChenyangGao',
-        admin: ["ChenyangGao"]
-    })
-    gitalk.render('comment-container')
+    var disqus_config = function () {
+        this.page.url = 'https://chenyanggao.github.io/2019/04/30/CPython中函数的非本地变量/';
+        this.page.identifier = '2019/04/30/CPython中函数的非本地变量/';
+    };
+    (function() {
+        var d = document, s = d.createElement('script');  
+        s.src = '//' + 'chenyanggao-blog' + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
 </script>
 
+<div id="disqus_thread">
+    
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
     </div>
 </div>
 </div>
