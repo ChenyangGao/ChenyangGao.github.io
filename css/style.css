@@ -1,3 +1,4 @@
+/* Powered By [stylus](http://stylus-lang.com "stylus") */
 /* ---------------------------------
  *       Override CSS Framework
  * --------------------------------- */
@@ -496,8 +497,22 @@ figure.highlight:hover .copy {
   all: initial;
 }
 /* ---------------------------------
- *        Fix Content OverFlow
+ *    Import My Custom Css Styles
  * --------------------------------- */
+/* Set the border style for kbd */
+kbd {
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  display: inline-block;
+  font-size: 12px!important;
+  line-height: 12px;
+  margin-bottom: 3px;
+  padding: 3px 5px;
+  vertical-align: middle
+}
+
+/* Fix content overflow */
 div.content {
   overflow-x: auto;
 }
+
