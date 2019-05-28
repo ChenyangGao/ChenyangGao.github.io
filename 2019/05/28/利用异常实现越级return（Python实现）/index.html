@@ -7,19 +7,19 @@
 
 
 
-    <meta name="description" content="异常是一类消息 在面向对象的世界里，对象之间的交互表现为消息的传递。异常也是一种消息，就我的理解，异常并非错误，它经常用来表明存在错误，但本质上它是一类特殊的消息，关联着一种跳出局部范围的机制。而在Python的世界里，所有异常都必须是BaseException的子类。 所谓异常是消息，指的是一个异常对象可以携带信息，捕获异常或者传递一个异常对象，你就可以从中提取信息。这个消息有时会被认为是一个">
+    <meta name="description" content="异常是一类消息 在面向对象的世界里，对象之间的交互表现为消息的传递。异常也是一种消息，就我的理解，异常并非错误，它经常用来表明存在错误，但本质上它是一类特殊的消息，关联着一种跳出局部范围的机制。而在Python的世界里，所有异常都必须是BaseException的子类。 所谓异常是消息，指的是一个异常对象可以携带信息，捕获异常（就得到了一个异常对象）或者传递一个异常对象，你就可以从这个异常对象中">
 <meta name="keywords" content="Python">
 <meta property="og:type" content="article">
 <meta property="og:title" content="利用异常实现越级return（Python实现）">
 <meta property="og:url" content="https://chenyanggao.github.io/2019/05/28/利用异常实现越级return（Python实现）/index.html">
 <meta property="og:site_name" content="思考者">
-<meta property="og:description" content="异常是一类消息 在面向对象的世界里，对象之间的交互表现为消息的传递。异常也是一种消息，就我的理解，异常并非错误，它经常用来表明存在错误，但本质上它是一类特殊的消息，关联着一种跳出局部范围的机制。而在Python的世界里，所有异常都必须是BaseException的子类。 所谓异常是消息，指的是一个异常对象可以携带信息，捕获异常或者传递一个异常对象，你就可以从中提取信息。这个消息有时会被认为是一个">
+<meta property="og:description" content="异常是一类消息 在面向对象的世界里，对象之间的交互表现为消息的传递。异常也是一种消息，就我的理解，异常并非错误，它经常用来表明存在错误，但本质上它是一类特殊的消息，关联着一种跳出局部范围的机制。而在Python的世界里，所有异常都必须是BaseException的子类。 所谓异常是消息，指的是一个异常对象可以携带信息，捕获异常（就得到了一个异常对象）或者传递一个异常对象，你就可以从这个异常对象中">
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="https://cdn.pixabay.com/photo/2014/11/21/15/33/snake-540656_960_720.jpg">
-<meta property="og:updated_time" content="2019-05-28T10:03:09.359Z">
+<meta property="og:updated_time" content="2019-05-28T10:08:12.085Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="利用异常实现越级return（Python实现）">
-<meta name="twitter:description" content="异常是一类消息 在面向对象的世界里，对象之间的交互表现为消息的传递。异常也是一种消息，就我的理解，异常并非错误，它经常用来表明存在错误，但本质上它是一类特殊的消息，关联着一种跳出局部范围的机制。而在Python的世界里，所有异常都必须是BaseException的子类。 所谓异常是消息，指的是一个异常对象可以携带信息，捕获异常或者传递一个异常对象，你就可以从中提取信息。这个消息有时会被认为是一个">
+<meta name="twitter:description" content="异常是一类消息 在面向对象的世界里，对象之间的交互表现为消息的传递。异常也是一种消息，就我的理解，异常并非错误，它经常用来表明存在错误，但本质上它是一类特殊的消息，关联着一种跳出局部范围的机制。而在Python的世界里，所有异常都必须是BaseException的子类。 所谓异常是消息，指的是一个异常对象可以携带信息，捕获异常（就得到了一个异常对象）或者传递一个异常对象，你就可以从这个异常对象中">
 <meta name="twitter:image" content="https://cdn.pixabay.com/photo/2014/11/21/15/33/snake-540656_960_720.jpg">
 
 
@@ -203,7 +203,7 @@
                 <span class="level-item has-text-grey">
                     
                     
-                    9 分钟 读完 (大约 1284 个字)
+                    9 分钟 读完 (大约 1313 个字)
                 </span>
                 
                 
@@ -223,7 +223,7 @@
         <div class="content">
             <h2 id="异常是一类消息"><a class="markdownIt-Anchor" href="#异常是一类消息"></a> 异常是一类消息</h2>
 <p>在面向对象的世界里，对象之间的交互表现为消息的传递。异常也是一种消息，就我的理解，异常并非错误，它经常用来表明存在错误，但本质上它是一类特殊的消息，关联着一种跳出局部范围的机制。而在<kbd>Python</kbd>的世界里，所有异常都必须是<a href="https://docs.python.org/3/library/exceptions.html#BaseException" target="_blank" rel="noopener">BaseException</a>的子类。<br>
-所谓异常是消息，指的是一个异常对象可以携带信息，捕获异常或者传递一个异常对象，你就可以从中提取信息。这个消息有时会被认为是一个指令或者信号，即便仅仅只是捕获到了一个特定类型的异常，例如，某个无限循环中有一个捕获异常的语句，当某个异常发生时，它就认为就收到了退出的信号，优雅地退出。</p>
+所谓异常是消息，指的是一个异常对象可以携带信息，捕获异常（就得到了一个异常对象）或者传递一个异常对象，你就可以从这个异常对象中提取信息。这个消息有时会被认为是一个指令或者信号，即便仅仅只是捕获到了一个特定类型的异常对象，例如，某个无限循环中有一个捕获异常的语句，当捕获到某个类型的异常对象时，它就认为接收到了退出的信号，快速、优雅地退出。</p>
 <a id="more"></a>
 <h2 id="处理异常的语句是流程控制语句"><a class="markdownIt-Anchor" href="#处理异常的语句是流程控制语句"></a> 处理异常的语句是流程控制语句</h2>
 <p>当异常发生时，异常现场所在的局部范围就将被丢弃，并且把相关统计信息存储在一个异常对象中向上冒泡。所谓的局部范围，包括控制语句内部、局部作用域等层次结构中。<br>
