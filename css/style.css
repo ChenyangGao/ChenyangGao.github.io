@@ -516,6 +516,26 @@ div.content {
   overflow-x: auto;
 }
 
+.content > table tr:hover {
+  background: #f9fcff;
+}
+
+.content > table td:hover {
+  background: #ebf3ff;
+}
+
+.content > table td {
+  border: 1px solid #ccc;
+}
+
+.content > table td:first-child {
+  border-left: 0;
+}
+
+.content > table td:last-child {
+  border-right: 0;
+}
+
 .highlight-wrap[data-rel] {
   position: relative;
   overflow: hidden;
