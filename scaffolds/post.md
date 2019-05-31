@@ -1,5 +1,9 @@
 ---
 title: {{ title }}
 date: {{ date }}
-tags:
+author: ChenyangGao
+tags: 
+categories: 
+thumbnail: 
+
 ---

@@ -116,11 +116,15 @@
 </div>
 <% } %>
 
-<% if (!index && has_config('comment.type')) { %>
+<% if (!index && has_config('comment') && get_config('comment')) { %>
+    <% for (let comment of get_config('comment')) { %>
+        <% if (comment.type) { %>
 <div class="card">
     <div class="card-content">
         <h3 class="title is-5 has-text-weight-normal"><%= __('article.comments') %></h3>
-        <%- partial('comment/' + get_config('comment.type')) %>
+        <%- partial('comment/' + comment.type, {comment: comment}) %>
     </div>
 </div>
+        <% } %>
+    <% } %>
 <% } %>

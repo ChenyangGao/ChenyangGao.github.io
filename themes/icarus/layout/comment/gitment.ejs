@@ -1,5 +1,5 @@
-<% if (!has_config('comment.owner') || !has_config('comment.repo') || !has_config('comment.client_id') ||
-		!has_config('comment.client_secret')) { %>
+<% if (!comment.owner || !comment.repo || !comment.client_id ||
+		!comment.client_secret) { %>
 <div class="notification is-danger">
 	You forgot to set the <code>owner</code>, <code>repo</code>, <code>client_id</code>, or <code>client_secret</code> for Gitment.
 	Please set it in <code>_config.yml</code>.
@@ -11,11 +11,11 @@
 <script>
 	var gitment = new Gitment({
 		id: '<%= page.path %>',
-		owner: '<%= get_config('comment.owner') %>',
-		repo: '<%= get_config('comment.repo') %>',
+		owner: '<%= comment.owner %>',
+		repo: '<%= comment.repo %>',
 		oauth: {
-			client_id: '<%= get_config('comment.client_id') %>',
-			client_secret: '<%= get_config('comment.client_secret') %>',
+			client_id: '<%= comment.client_id %>',
+			client_secret: '<%= comment.client_secret %>',
 		},
 	})
 	gitment.render('comment-container')

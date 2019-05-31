@@ -1,0 +1,36 @@
+/* Set the border style for kbd */
+kbd {
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  display: inline-block;
+  font-size: 12px!important;
+  line-height: 12px;
+  margin-bottom: 3px;
+  padding: 3px 5px;
+  vertical-align: middle
+}
+
+/* Fix content overflow */
+div.content {
+  overflow-x: auto;
+}
+
+div.content > table tr:hover {
+  background: #f9fcff;
+}
+
+div.content > table td:hover {
+  background: #ebf3ff;
+}
+
+div.content > table td {
+  border: 1px solid #ccc;
+}
+
+div.content > table td:first-child {
+  border-left: 0;
+}
+
+div.content > table td:last-child {
+  border-right: 0;
+}

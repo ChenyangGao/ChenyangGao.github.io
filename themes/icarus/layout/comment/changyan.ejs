@@ -1,4 +1,4 @@
-<% if (!has_config('comment.appid') || !has_config('comment.conf')) { %>
+<% if (!comment.appid || !comment.conf) { %>
 <div class="notification is-danger">
     You forgot to set the <code>appid</code> or <code>conf</code> for Changyan. Please set it in <code>_config.yml</code>.
 </div>
@@ -7,8 +7,8 @@
 <script charset="utf-8" type="text/javascript" src="https://changyan.sohu.com/upload/changyan.js" ></script>
 <script type="text/javascript">
 window.changyan.api.config({
-    appid: '<%= get_config('comment.appid') %>',
-    conf: '<%= get_config('comment.conf') %>'
+    appid: '<%= comment.appid %>',
+    conf: '<%= comment.conf %>'
 });
 </script>
 <% } %>

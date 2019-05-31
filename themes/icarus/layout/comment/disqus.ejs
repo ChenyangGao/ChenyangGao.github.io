@@ -1,4 +1,4 @@
-<% if (has_config('comment.shortname')) { %>
+<% if (comment.shortname) { %>
 <script>
     var disqus_config = function () {
         this.page.url = '<%= page.permalink %>';
@@ -6,14 +6,14 @@
     };
     (function() {
         var d = document, s = d.createElement('script');  
-        s.src = '//' + '<%= get_config('comment.shortname') %>' + '.disqus.com/embed.js';
+        s.src = '//' + '<%= comment.shortname %>' + '.disqus.com/embed.js';
         s.setAttribute('data-timestamp', +new Date());
         (d.head || d.body).appendChild(s);
     })();
 </script>
 <% } %>
 <div id="disqus_thread">
-    <% if (!has_config('comment.shortname')) { %>
+    <% if (!comment.shortname) { %>
     <div class="notification is-danger">
         You forgot to set the <code>shortname</code> for Disqus. Please set it in <code>_config.yml</code>.
     </div>

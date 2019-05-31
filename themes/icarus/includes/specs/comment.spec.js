@@ -112,18 +112,22 @@ const ValineSpec = {
     }
 };
 
+
 module.exports = {
-    [type]: 'object',
-    [doc]: 'Comment plugin settings\nhttps://ppoffice.github.io/hexo-theme-icarus/categories/Plugins/Comment',
-    type: {
-        [type]: 'string',
-        [doc]: 'Name of the comment plugin',
-        [defaultValue]: null
-    },
-    ...ChangYanSpec,
-    ...DisqusSpec,
-    ...GitmentGitalkSpec,
-    ...IssoSpec,
-    ...LiveReSpec,
-    ...ValineSpec
-}
+    [type]: 'array',
+    '*': {
+        [type]: 'object',
+        [doc]: 'Comment plugin settings\nhttps://ppoffice.github.io/hexo-theme-icarus/categories/Plugins/Comment',
+        type: {
+            [type]: 'string',
+            [doc]: 'Name of the comment plugin',
+            [defaultValue]: null
+        },
+        ...ChangYanSpec,
+        ...DisqusSpec,
+        ...GitmentGitalkSpec,
+        ...IssoSpec,
+        ...LiveReSpec,
+        ...ValineSpec
+    }
+};

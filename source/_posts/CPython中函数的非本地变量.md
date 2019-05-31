@@ -2,10 +2,8 @@
 title: CPython中函数的非本地变量
 date: 2019-04-30 22:36:10
 author: ChenyangGao
-top: true
 categories: 编程思想
 tags: Python
-summary: 本文讨论了CPython中函数的非本地变量的特点和应用，其中的思想可部分推广到其它的Python解释器和其它编程语言。特别说明了在函数的多次调用间持续引用某些对象，需利用非本地的容器进行缓存。
 thumbnail: https://cdn.pixabay.com/photo/2015/10/30/15/04/green-tree-python-1014229_960_720.jpg
 
 ---
