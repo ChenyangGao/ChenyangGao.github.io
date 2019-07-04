@@ -516,23 +516,23 @@ div.content {
   overflow-x: auto;
 }
 
-.content > table tr:hover {
+div.content > table tr:hover {
   background: #f9fcff;
 }
 
-.content > table td:hover {
+div.content > table td:hover {
   background: #ebf3ff;
 }
 
-.content > table td {
+div.content > table td {
   border: 1px solid #ccc;
 }
 
-.content > table td:first-child {
+div.content > table td:first-child {
   border-left: 0;
 }
 
-.content > table td:last-child {
+div.content > table td:last-child {
   border-right: 0;
 }
 

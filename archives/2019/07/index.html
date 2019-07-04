@@ -2,7 +2,7 @@
 <html lang="zh">
 <head><meta name="generator" content="Hexo 3.8.0">
     <meta charset="utf-8">
-<title>标签: Python - 思考者</title>
+<title>归档: 2019/7 - 思考者</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
 
@@ -11,7 +11,7 @@
 <meta name="keywords" content="数学，科学，技术，批判性思维，博弈论，经济学">
 <meta property="og:type" content="website">
 <meta property="og:title" content="思考者">
-<meta property="og:url" content="https://chenyanggao.github.io/tags/Python/index.html">
+<meta property="og:url" content="https://chenyanggao.github.io/archives/2019/07/index.html">
 <meta property="og:site_name" content="思考者">
 <meta property="og:description" content="黑格尔：“无知者是不自由的，因为和他对立的，是一个陌生的世界。”">
 <meta property="og:locale" content="zh-CN">
@@ -180,198 +180,43 @@
     <section class="section">
         <div class="container">
             <div class="columns">
-                <div class="column is-8-tablet is-8-desktop is-6-widescreen has-order-2 column-main"><div class="card">
+                <div class="column is-8-tablet is-8-desktop is-6-widescreen has-order-2 column-main">
+
+<div class="card widget">
     <div class="card-content">
-        <nav class="breadcrumb" aria-label="breadcrumbs">
-        <ul>
-            <li><a href="/tags">标签</a></li>
-            <li class="is-active"><a href="#" aria-current="page">Python</a></li>
-        </ul>
-        </nav>
+        <h3 class="tag is-link">
+        七月 2019
+        </h3>
+        <div class="timeline">
+        
+            <article class="media">
+                
+                <a href="/2019/07/04/掩码（Python实现）/" class="media-left">
+                    <p class="image is-64x64">
+                        <img class="thumbnail" src="https://static.boredpanda.com/blog/wp-content/uploads/2018/08/Naamloos-5b80200f6c2e5-png__700.jpg" alt="掩码（Python实现）">
+                    </p>
+                </a>
+                
+                <div class="media-content">
+                    <div class="content">
+                        <time class="has-text-grey is-size-7 is-block is-uppercase" datetime="2019-07-04T10:02:35.000Z">2019-07-04</time>
+                        <a href="/2019/07/04/掩码（Python实现）/" class="has-link-black-ter is-size-6">掩码（Python实现）</a>
+                        <div class="level article-meta is-mobile">
+                            <div class="level-left">
+                                
+                                <div class="level-item is-size-7 is-uppercase">
+                                <a class="has-link-grey -link" href="/categories/编程思想/">编程思想</a>
+                                </div>
+                                
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        
+        </div>
     </div>
 </div>
-
-    <div class="card">
-    
-    <div class="card-image">
-        <a href="/2019/07/04/掩码（Python实现）/" class="image is-7by1">
-            <img class="thumbnail" src="https://static.boredpanda.com/blog/wp-content/uploads/2018/08/Naamloos-5b80200f6c2e5-png__700.jpg" alt="掩码（Python实现）">
-        </a>
-    </div>
-    
-    <div class="card-content article ">
-        
-        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
-            <div class="level-left">
-                <time class="level-item has-text-grey" datetime="2019-07-04T10:02:35.000Z">2019-07-04</time>
-                
-                <div class="level-item">
-                <a class="has-link-grey -link" href="/categories/编程思想/">编程思想</a>
-                </div>
-                
-                
-                <span class="level-item has-text-grey">
-                    
-                    
-                    3 分钟 读完 (大约 519 个字)
-                </span>
-                
-                
-            </div>
-        </div>
-        
-        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
-            
-                <a class="has-link-black-ter" href="/2019/07/04/掩码（Python实现）/">掩码（Python实现）</a>
-            
-        </h1>
-        <div class="content">
-            <h2 id="什么是掩码"><a class="markdownIt-Anchor" href="#什么是掩码"></a> 什么是掩码</h2>
-<p><strong>掩码</strong>（mask）一个位模式，表示从一个二进制串中选出的位的集合。</p>
-<h2 id="一个特殊的例子flag"><a class="markdownIt-Anchor" href="#一个特殊的例子flag"></a> 一个特殊的例子Flag</h2>
-<figure class="highlight python hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Flag</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">__init__</span><span class="hljs-params">(self)</span>:</span></span><br><span class="line">        self._value = <span class="hljs-number">0</span></span><br><span class="line"></span><br><span class="line"><span class="hljs-meta">    @property</span></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">flag</span><span class="hljs-params">(self)</span> -&gt; int:</span></span><br><span class="line">        <span class="hljs-keyword">return</span> self._value</span><br><span class="line"></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">set</span><span class="hljs-params">(self)</span>:</span></span><br><span class="line">        <span class="hljs-string">'set the flag to 1'</span></span><br><span class="line">        self._value = <span class="hljs-number">1</span></span><br><span class="line"></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">clear</span><span class="hljs-params">(self)</span>:</span></span><br><span class="line">        <span class="hljs-string">'set the flag to 0'</span></span><br><span class="line">        self._value = <span class="hljs-number">0</span></span><br><span class="line"></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">isset</span><span class="hljs-params">(self)</span> -&gt; bool:</span></span><br><span class="line">        <span class="hljs-string">'Is flag = 1?'</span></span><br><span class="line">        <span class="hljs-keyword">return</span> self._value <span class="hljs-keyword">is</span> <span class="hljs-number">1</span></span><br></pre></td></tr></table></figure>
-        </div>
-        
-        
-        <div class="level is-mobile">
-            <div class="level-start">
-                <div class="level-item">
-                <a class="button is-size-7 is-light" href="/2019/07/04/掩码（Python实现）/#more">阅读更多</a>
-                </div>
-            </div>
-        </div>
-        
-        
-    </div>
-</div>
-
-
-
-
-
-
-
-
-    <div class="card">
-    
-    <div class="card-image">
-        <a href="/2019/05/28/利用异常实现越级return（Python实现）/" class="image is-7by1">
-            <img class="thumbnail" src="https://cdn.pixabay.com/photo/2014/11/21/15/33/snake-540656_960_720.jpg" alt="利用异常实现越级return（Python实现）">
-        </a>
-    </div>
-    
-    <div class="card-content article ">
-        
-        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
-            <div class="level-left">
-                <time class="level-item has-text-grey" datetime="2019-05-28T06:54:38.000Z">2019-05-28</time>
-                
-                <div class="level-item">
-                <a class="has-link-grey -link" href="/categories/编程思想/">编程思想</a>
-                </div>
-                
-                
-                <span class="level-item has-text-grey">
-                    
-                    
-                    9 分钟 读完 (大约 1309 个字)
-                </span>
-                
-                
-            </div>
-        </div>
-        
-        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
-            
-                <a class="has-link-black-ter" href="/2019/05/28/利用异常实现越级return（Python实现）/">利用异常实现越级return（Python实现）</a>
-            
-        </h1>
-        <div class="content">
-            <h2 id="异常是一类消息"><a class="markdownIt-Anchor" href="#异常是一类消息"></a> 异常是一类消息</h2>
-<p>在面向对象的世界里，对象之间的交互表现为消息的传递。异常也是一种消息，就我的理解，异常并非错误，它经常用来表明存在错误，但本质上它是一类特殊的消息，关联着一种跳出局部范围的机制。而在<kbd>Python</kbd>的世界里，所有异常都必须是<a href="https://docs.python.org/3/library/exceptions.html#BaseException" target="_blank" rel="noopener">BaseException</a>的子类。<br>
-所谓异常是消息，指的是一个异常对象可以携带信息，捕获异常（就得到了一个异常对象）或者传递一个异常对象，你就可以从这个异常对象中提取信息。这个消息有时会被认为是一个指令或者信号，即便仅仅只是捕获到了一个特定类型的异常对象，例如，某个无限循环中有一个捕获异常的语句，当捕获到某个类型的异常对象时，它就认为接收到了退出的信号，快速、优雅地退出。</p>
-        </div>
-        
-        
-        <div class="level is-mobile">
-            <div class="level-start">
-                <div class="level-item">
-                <a class="button is-size-7 is-light" href="/2019/05/28/利用异常实现越级return（Python实现）/#more">阅读更多</a>
-                </div>
-            </div>
-        </div>
-        
-        
-    </div>
-</div>
-
-
-
-
-
-
-
-
-    <div class="card">
-    
-    <div class="card-image">
-        <a href="/2019/04/30/CPython中函数的非本地变量/" class="image is-7by1">
-            <img class="thumbnail" src="https://cdn.pixabay.com/photo/2015/10/30/15/04/green-tree-python-1014229_960_720.jpg" alt="CPython中函数的非本地变量">
-        </a>
-    </div>
-    
-    <div class="card-content article ">
-        
-        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
-            <div class="level-left">
-                <time class="level-item has-text-grey" datetime="2019-04-30T14:36:10.000Z">2019-04-30</time>
-                
-                <div class="level-item">
-                <a class="has-link-grey -link" href="/categories/编程思想/">编程思想</a>
-                </div>
-                
-                
-                <span class="level-item has-text-grey">
-                    
-                    
-                    34 分钟 读完 (大约 5134 个字)
-                </span>
-                
-                
-            </div>
-        </div>
-        
-        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
-            
-                <a class="has-link-black-ter" href="/2019/04/30/CPython中函数的非本地变量/">CPython中函数的非本地变量</a>
-            
-        </h1>
-        <div class="content">
-            <h2 id="函数对象的特殊属性"><a class="markdownIt-Anchor" href="#函数对象的特殊属性"></a> 函数对象的特殊属性</h2>
-<blockquote>
-<p><strong>NOTE</strong> 当前测试的<kbd>CPython</kbd>解释器版本为</p>
-</blockquote>
-<figure class="highlight python hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-meta">&gt;&gt;&gt; </span>print(__import__(<span class="hljs-string">'sys'</span>).version)</span><br><span class="line"><span class="hljs-number">3.7</span><span class="hljs-number">.3</span> (default, Mar <span class="hljs-number">27</span> <span class="hljs-number">2019</span>, <span class="hljs-number">16</span>:<span class="hljs-number">54</span>:<span class="hljs-number">48</span>)</span><br><span class="line">[Clang <span class="hljs-number">4.0</span><span class="hljs-number">.1</span> (tags/RELEASE_401/final)]</span><br></pre></td></tr></table></figure>
-        </div>
-        
-        
-        <div class="level is-mobile">
-            <div class="level-start">
-                <div class="level-item">
-                <a class="button is-size-7 is-light" href="/2019/04/30/CPython中函数的非本地变量/#more">阅读更多</a>
-                </div>
-            </div>
-        </div>
-        
-        
-    </div>
-</div>
-
-
-
-
-
-
 
 
 </div>

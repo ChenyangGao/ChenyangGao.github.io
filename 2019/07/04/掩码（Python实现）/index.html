@@ -2,24 +2,25 @@
 <html lang="zh">
 <head><meta name="generator" content="Hexo 3.8.0">
     <meta charset="utf-8">
-<title>标签: Python - 思考者</title>
+<title>掩码（Python实现） - 思考者</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
 
 
-    <meta name="description" content="黑格尔：“无知者是不自由的，因为和他对立的，是一个陌生的世界。”">
-<meta name="keywords" content="数学，科学，技术，批判性思维，博弈论，经济学">
-<meta property="og:type" content="website">
-<meta property="og:title" content="思考者">
-<meta property="og:url" content="https://chenyanggao.github.io/tags/Python/index.html">
+    <meta name="description" content="什么是掩码 掩码（mask）一个位模式，表示从一个二进制串中选出的位的集合。  一个特殊的例子Flag 1234567891011121314151617181920class Flag:    def __init__(self):        self._value = 0    @property    def flag(self) -&amp;gt; int:        return se">
+<meta name="keywords" content="Python">
+<meta property="og:type" content="article">
+<meta property="og:title" content="掩码（Python实现）">
+<meta property="og:url" content="https://chenyanggao.github.io/2019/07/04/掩码（Python实现）/index.html">
 <meta property="og:site_name" content="思考者">
-<meta property="og:description" content="黑格尔：“无知者是不自由的，因为和他对立的，是一个陌生的世界。”">
+<meta property="og:description" content="什么是掩码 掩码（mask）一个位模式，表示从一个二进制串中选出的位的集合。  一个特殊的例子Flag 1234567891011121314151617181920class Flag:    def __init__(self):        self._value = 0    @property    def flag(self) -&amp;gt; int:        return se">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:image" content="https://chenyanggao.github.io/images/og_image.png">
+<meta property="og:image" content="https://static.boredpanda.com/blog/wp-content/uploads/2018/08/Naamloos-5b80200f6c2e5-png__700.jpg">
+<meta property="og:updated_time" content="2019-07-04T10:40:13.838Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="思考者">
-<meta name="twitter:description" content="黑格尔：“无知者是不自由的，因为和他对立的，是一个陌生的世界。”">
-<meta name="twitter:image" content="https://chenyanggao.github.io/images/og_image.png">
+<meta name="twitter:title" content="掩码（Python实现）">
+<meta name="twitter:description" content="什么是掩码 掩码（mask）一个位模式，表示从一个二进制串中选出的位的集合。  一个特殊的例子Flag 1234567891011121314151617181920class Flag:    def __init__(self):        self._value = 0    @property    def flag(self) -&amp;gt; int:        return se">
+<meta name="twitter:image" content="https://static.boredpanda.com/blog/wp-content/uploads/2018/08/Naamloos-5b80200f6c2e5-png__700.jpg">
 
 
 
@@ -137,7 +138,7 @@
         <div class="navbar-brand is-flex-center">
             <a class="navbar-item navbar-logo" href="/">
             
-                <img src="/images/logo.svg" alt="思考者" height="28">
+                <img src="/images/logo.svg" alt="掩码（Python实现）" height="28">
             
             </a>
         </div>
@@ -181,22 +182,11 @@
         <div class="container">
             <div class="columns">
                 <div class="column is-8-tablet is-8-desktop is-6-widescreen has-order-2 column-main"><div class="card">
-    <div class="card-content">
-        <nav class="breadcrumb" aria-label="breadcrumbs">
-        <ul>
-            <li><a href="/tags">标签</a></li>
-            <li class="is-active"><a href="#" aria-current="page">Python</a></li>
-        </ul>
-        </nav>
-    </div>
-</div>
-
-    <div class="card">
     
     <div class="card-image">
-        <a href="/2019/07/04/掩码（Python实现）/" class="image is-7by1">
+        <span class="image is-7by1">
             <img class="thumbnail" src="https://static.boredpanda.com/blog/wp-content/uploads/2018/08/Naamloos-5b80200f6c2e5-png__700.jpg" alt="掩码（Python实现）">
-        </a>
+        </span>
     </div>
     
     <div class="card-content article ">
@@ -217,29 +207,41 @@
                 </span>
                 
                 
+                <span class="level-item has-text-grey" id="busuanzi_container_page_pv">
+                    <i class="far fa-eye"></i>
+                    <span id="busuanzi_value_page_pv">0</span>次访问
+                </span>
+                
             </div>
         </div>
         
         <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
             
-                <a class="has-link-black-ter" href="/2019/07/04/掩码（Python实现）/">掩码（Python实现）</a>
+                掩码（Python实现）
             
         </h1>
         <div class="content">
             <h2 id="什么是掩码"><a class="markdownIt-Anchor" href="#什么是掩码"></a> 什么是掩码</h2>
 <p><strong>掩码</strong>（mask）一个位模式，表示从一个二进制串中选出的位的集合。</p>
 <h2 id="一个特殊的例子flag"><a class="markdownIt-Anchor" href="#一个特殊的例子flag"></a> 一个特殊的例子Flag</h2>
-<figure class="highlight python hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Flag</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">__init__</span><span class="hljs-params">(self)</span>:</span></span><br><span class="line">        self._value = <span class="hljs-number">0</span></span><br><span class="line"></span><br><span class="line"><span class="hljs-meta">    @property</span></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">flag</span><span class="hljs-params">(self)</span> -&gt; int:</span></span><br><span class="line">        <span class="hljs-keyword">return</span> self._value</span><br><span class="line"></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">set</span><span class="hljs-params">(self)</span>:</span></span><br><span class="line">        <span class="hljs-string">'set the flag to 1'</span></span><br><span class="line">        self._value = <span class="hljs-number">1</span></span><br><span class="line"></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">clear</span><span class="hljs-params">(self)</span>:</span></span><br><span class="line">        <span class="hljs-string">'set the flag to 0'</span></span><br><span class="line">        self._value = <span class="hljs-number">0</span></span><br><span class="line"></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">isset</span><span class="hljs-params">(self)</span> -&gt; bool:</span></span><br><span class="line">        <span class="hljs-string">'Is flag = 1?'</span></span><br><span class="line">        <span class="hljs-keyword">return</span> self._value <span class="hljs-keyword">is</span> <span class="hljs-number">1</span></span><br></pre></td></tr></table></figure>
+<div class="highlight-wrap" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true" data-rel="PYTHON"><figure class="iseeu highlight /python hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Flag</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">__init__</span><span class="hljs-params">(self)</span>:</span></span><br><span class="line">        self._value = <span class="hljs-number">0</span></span><br><span class="line"></span><br><span class="line"><span class="hljs-meta">    @property</span></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">flag</span><span class="hljs-params">(self)</span> -&gt; int:</span></span><br><span class="line">        <span class="hljs-keyword">return</span> self._value</span><br><span class="line"></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">set</span><span class="hljs-params">(self)</span>:</span></span><br><span class="line">        <span class="hljs-string">'set the flag to 1'</span></span><br><span class="line">        self._value = <span class="hljs-number">1</span></span><br><span class="line"></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">clear</span><span class="hljs-params">(self)</span>:</span></span><br><span class="line">        <span class="hljs-string">'set the flag to 0'</span></span><br><span class="line">        self._value = <span class="hljs-number">0</span></span><br><span class="line"></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">isset</span><span class="hljs-params">(self)</span> -&gt; bool:</span></span><br><span class="line">        <span class="hljs-string">'Is flag = 1?'</span></span><br><span class="line">        <span class="hljs-keyword">return</span> self._value <span class="hljs-keyword">is</span> <span class="hljs-number">1</span></span><br></pre></td></tr></table></figure></div>
+<a id="more"></a>
+<h2 id="代码实现"><a class="markdownIt-Anchor" href="#代码实现"></a> 代码实现</h2>
+<div class="highlight-wrap" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true" data-rel="PYTHON"><figure class="iseeu highlight /python hljs"><figcaption><span>mask.py</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">from</span> typing <span class="hljs-keyword">import</span> TypeVar, Generic, Union</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">T = TypeVar(<span class="hljs-string">'T'</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MaskOpMixin</span><span class="hljs-params">(Generic[T])</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">__eq__</span><span class="hljs-params">(self, o: Union[int, T])</span> -&gt; bool:</span></span><br><span class="line">        <span class="hljs-keyword">if</span> isinstance(o, type(self)):</span><br><span class="line">            <span class="hljs-keyword">return</span> self._value == o._value</span><br><span class="line">        <span class="hljs-keyword">return</span> self._value == o</span><br><span class="line"></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">__and__</span><span class="hljs-params">(self, o: Union[int, T])</span> -&gt; T:</span></span><br><span class="line">        cls = type(self)</span><br><span class="line">        <span class="hljs-keyword">if</span> isinstance(o, cls):</span><br><span class="line">            <span class="hljs-keyword">return</span> cls(self._value &amp; o._value)</span><br><span class="line">        <span class="hljs-keyword">return</span> cls(self._value &amp; o)</span><br><span class="line"></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">__or__</span><span class="hljs-params">(self, o: Union[int, T])</span> -&gt; T:</span></span><br><span class="line">        cls = type(self)</span><br><span class="line">        <span class="hljs-keyword">if</span> isinstance(o, cls):</span><br><span class="line">            <span class="hljs-keyword">return</span> cls(self._value | o._value)</span><br><span class="line">        <span class="hljs-keyword">return</span> cls(self._value | o)</span><br><span class="line"></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">__xor__</span><span class="hljs-params">(self, o: Union[int, T])</span> -&gt; T:</span></span><br><span class="line">        cls = type(self)</span><br><span class="line">        <span class="hljs-keyword">if</span> isinstance(o, cls):</span><br><span class="line">            <span class="hljs-keyword">return</span> cls(self._value ^ o._value)</span><br><span class="line">        <span class="hljs-keyword">return</span> cls(self._value ^ o)</span><br><span class="line"></span><br><span class="line">    __rand__ = __and__</span><br><span class="line">    __ror__ = __or__</span><br><span class="line">    __rxor__ = __xor__</span><br><span class="line"></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">__iand__</span><span class="hljs-params">(self, o: Union[int, T])</span> -&gt; T:</span></span><br><span class="line">        <span class="hljs-keyword">if</span> isinstance(o, type(self)):</span><br><span class="line">            o = o._value</span><br><span class="line">        self._value &amp;= o</span><br><span class="line">        <span class="hljs-keyword">return</span> self</span><br><span class="line"></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">__ior__</span><span class="hljs-params">(self, o: Union[int, T])</span> -&gt; T:</span></span><br><span class="line">        <span class="hljs-keyword">if</span> isinstance(o, type(self)):</span><br><span class="line">            o = o._value</span><br><span class="line">        self._value |= o</span><br><span class="line">        <span class="hljs-keyword">return</span> self</span><br><span class="line"></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">__ixor__</span><span class="hljs-params">(self, o: Union[int, T])</span> -&gt; T:</span></span><br><span class="line">        <span class="hljs-keyword">if</span> isinstance(o, type(self)):</span><br><span class="line">            o = o._value</span><br><span class="line">        self._value ^= o</span><br><span class="line">        <span class="hljs-keyword">return</span> self</span><br><span class="line"></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">__sub__</span><span class="hljs-params">(self, o: Union[int, T])</span> -&gt; T:</span></span><br><span class="line">        cls = type(self)</span><br><span class="line">        <span class="hljs-keyword">if</span> isinstance(o, cls):</span><br><span class="line">            <span class="hljs-keyword">return</span> cls((self._value | o._value) ^ o._value)</span><br><span class="line">        <span class="hljs-keyword">return</span> cls((self._value | o) ^ o)</span><br><span class="line"></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">__isub__</span><span class="hljs-params">(self, o: Union[int, T])</span> -&gt; T:</span></span><br><span class="line">        <span class="hljs-keyword">if</span> isinstance(o, type(self)):</span><br><span class="line">            o = o._value</span><br><span class="line">        self._value = (self._value | o) ^ o</span><br><span class="line">        <span class="hljs-keyword">return</span> self</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MaskBase</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">__init__</span><span class="hljs-params">(self, mask: int = <span class="hljs-number">0</span>)</span> -&gt; <span class="hljs-keyword">None</span>:</span></span><br><span class="line">        self._value = mask</span><br><span class="line"></span><br><span class="line"><span class="hljs-meta">    @property</span></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">mask</span><span class="hljs-params">(self)</span> -&gt; int:</span></span><br><span class="line">        <span class="hljs-keyword">return</span> self._value</span><br><span class="line"></span><br><span class="line"><span class="hljs-meta">    @property</span></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">binmask</span><span class="hljs-params">(self)</span> -&gt; str:</span></span><br><span class="line">        <span class="hljs-keyword">return</span> bin(self._value)</span><br><span class="line"></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">__repr__</span><span class="hljs-params">(self)</span> -&gt; str:</span></span><br><span class="line">        <span class="hljs-keyword">return</span> <span class="hljs-string">f'<span class="hljs-subst">&#123;type(self).__name__&#125;</span>(<span class="hljs-subst">&#123;bin(self._value)&#125;</span>)'</span></span><br><span class="line"></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">set</span><span class="hljs-params">(self, m: int)</span> -&gt; <span class="hljs-keyword">None</span>:</span></span><br><span class="line">        <span class="hljs-string">'set mask by offset m'</span></span><br><span class="line">        self._value |= <span class="hljs-number">1</span> &lt;&lt; m</span><br><span class="line"></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">clear</span><span class="hljs-params">(self, m: int)</span> -&gt; <span class="hljs-keyword">None</span>:</span></span><br><span class="line">        <span class="hljs-string">'clear mask by offset m'</span></span><br><span class="line">        self._value ^= <span class="hljs-number">1</span> &lt;&lt; m</span><br><span class="line"></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test</span><span class="hljs-params">(self, m: int)</span> -&gt; bool:</span></span><br><span class="line">        <span class="hljs-string">'test mask by offset m'</span></span><br><span class="line">        <span class="hljs-keyword">return</span> bool(self._value &amp; <span class="hljs-number">1</span> &lt;&lt; m)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Mask</span><span class="hljs-params">(MaskBase, MaskOpMixin[MaskBase])</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">set</span><span class="hljs-params">(self, m: Union[int, MaskBase])</span> -&gt; <span class="hljs-keyword">None</span>:</span></span><br><span class="line">        <span class="hljs-string">'set mask by mask m'</span></span><br><span class="line">        self |= m</span><br><span class="line"></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">clear</span><span class="hljs-params">(self, m: Union[int, MaskBase])</span> -&gt; <span class="hljs-keyword">None</span>:</span></span><br><span class="line">        <span class="hljs-string">'clear mask by mask m'</span></span><br><span class="line">        self -= m</span><br><span class="line"></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">reverse</span><span class="hljs-params">(self, m: Union[int, MaskBase])</span> -&gt; <span class="hljs-keyword">None</span>:</span></span><br><span class="line">        <span class="hljs-string">'reverse mask by mask m'</span></span><br><span class="line">        self ^=  m</span><br><span class="line"></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test</span><span class="hljs-params">(self, m: Union[int, MaskBase])</span> -&gt; bool:</span></span><br><span class="line">        <span class="hljs-string">'clear mask by mask m'</span></span><br><span class="line">        <span class="hljs-keyword">return</span> self &amp; m == m</span><br></pre></td></tr></table></figure></div>
+<h2 id="简单测试"><a class="markdownIt-Anchor" href="#简单测试"></a> 简单测试</h2>
+<div class="highlight-wrap" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true" data-rel="PYTHON"><figure class="iseeu highlight /python hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">from</span> mask <span class="hljs-keyword">import</span> *</span><br><span class="line"><span class="hljs-meta">&gt;&gt;&gt; </span>EVENT0 = <span class="hljs-number">1</span> &lt;&lt; <span class="hljs-number">0</span></span><br><span class="line"><span class="hljs-meta">&gt;&gt;&gt; </span>EVENT1 = <span class="hljs-number">1</span> &lt;&lt; <span class="hljs-number">1</span></span><br><span class="line"><span class="hljs-meta">&gt;&gt;&gt; </span>EVENT2 = <span class="hljs-number">1</span> &lt;&lt; <span class="hljs-number">2</span></span><br><span class="line"><span class="hljs-meta">&gt;&gt;&gt; </span>EVENT3 = <span class="hljs-number">1</span> &lt;&lt; <span class="hljs-number">3</span></span><br><span class="line"><span class="hljs-meta">&gt;&gt;&gt; </span>m = Mask(EVENT1)</span><br><span class="line"><span class="hljs-meta">&gt;&gt;&gt; </span>m.set(EVENT0 | EVENT3)</span><br><span class="line"><span class="hljs-meta">&gt;&gt;&gt; </span>m</span><br><span class="line">Mask(<span class="hljs-number">0b1011</span>)</span><br><span class="line"><span class="hljs-meta">&gt;&gt;&gt; </span>m.test(EVENT0 | EVENT1)</span><br><span class="line"><span class="hljs-literal">True</span></span><br><span class="line"><span class="hljs-meta">&gt;&gt;&gt; </span>m.clear(EVENT0 | EVENT1)</span><br><span class="line"><span class="hljs-meta">&gt;&gt;&gt; </span>m</span><br><span class="line">Mask(<span class="hljs-number">0b1000</span>)</span><br><span class="line"><span class="hljs-meta">&gt;&gt;&gt; </span>m.reverse((<span class="hljs-number">1</span> &lt;&lt; <span class="hljs-number">4</span>) - <span class="hljs-number">1</span>)</span><br><span class="line"><span class="hljs-meta">&gt;&gt;&gt; </span>m</span><br><span class="line">Mask(<span class="hljs-number">0b111</span>)</span><br></pre></td></tr></table></figure></div>
+
         </div>
         
-        
-        <div class="level is-mobile">
+        <div class="level is-size-7 is-uppercase">
             <div class="level-start">
                 <div class="level-item">
-                <a class="button is-size-7 is-light" href="/2019/07/04/掩码（Python实现）/#more">阅读更多</a>
+                    <span class="is-size-6 has-text-grey has-mr-7">#</span>
+                    <a class="has-link-grey -link" href="/tags/Python/">Python</a>
                 </div>
             </div>
         </div>
+        
         
         
     </div>
@@ -249,131 +251,73 @@
 
 
 
-
-
-
-    <div class="card">
-    
-    <div class="card-image">
-        <a href="/2019/05/28/利用异常实现越级return（Python实现）/" class="image is-7by1">
-            <img class="thumbnail" src="https://cdn.pixabay.com/photo/2014/11/21/15/33/snake-540656_960_720.jpg" alt="利用异常实现越级return（Python实现）">
-        </a>
-    </div>
-    
-    <div class="card-content article ">
+<div class="card card-transparent">
+    <div class="level post-navigation is-flex-wrap is-mobile">
         
-        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
-            <div class="level-left">
-                <time class="level-item has-text-grey" datetime="2019-05-28T06:54:38.000Z">2019-05-28</time>
-                
-                <div class="level-item">
-                <a class="has-link-grey -link" href="/categories/编程思想/">编程思想</a>
-                </div>
-                
-                
-                <span class="level-item has-text-grey">
-                    
-                    
-                    9 分钟 读完 (大约 1309 个字)
-                </span>
-                
-                
-            </div>
+        
+        <div class="level-end">
+            <a class="level level-item has-link-grey  article-nav-next" href="/2019/05/28/利用异常实现越级return（Python实现）/">
+                <span class="level-item">利用异常实现越级return（Python实现）</span>
+                <i class="level-item fas fa-chevron-right"></i>
+            </a>
         </div>
-        
-        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
-            
-                <a class="has-link-black-ter" href="/2019/05/28/利用异常实现越级return（Python实现）/">利用异常实现越级return（Python实现）</a>
-            
-        </h1>
-        <div class="content">
-            <h2 id="异常是一类消息"><a class="markdownIt-Anchor" href="#异常是一类消息"></a> 异常是一类消息</h2>
-<p>在面向对象的世界里，对象之间的交互表现为消息的传递。异常也是一种消息，就我的理解，异常并非错误，它经常用来表明存在错误，但本质上它是一类特殊的消息，关联着一种跳出局部范围的机制。而在<kbd>Python</kbd>的世界里，所有异常都必须是<a href="https://docs.python.org/3/library/exceptions.html#BaseException" target="_blank" rel="noopener">BaseException</a>的子类。<br>
-所谓异常是消息，指的是一个异常对象可以携带信息，捕获异常（就得到了一个异常对象）或者传递一个异常对象，你就可以从这个异常对象中提取信息。这个消息有时会被认为是一个指令或者信号，即便仅仅只是捕获到了一个特定类型的异常对象，例如，某个无限循环中有一个捕获异常的语句，当捕获到某个类型的异常对象时，它就认为接收到了退出的信号，快速、优雅地退出。</p>
-        </div>
-        
-        
-        <div class="level is-mobile">
-            <div class="level-start">
-                <div class="level-item">
-                <a class="button is-size-7 is-light" href="/2019/05/28/利用异常实现越级return（Python实现）/#more">阅读更多</a>
-                </div>
-            </div>
-        </div>
-        
         
     </div>
 </div>
 
 
 
-
-
-
-
-
-    <div class="card">
     
-    <div class="card-image">
-        <a href="/2019/04/30/CPython中函数的非本地变量/" class="image is-7by1">
-            <img class="thumbnail" src="https://cdn.pixabay.com/photo/2015/10/30/15/04/green-tree-python-1014229_960_720.jpg" alt="CPython中函数的非本地变量">
-        </a>
-    </div>
-    
-    <div class="card-content article ">
         
-        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
-            <div class="level-left">
-                <time class="level-item has-text-grey" datetime="2019-04-30T14:36:10.000Z">2019-04-30</time>
-                
-                <div class="level-item">
-                <a class="has-link-grey -link" href="/categories/编程思想/">编程思想</a>
-                </div>
-                
-                
-                <span class="level-item has-text-grey">
-                    
-                    
-                    34 分钟 读完 (大约 5134 个字)
-                </span>
-                
-                
-            </div>
-        </div>
+<div class="card">
+    <div class="card-content">
+        <h3 class="title is-5 has-text-weight-normal">评论</h3>
         
-        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
-            
-                <a class="has-link-black-ter" href="/2019/04/30/CPython中函数的非本地变量/">CPython中函数的非本地变量</a>
-            
-        </h1>
-        <div class="content">
-            <h2 id="函数对象的特殊属性"><a class="markdownIt-Anchor" href="#函数对象的特殊属性"></a> 函数对象的特殊属性</h2>
-<blockquote>
-<p><strong>NOTE</strong> 当前测试的<kbd>CPython</kbd>解释器版本为</p>
-</blockquote>
-<figure class="highlight python hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-meta">&gt;&gt;&gt; </span>print(__import__(<span class="hljs-string">'sys'</span>).version)</span><br><span class="line"><span class="hljs-number">3.7</span><span class="hljs-number">.3</span> (default, Mar <span class="hljs-number">27</span> <span class="hljs-number">2019</span>, <span class="hljs-number">16</span>:<span class="hljs-number">54</span>:<span class="hljs-number">48</span>)</span><br><span class="line">[Clang <span class="hljs-number">4.0</span><span class="hljs-number">.1</span> (tags/RELEASE_401/final)]</span><br></pre></td></tr></table></figure>
-        </div>
-        
-        
-        <div class="level is-mobile">
-            <div class="level-start">
-                <div class="level-item">
-                <a class="button is-size-7 is-light" href="/2019/04/30/CPython中函数的非本地变量/#more">阅读更多</a>
-                </div>
-            </div>
-        </div>
-        
-        
+<div id="comment-container"></div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1.4.1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1.4.1/dist/gitalk.min.js"></script>
+<script>
+    var gitalk = new Gitalk({
+        clientID: '0c4d63f8312662c8e0ef',
+        clientSecret: '85fac375ae5f908d13add1e7289e689b5cc905ec',
+        id: '22fca1b59cb773c00fbada189d80b62b',
+        repo: 'ChenyangGao.github.io',
+        owner: 'ChenyangGao',
+        admin: ["ChenyangGao"]
+    })
+    gitalk.render('comment-container')
+</script>
+
     </div>
 </div>
+        
+    
+        
+<div class="card">
+    <div class="card-content">
+        <h3 class="title is-5 has-text-weight-normal">评论</h3>
+        
+<script>
+    var disqus_config = function () {
+        this.page.url = 'https://chenyanggao.github.io/2019/07/04/掩码（Python实现）/';
+        this.page.identifier = '2019/07/04/掩码（Python实现）/';
+    };
+    (function() {
+        var d = document, s = d.createElement('script');  
+        s.src = '//' + 'chenyanggao-blog' + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
 
-
-
-
-
-
-
-
+<div id="disqus_thread">
+    
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+    </div>
+</div>
+        
+    
 </div>
                 
 
@@ -934,7 +878,7 @@
             <div class="level-start has-text-centered-mobile">
                 <a class="footer-logo is-block has-mb-6" href="/">
                 
-                    <img src="/images/logo.svg" alt="思考者" height="28">
+                    <img src="/images/logo.svg" alt="掩码（Python实现）" height="28">
                 
                 </a>
                 <p class="is-size-7">
