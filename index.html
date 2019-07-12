@@ -184,6 +184,71 @@
     <div class="card">
     
     <div class="card-image">
+        <a href="/2019/07/12/CPython中函数引用它自身/" class="image is-7by1">
+            <img class="thumbnail" src="https://cdn.pixabay.com/photo/2017/04/02/06/21/python-2195106_960_720.jpg" alt="CPython中函数引用它自身">
+        </a>
+    </div>
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey" datetime="2019-07-12T03:33:08.000Z">2019-07-12</time>
+                
+                <div class="level-item">
+                <a class="has-link-grey -link" href="/categories/编程思想/">编程思想</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    9 分钟 读完 (大约 1376 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+                <a class="has-link-black-ter" href="/2019/07/12/CPython中函数引用它自身/">CPython中函数引用它自身</a>
+            
+        </h1>
+        <div class="content">
+            <p>⚠️ 请确保<kbd>CPython</kbd>的版本不低于<kbd>3.8</kbd>，因语法涉及2个<kbd>PEP</kbd>：<a href="https://www.python.org/dev/peps/pep-0570/" title="PEP570" target="_blank" rel="noopener">PEP570</a>，<a href="https://www.python.org/dev/peps/pep-0572/" title="PEP572" target="_blank" rel="noopener">PEP572</a></p>
+<h2 id="问题"><a class="markdownIt-Anchor" href="#问题"></a> 问题</h2>
+<blockquote>
+<p>启发自这篇问答：<a href="https://stackoverflow.com/questions/5063607/is-there-a-generic-way-for-a-function-to-reference-itself" title="Is there a generic way for a function to reference itself?" target="_blank" rel="noopener">Is there a generic way for a function to reference itself?</a><br>
+曾有一个提议<a href="https://www.python.org/dev/peps/pep-3130/" title="PEP 3130 -- Access to Current Module/Class/Function" target="_blank" rel="noopener">PEP 3130 – Access to Current Module/Class/Function</a>，但是因为方案不完善而被拒绝了</p>
+</blockquote>
+<p>就像<code>__class__</code>在函数体内指向于调用这个函数的类，是否有一个指针或者说魔法关键词，例如<code>__func__</code>，在函数体内使用时，能指向被调用的函数本身？因此，我可以写出像下面这样的代码：</p>
+<figure class="highlight python hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">()</span>:</span></span><br><span class="line">    print(__func__.__name__)</span><br><span class="line">    print(__func__.__hash__)</span><br><span class="line">    print(__func__.__code__)</span><br><span class="line">    ... <span class="hljs-comment"># other simliars</span></span><br></pre></td></tr></table></figure>
+        </div>
+        
+        
+        <div class="level is-mobile">
+            <div class="level-start">
+                <div class="level-item">
+                <a class="button is-size-7 is-light" href="/2019/07/12/CPython中函数引用它自身/#more">阅读更多</a>
+                </div>
+            </div>
+        </div>
+        
+        
+    </div>
+</div>
+
+
+
+
+
+
+
+
+    <div class="card">
+    
+    <div class="card-image">
         <a href="/2019/07/04/掩码（Python实现）/" class="image is-7by1">
             <img class="thumbnail" src="https://static.boredpanda.com/blog/wp-content/uploads/2018/08/Naamloos-5b80200f6c2e5-png__700.jpg" alt="掩码（Python实现）">
         </a>
@@ -503,7 +568,7 @@
                         文章
                     </p>
                     <p class="title has-text-weight-normal">
-                        4
+                        5
                     </p>
                 </div>
             </div>
@@ -651,7 +716,7 @@
                 <span class="level-item">编程思想</span>
             </span>
             <span class="level-end">
-                <span class="level-item tag">3</span>
+                <span class="level-item tag">4</span>
             </span>
         </a></li>
             </ul>
@@ -681,6 +746,25 @@
         <h3 class="menu-label">
             最新文章
         </h3>
+        
+        <article class="media">
+            
+            <a href="/2019/07/12/CPython中函数引用它自身/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://cdn.pixabay.com/photo/2017/04/02/06/21/python-2195106_960_720.jpg" alt="CPython中函数引用它自身">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2019-07-12T03:33:08.000Z">2019-07-12</time></div>
+                    <a href="/2019/07/12/CPython中函数引用它自身/" class="has-link-black-ter is-size-6">CPython中函数引用它自身</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/编程思想/">编程思想</a>
+                    </p>
+                </div>
+            </div>
+        </article>
         
         <article class="media">
             
@@ -776,7 +860,7 @@
                     <span class="level-item">七月 2019</span>
                 </span>
                 <span class="level-end">
-                    <span class="level-item tag">1</span>
+                    <span class="level-item tag">2</span>
                 </span>
             </a>
         </li>
@@ -819,7 +903,7 @@
                 <div class="control">
                     <a class="tags has-addons" href="/tags/Python/">
                         <span class="tag">Python</span>
-                        <span class="tag is-grey">3</span>
+                        <span class="tag is-grey">4</span>
                     </a>
                 </div>
                 
@@ -857,6 +941,25 @@
         
         <article class="media">
             
+            <a href="/2019/07/12/CPython中函数引用它自身/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://cdn.pixabay.com/photo/2017/04/02/06/21/python-2195106_960_720.jpg" alt="CPython中函数引用它自身">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2019-07-12T03:33:08.000Z">2019-07-12</time></div>
+                    <a href="/2019/07/12/CPython中函数引用它自身/" class="has-link-black-ter is-size-6">CPython中函数引用它自身</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/编程思想/">编程思想</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
             <a href="/2019/07/04/掩码（Python实现）/" class="media-left">
                 <p class="image is-64x64">
                     <img class="thumbnail" src="https://static.boredpanda.com/blog/wp-content/uploads/2018/08/Naamloos-5b80200f6c2e5-png__700.jpg" alt="掩码（Python实现）">
@@ -949,7 +1052,7 @@
                     <span class="level-item">七月 2019</span>
                 </span>
                 <span class="level-end">
-                    <span class="level-item tag">1</span>
+                    <span class="level-item tag">2</span>
                 </span>
             </a>
         </li>
@@ -992,7 +1095,7 @@
                 <div class="control">
                     <a class="tags has-addons" href="/tags/Python/">
                         <span class="tag">Python</span>
-                        <span class="tag is-grey">3</span>
+                        <span class="tag is-grey">4</span>
                     </a>
                 </div>
                 
