@@ -1,0 +1,147 @@
+---
+title: CPython中函数引用它自身
+author: ChenyangGao
+date: 2019-07-12 11:33:08
+categories: 编程思想
+tags: Python
+thumbnail: https://cdn.pixabay.com/photo/2017/04/02/06/21/python-2195106_960_720.jpg
+---
+
+⚠️ 请确保<kbd>CPython</kbd>的版本不低于<kbd>3.8</kbd>，因语法涉及2个<kbd>PEP</kbd>：[PEP570](https://www.python.org/dev/peps/pep-0570/ "PEP570")，[PEP572](https://www.python.org/dev/peps/pep-0572/ "PEP572")
+
+## 问题
+
+> 启发自这篇问答：[Is there a generic way for a function to reference itself?](https://stackoverflow.com/questions/5063607/is-there-a-generic-way-for-a-function-to-reference-itself "Is there a generic way for a function to reference itself?")
+> 曾有一个提议[PEP 3130 -- Access to Current Module/Class/Function](https://www.python.org/dev/peps/pep-3130/ "PEP 3130 -- Access to Current Module/Class/Function")，但是因为方案不完善而被拒绝了
+
+就像`__class__`在函数体内指向于调用这个函数的类，是否有一个指针或者说魔法关键词，例如`__func__`，在函数体内使用时，能指向被调用的函数本身？因此，我可以写出像下面这样的代码：
+
+```python
+def foo():
+    print(__func__.__name__)
+    print(__func__.__hash__)
+    print(__func__.__code__)
+    ... # other simliars
+```
+
+<!--more-->
+
+## 解决方案
+
+> 暂时还没有这样的一个指针和魔法关键词，起码就<kbd>python `3.8`</kbd>来看。因此暂时只能用一些侵入式的方案，来模拟实现这一需求。
+
+### 通过调用栈信息来获取函数引用
+
+我可以在一个函数的函数体内访问这个函数本身，通过以下代码：
+
+```python
+def foo():
+    print(foo.__name__)
+    print(foo.__hash__)
+    print(foo.__code__)
+    ... # other simliars
+```
+
+因为以上方式需要显式地指定函数名，当函数名发生改变时，函数体内相应的名字也要进行改变。为了避免这一点，需要函数有充足的信息以定位自身。例如，当可以通过函数在定义时的名字在相应的全局命名空间中查找引用时
+
+> 这个名字存储于<kbd>function</kbd>`.__code__.co_name`：如果用`def func_name`或者`async def func_name`创建函数，`func_name`就是名字；如果用`lambda`创建函数，名字就是`<lambda>`，我特别不建议如此。
+> ⚠️ 这个属性`co_name`是只读的且不能被改变。但你可以自己[创建一个新的<kbd>code</kbd>对象](https://stackoverflow.com/questions/16064409/how-to-create-a-code-object-in-python "How to create a code object in python?")，复制相同的功能，选用不同的名字。
+> ⚠️ 这里并没有用到<kbd>function</kbd>`.__name__`，这个属性是可变的，而且更加灵活和合适，但是相对来说获取困难，所以不采用。特别是，<kbd>function</kbd>`.__qualname__`也同样难以获得，不然可以统一地解决很多问题了。
+> **Note** [Name of a Python function](https://medium.com/@vadimpushtaev/name-of-python-function-e6d650806c4 "Name of a Python function")
+
+，就可以使用以下帮助函数来获取这个函数的引用：
+
+
+```python
+import sys
+
+def getfuncref():
+    '''
+    Get a reference to the `function` which is called recently 
+    in this thread，as long as the key where in `globals` that 
+    point to the function is equal to `function.__code__.co_name`.
+    '''
+    # REF: https://www.oreilly.com/library/view/python-cookbook/0596001673/ch14s08.html
+    # This introspective task is easily performed with sys._getframe. 
+    # This function returns a frame object whose attribute f_code is 
+    # a code object and the co_name attribute of that object is the 
+    # function name.
+    # By calling sys._getframe(1), you can get this information 
+    # for the caller of the current function. So you can package 
+    # this functionality into your own handy functions.
+    # This calls sys._getframe with argument 1, because the call 
+    # to `getfuncref` is now frame 0.
+    f = sys._getframe(1)
+    return f.f_globals[f.f_code.co_name]
+```
+
+> **See Also**
+> - http://code.activestate.com/recipes/66062/
+> - https://stackoverflow.com/questions/33162319/how-can-get-current-function-name-inside-that-function-in-python
+> - https://stackoverflow.com/questions/21218416/reference-to-the-function-from-inside-itself-like-arguments-callee-in-javascrip
+> - https://stackoverflow.com/questions/4492559/how-to-get-current-function-into-a-variable
+> - https://stackoverflow.com/questions/5067604/determine-function-name-from-within-that-function-without-using-traceback
+> - ...
+
+> 测试结果如下：
+
+```python
+>>> def foo(): return getfuncref()
+>>> foo is foo()
+True
+```
+
+> **Note** 截至<kbd>python `3.8`</kbd>，调用栈的帧<kbd>frame</kbd>（[frame-objects](https://docs.python.org/3.8/reference/datamodel.html#frame-objects "frame-objects")）上并没有对函数对象的引用，只是引用了函数相应的<kbd>code</kbd>对象，以及相关的执行环境信息。因此，通过审查调用栈来获取函数<kbd>function</kbd>调用时对应的帧<kbd>frame</kbd>的信息，以获取<kbd>function</kbd>的引用，需要根据一些信息以间接方式在相关的命名空间上搜索。而且由于<kbd>code</kbd>对象上没有存储函数的描述信息（尽管这种策略有利于<kbd>code</kbd>对象的复用），如果函数定义在类中，那么定位这个函数的策略将会比较复杂，因为有一些不同的情况需要分别对待，而且可能还需要一些另外的信息。
+> 🔔 我觉得你可以利用[inspect](https://docs.python.org/3/library/inspect.html "inspect")模块来辅助收集信息。
+
+### 通过把函数的引用绑定到参数上
+
+可以通过在调用函数时传入这个函数的引用，在函数体内使用：
+
+```python
+def foo(__func__, /):
+    print(__func__.__name__)
+    print(__func__.__hash__)
+    print(__func__.__code__)
+    ... # other simliars
+```
+
+为此，我设计了3个装饰器来实现一种绑定效果
+
+```python
+############### plan 1 ###############
+import inspect
+
+def partial_bind_func(f, /):
+    'Decorate function `f` to pass a reference to the function as the first argument'
+    return partial(f, f)
+
+############### plan 2 ###############
+def method_bind_func(f, /):
+    'Decorate function `f` to pass a reference to the function as the first argument'
+    return f.__get__(f, type(f))
+
+############### plan 3 ###############
+from functools import partial, update_wrapper
+
+def assign_bind_func(f, /):
+    'Decorate function `f` to pass a reference to the function as the first argument'
+    wrapper = update_wrapper(lambda *a, **k: f(f, *args, **kwds), f)
+    params = tuple(inspect.signature(f).parameters.values())
+    wrapper.__signature__ = inspect.Signature(params[1:])
+    return wrapper
+```
+
+> 测试结果如下：
+
+```python
+>>> def foo(__func__, /, a, *b, c, **d): pass
+>>> inspect.signature(foo)
+<Signature (__func__, /, a, *b, c, **d)>
+>>> inspect.signature(partial_bind_func(foo))
+<Signature (a, *b, c, **d)>
+>>> inspect.signature(method_bind_func(foo))
+<Signature (a, *b, c, **d)>
+>>> inspect.signature(assign_bind_func(foo))
+<Signature (a, *b, c, **d)>
+```

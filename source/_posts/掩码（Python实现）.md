@@ -7,22 +7,38 @@ tags: Python
 thumbnail: https://static.boredpanda.com/blog/wp-content/uploads/2018/08/Naamloos-5b80200f6c2e5-png__700.jpg
 ---
 
-## 什么是掩码
-**掩码**<kbd>mask</kbd>，是一个**位模式**，表示从一个二进制串中选出的位的集合。
-**掩码**<kbd>mask</kbd>，是一个**0-1序列**，表示从一个二值序列中选出的位置的集合。
+## 关于掩码
 
-**Note** 掩码是一类特殊的**状态**<kbd>state</kbd>，或者用于表示这类状态，表示一类二值序列状态（向量<kbd>vector</kbd>）。
-$$\mathrm{mask}: \{b_{1, 1}, b_{1, 2}\} \times \{b_{2, 1}, b_{2, 2}\} \times ... \times \{b_{n, 1}, b_{n, 2}\} \leftrightarrow \{0,1\}^n$$
+### 什么是标志flag
+在掩码的语境下，标志<kbd>flag</kbd>，是只有1位的掩码，取值范围$range(\mathrm{flag})$满足：
+$$range(\mathrm{flag}) = \{0, 1\}$$
+。
 
+<kbd>flag</kbd>可以是一个单纯的取值范围为$\{0,1\}$的二值的状态量，也可以是相对于另一个取值范围是$\{s_1, s_2\}$的二值的状态量<kbd>state</kbd>，所建立一一映射
+$$\mathrm{flag}: \{s_1, s_2\} \leftrightarrow \{0,1\}$$
+。
 
-## 一个特殊的例子Flag
-**标志**<kbd>flag</kbd>，是只有1位的掩码。
-**标志**<kbd>flag</kbd>，是一个取值0-1二值量。
+> **Note** 更一般而且常见的，标志<kbd>flag</kbd>是一个离散的状态量，取值范围是自然数集$\N$的子集。它可以是单纯的状态量，也可以是：设存在一个状态量<kbd>state</kbd>，它的取值范围$range(\mathrm{state})$是离散的，<kbd>flag</kbd>是$range(\mathrm{state})$到自然数集$\N$的映射
+> $$\mathrm{flag}: range(\mathrm{state}) \to \N$$
+> 。也即，使用不同的自然数来分别枚举和指代状态量<kbd>state</kbd>的各个状态值。
 
-**Note** 标志也是一类特殊的**状态**<kbd>state</kbd>，或者用于表示这类状态，表示一类二值状态（标量<kbd>scalar</kbd>）。
-$$\mathrm{flag}: \{b_1, b_2\} \leftrightarrow \{0,1\}$$
+### 什么是掩码mask
+掩码<kbd>mask</kbd>，是一个二进制的位模式，取值范围$range(\mathrm{mask})$满足：
+$$range(\mathrm{mask}) = \{0, 1\}^n, n \in \N$$
+。
+
+<kbd>mask</kbd>是一个状态量，或者状态映射：给定状态向量<kbd>**state**</kbd>，是一组二值的状态量$\{\mathrm{state}_i \big| 0 < i \le n, n \in \N\}$的序列，分别有取值范围$range(\mathrm{state}_i)=\{s_{i, 1}, s_{i, 2}\}$，<kbd>mask</kbd>是相对于<kbd>**state**</kbd>，所建立一一映射
+$$\mathrm{mask}: \underset{i=1}{\overset{n}{\times}}\{s_{i, 1}, s_{i, 2}\} \leftrightarrow \{0,1\}^n$$
+。
+
+> **Note** 标志<kbd>flag</kbd>的值域是标量<kbd>scalar</kbd>，掩码<kbd>mask</kbd>的值域是向量<kbd>vector</kbd>，两者都是状态量或者状态映射。
+> 可以认为，<kbd>mask</kbd>是建立在$\{0,1\}^n,n \in \N$上的线性空间，给定它的一组基$\{\bold{u}_i \in \{0,1\}^n \big| 0 < i \le n;\forall 0 < i, j \le n,\bold{u}_i[j] = 1 \iff i = j\}$，也即分别有$\bold{u}_i$对应于<kbd>mask</kbd>的第$i$位。令标志$\mathrm{flag}_i$对应于$\mathrm{mask}$的第$i$位的值，即有$\mathrm{flag}_i = \mathrm{mask}[i]$且有线性组合
+> $$\mathrm{mask} = \sum_{i=1}^n \mathrm{flag}_i \cdot \bold{u}_i$$
+> 。总而言之，<kbd>mask</kbd>的每一位分别对应一个<kbd>flag</kbd>，<kbd>mask</kbd>是多个占据不同位的<kbd>flag</kbd>的线性组合，因此<kbd>mask</kbd>是一个状态向量或者组合状态映射。
 
 <!--more-->
+
+## 实现：标志Flag
 
 ```python
 class Flag:
@@ -51,8 +67,7 @@ class Flag:
         return self._value is 1
 ```
 
-
-## 代码实现
+## 实现：掩码Mask
 
 **Note** 因为在<kbd>Python</kbd>中，<kbd>int</kbd>是不可变类型，操作的结果往往会产生新的<kbd>int</kbd>对象，这是低效的。建议使用<kbd>C</kbd>扩展或者某些可改动内存的结构，至少保证位操作可以复用原来的内存区域。
 
@@ -179,7 +194,7 @@ class Mask(MaskBase, MaskOpMixin[MaskBase]):
         return self & m == m
 ```
 
-## 简单测试
+> 测试结果如下：
 
 ```python
 >>> from mask import *
