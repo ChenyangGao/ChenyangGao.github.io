@@ -2,7 +2,7 @@
 <html lang="zh">
 <head><meta name="generator" content="Hexo 3.8.0">
     <meta charset="utf-8">
-<title>标签: Python,Script - 思考者</title>
+<title>标签: Shell - 思考者</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
 
@@ -11,7 +11,7 @@
 <meta name="keywords" content="数学，科学，技术，批判性思维，博弈论，经济学">
 <meta property="og:type" content="website">
 <meta property="og:title" content="思考者">
-<meta property="og:url" content="https://chenyanggao.github.io/tags/Python-Script/index.html">
+<meta property="og:url" content="https://chenyanggao.github.io/tags/Shell/index.html">
 <meta property="og:site_name" content="思考者">
 <meta property="og:description" content="黑格尔：“无知者是不自由的，因为和他对立的，是一个陌生的世界。”">
 <meta property="og:locale" content="zh-CN">
@@ -185,7 +185,7 @@
         <nav class="breadcrumb" aria-label="breadcrumbs">
         <ul>
             <li><a href="/tags">标签</a></li>
-            <li class="is-active"><a href="#" aria-current="page">Python,Script</a></li>
+            <li class="is-active"><a href="#" aria-current="page">Shell</a></li>
         </ul>
         </nav>
     </div>
@@ -194,8 +194,8 @@
     <div class="card">
     
     <div class="card-image">
-        <a href="/2022/08/27/Python脚本作为配置文件加载/" class="image is-7by1">
-            <img class="thumbnail" src="https://cdn.pixabay.com/photo/2015/05/17/20/39/snake-771541_640.jpg" alt="Python脚本作为配置文件加载">
+        <a href="/2022/08/02/7.Shell脚本实现在Linux命令行开启代理/" class="image is-7by1">
+            <img class="thumbnail" src="https://cdn.pixabay.com/photo/2019/06/06/08/27/vpn-4255473_640.jpg" alt="Shell脚本实现在Linux命令行开启代理">
         </a>
     </div>
     
@@ -203,7 +203,7 @@
         
         <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
             <div class="level-left">
-                <time class="level-item has-text-grey" datetime="2022-08-27T11:37:00.000Z">2022-08-27</time>
+                <time class="level-item has-text-grey" datetime="2022-08-02T12:30:00.000Z">2022-08-02</time>
                 
                 <div class="level-item">
                 <a class="has-link-grey -link" href="/categories/脚本工具/">脚本工具</a>
@@ -213,7 +213,7 @@
                 <span class="level-item has-text-grey">
                     
                     
-                    15 分钟 读完 (大约 2306 个字)
+                    8 分钟 读完 (大约 1232 个字)
                 </span>
                 
                 
@@ -222,115 +222,20 @@
         
         <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
             
-                <a class="has-link-black-ter" href="/2022/08/27/Python脚本作为配置文件加载/">Python脚本作为配置文件加载</a>
+                <a class="has-link-black-ter" href="/2022/08/02/7.Shell脚本实现在Linux命令行开启代理/">Shell脚本实现在Linux命令行开启代理</a>
             
         </h1>
         <div class="content">
             <h2 id="背景"><a class="markdownIt-Anchor" href="#背景"></a> 背景</h2>
-<p>在使用 <code>Python</code> 开发时，如果要把对象 <code>obj</code> 当作字典使用，可以直接操作 <code>obj.__dict__</code>（如果有的话），具体而言：</p>
-<table>
-<thead>
-<tr>
-<th></th>
-<th>对象操作</th>
-<th>字典操作</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>查</td>
-<td><code>obj.foo</code></td>
-<td><code>obj.__dict__[&quot;foo&quot;]</code></td>
-</tr>
-<tr>
-<td>改</td>
-<td><code>obj.foo = &quot;bar&quot;</code></td>
-<td><code>obj.__dict__[&quot;foo&quot;] = &quot;bar&quot;</code></td>
-</tr>
-<tr>
-<td>删</td>
-<td><code>del obj.foo</code></td>
-<td><code>del obj.__dict__[&quot;foo&quot;]</code></td>
-</tr>
-</tbody>
-</table>
-<p>对象操作和字典（这里指的是对象的命名空间）操作并不等价，字典操作并不执行复杂的<strong>方法查找</strong>和<strong>描述符</strong>，步骤更少，一般而言更快。</p>
-<p>而要把字典 <code>d</code> 视为对象操作，则要专门包装一下</p>
- <figure class="highlight python hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DictAsObject</span>:</span></span><br><span class="line"> </span><br><span class="line">     <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">__init__</span><span class="hljs-params">(self, d)</span>:</span></span><br><span class="line">         self.__dict__ = d</span><br><span class="line"></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">__repr__</span><span class="hljs-params">(self)</span>:</span></span><br><span class="line">        <span class="hljs-keyword">return</span> <span class="hljs-string">f"<span class="hljs-subst">&#123;type(self).__qualname__&#125;</span>(<span class="hljs-subst">&#123;self.__dict__!r&#125;</span>)"</span></span><br><span class="line"></span><br><span class="line">dict_as_obj = DictAsObject</span><br></pre></td></tr></table></figure>
-<p>也可以直接用标准库中的包装，例如</p>
-<figure class="highlight python hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">from</span> argparse <span class="hljs-keyword">import</span> Namespace</span><br><span class="line"></span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">dict_as_obj</span><span class="hljs-params">(d)</span>:</span></span><br><span class="line">    ns = Namespace()</span><br><span class="line">    ns.__dict__ = d</span><br><span class="line">    <span class="hljs-keyword">return</span> ns</span><br></pre></td></tr></table></figure>
-<p>令 <code>ns = dict_as_obj(d)</code>，具体而言：</p>
-<table>
-<thead>
-<tr>
-<th></th>
-<th>对象操作</th>
-<th>字典操作</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>查</td>
-<td><code>ns.foo</code></td>
-<td><code>d[&quot;foo&quot;]</code></td>
-</tr>
-<tr>
-<td>改</td>
-<td><code>ns.foo = &quot;bar&quot;</code></td>
-<td><code>d[&quot;foo&quot;] = &quot;bar&quot;</code></td>
-</tr>
-<tr>
-<td>删</td>
-<td><code>del ns.foo</code></td>
-<td><code>del d[&quot;foo&quot;]</code></td>
-</tr>
-</tbody>
-</table>
-<p>更一般地说，就是要把下列操作建立对应</p>
-<table>
-<thead>
-<tr>
-<th></th>
-<th>对象操作</th>
-<th>字典操作</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>查</td>
-<td><code>__getattr__</code></td>
-<td><code>__getitem__</code></td>
-</tr>
-<tr>
-<td>改</td>
-<td><code>__setattr__</code></td>
-<td><code>__setitem__</code></td>
-</tr>
-<tr>
-<td>删</td>
-<td><code>__delattr__</code></td>
-<td><code>__delitem__</code></td>
-</tr>
-</tbody>
-</table>
-<p>有些不同的是，在抛异常时，对象操作抛出 <code>AttributeError</code>，字典操作抛出 <code>KeyError</code>。</p>
-<p>有一些第三方模块实现了上述对应关系的可相互替代，例如</p>
-<ul>
-<li><a href="https://pypi.org/project/attrdict/" target="_blank" rel="noopener">https://pypi.org/project/attrdict/</a></li>
-<li><a href="https://pypi.org/search/?q=attrdict" target="_blank" rel="noopener">https://pypi.org/search/?q=attrdict</a></li>
-<li><a href="https://github.com/mewwts/addict" target="_blank" rel="noopener">https://github.com/mewwts/addict</a></li>
-<li><a href="https://github.com/sanand0/orderedattrdict" target="_blank" rel="noopener">https://github.com/sanand0/orderedattrdict</a></li>
-</ul>
-<p>我有一个现实的需求，希望能直接以 <code>Python</code> 脚本作为配置文件：读取一个脚本，并以 <code>exec</code> 函数运行之，然后把脚本运行时的全局命名空间作为配置，如果里面用到了不存在的名字，应该自动把它设为空字典 <code>{}</code>。操作策略借鉴了 <a href="https://pypi.org/project/addict/" target="_blank" rel="noopener">addict</a>，操作如下</p>
-<figure class="highlight shell hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-meta">&gt;</span><span class="hljs-bash">&gt;&gt; from addict import Dict</span></span><br><span class="line"><span class="hljs-meta">&gt;</span><span class="hljs-bash">&gt;&gt; mapping = Dict()</span></span><br><span class="line"><span class="hljs-meta">&gt;</span><span class="hljs-bash">&gt;&gt; mapping.a.b.c.d.e = 2</span></span><br><span class="line"><span class="hljs-meta">&gt;</span><span class="hljs-bash">&gt;&gt; mapping</span></span><br><span class="line">&#123;'a': &#123;'b': &#123;'c': &#123;'d': &#123;'e': 2&#125;&#125;&#125;&#125;&#125;</span><br></pre></td></tr></table></figure>
-<p>为此，我专门写了一个模块，来适配我的需求，造轮子并非没有意义，它能加深我的思考，并且享受 DIY 的快乐。</p>
+<p>我们在 <code>Linux</code> 命令行中，经常会需要使用代理（参考：<a href="https://www.cyberciti.biz/faq/linux-unix-set-proxy-environment-variable/#:~:text=Set%20http_proxy%20shell%20variable%20on%20Linux%2FOS%20X%2FUnix%20bash,export%20http_proxy%3Dhttp%3A%2F%2Fserver-ip%3Aport%2F%20%24%20export%20http_proxy%3Dhttp%3A%2F%2F127.0.0.1%3A3128%2F%20%24%20export%20http_proxy%3Dhttp%3A%2F%2Fproxy-server.mycorp.com%3A3128%2F" target="_blank" rel="noopener">How To Use Proxy Server To Access Internet at Shell Prompt With http_proxy Variable</a>，<a href="https://www.shellhacks.com/linux-proxy-server-settings-set-proxy-command-line/" target="_blank" rel="noopener">Linux Proxy Server Settings – Set Proxy For Command Line</a>），以便能访问某些资源。<br>
+为了便于做到这一点，我以自己的偏好出发，编写了一个 <code>shell</code> 脚本，已经在 <code>bash</code> 和 <code>zsh</code> 中通过测试。</p>
         </div>
         
         
         <div class="level is-mobile">
             <div class="level-start">
                 <div class="level-item">
-                <a class="button is-size-7 is-light" href="/2022/08/27/Python脚本作为配置文件加载/#more">阅读更多</a>
+                <a class="button is-size-7 is-light" href="/2022/08/02/7.Shell脚本实现在Linux命令行开启代理/#more">阅读更多</a>
                 </div>
             </div>
         </div>
@@ -389,7 +294,7 @@
                         文章
                     </p>
                     <p class="title has-text-weight-normal">
-                        6
+                        10
                     </p>
                 </div>
             </div>
@@ -409,7 +314,7 @@
                         标签
                     </p>
                     <p class="title has-text-weight-normal">
-                        3
+                        4
                     </p>
                 </div>
             </div>
@@ -545,7 +450,7 @@
                 <span class="level-item">脚本工具</span>
             </span>
             <span class="level-end">
-                <span class="level-item tag">1</span>
+                <span class="level-item tag">5</span>
             </span>
         </a></li>
             </ul>
@@ -559,7 +464,7 @@
         <h3 class="menu-label">
             标签云
         </h3>
-        <a href="/tags/Python/" style="font-size: 20px;">Python</a> <a href="/tags/Python-Script/" style="font-size: 10px;">Python,Script</a> <a href="/tags/博弈论/" style="font-size: 10px;">博弈论</a>
+        <a href="/tags/Python/" style="font-size: 20px;">Python</a> <a href="/tags/Script/" style="font-size: 15px;">Script</a> <a href="/tags/Shell/" style="font-size: 10px;">Shell</a> <a href="/tags/博弈论/" style="font-size: 10px;">博弈论</a>
     </div>
 </div>
 
@@ -578,7 +483,7 @@
         
         <article class="media">
             
-            <a href="/2022/08/27/Python脚本作为配置文件加载/" class="media-left">
+            <a href="/2022/08/27/10.Python脚本作为配置文件加载/" class="media-left">
                 <p class="image is-64x64">
                     <img class="thumbnail" src="https://cdn.pixabay.com/photo/2015/05/17/20/39/snake-771541_640.jpg" alt="Python脚本作为配置文件加载">
                 </p>
@@ -587,7 +492,7 @@
             <div class="media-content">
                 <div class="content">
                     <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2022-08-27T11:37:00.000Z">2022-08-27</time></div>
-                    <a href="/2022/08/27/Python脚本作为配置文件加载/" class="has-link-black-ter is-size-6">Python脚本作为配置文件加载</a>
+                    <a href="/2022/08/27/10.Python脚本作为配置文件加载/" class="has-link-black-ter is-size-6">Python脚本作为配置文件加载</a>
                     <p class="is-size-7 is-uppercase">
                         <a class="has-link-grey -link" href="/categories/脚本工具/">脚本工具</a>
                     </p>
@@ -597,18 +502,18 @@
         
         <article class="media">
             
-            <a href="/2019/07/12/5.CPython中函数引用它自身/" class="media-left">
+            <a href="/2022/08/26/9.Python在命令行修改Properties配置文件/" class="media-left">
                 <p class="image is-64x64">
-                    <img class="thumbnail" src="https://cdn.pixabay.com/photo/2017/04/02/06/21/python-2195106_960_720.jpg" alt="CPython中函数引用它自身">
+                    <img class="thumbnail" src="https://cdn.pixabay.com/photo/2014/08/15/21/40/snake-419043_640.jpg" alt="Python在命令行修改Properties配置文件">
                 </p>
             </a>
             
             <div class="media-content">
                 <div class="content">
-                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2019-07-12T03:33:08.000Z">2019-07-12</time></div>
-                    <a href="/2019/07/12/5.CPython中函数引用它自身/" class="has-link-black-ter is-size-6">CPython中函数引用它自身</a>
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2022-08-26T12:30:00.000Z">2022-08-26</time></div>
+                    <a href="/2022/08/26/9.Python在命令行修改Properties配置文件/" class="has-link-black-ter is-size-6">Python在命令行修改Properties配置文件</a>
                     <p class="is-size-7 is-uppercase">
-                        <a class="has-link-grey -link" href="/categories/编程思想/">编程思想</a>
+                        <a class="has-link-grey -link" href="/categories/脚本工具/">脚本工具</a>
                     </p>
                 </div>
             </div>
@@ -616,18 +521,18 @@
         
         <article class="media">
             
-            <a href="/2019/07/04/4.掩码（Python实现）/" class="media-left">
+            <a href="/2022/08/13/8.Python函数作为命令行使用/" class="media-left">
                 <p class="image is-64x64">
-                    <img class="thumbnail" src="https://static.boredpanda.com/blog/wp-content/uploads/2018/08/Naamloos-5b80200f6c2e5-png__700.jpg" alt="掩码（Python实现）">
+                    <img class="thumbnail" src="https://cdn.pixabay.com/photo/2022/04/15/14/18/python-7134564_640.jpg" alt="Python函数作为命令行使用">
                 </p>
             </a>
             
             <div class="media-content">
                 <div class="content">
-                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2019-07-04T10:02:35.000Z">2019-07-04</time></div>
-                    <a href="/2019/07/04/4.掩码（Python实现）/" class="has-link-black-ter is-size-6">掩码（Python实现）</a>
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2022-08-13T12:30:00.000Z">2022-08-13</time></div>
+                    <a href="/2022/08/13/8.Python函数作为命令行使用/" class="has-link-black-ter is-size-6">Python函数作为命令行使用</a>
                     <p class="is-size-7 is-uppercase">
-                        <a class="has-link-grey -link" href="/categories/编程思想/">编程思想</a>
+                        <a class="has-link-grey -link" href="/categories/脚本工具/">脚本工具</a>
                     </p>
                 </div>
             </div>
@@ -635,18 +540,18 @@
         
         <article class="media">
             
-            <a href="/2019/05/28/3.利用异常实现越级return（Python实现）/" class="media-left">
+            <a href="/2022/08/02/7.Shell脚本实现在Linux命令行开启代理/" class="media-left">
                 <p class="image is-64x64">
-                    <img class="thumbnail" src="https://cdn.pixabay.com/photo/2014/11/21/15/33/snake-540656_960_720.jpg" alt="利用异常实现越级return（Python实现）">
+                    <img class="thumbnail" src="https://cdn.pixabay.com/photo/2019/06/06/08/27/vpn-4255473_640.jpg" alt="Shell脚本实现在Linux命令行开启代理">
                 </p>
             </a>
             
             <div class="media-content">
                 <div class="content">
-                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2019-05-28T06:54:38.000Z">2019-05-28</time></div>
-                    <a href="/2019/05/28/3.利用异常实现越级return（Python实现）/" class="has-link-black-ter is-size-6">利用异常实现越级return（Python实现）</a>
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2022-08-02T12:30:00.000Z">2022-08-02</time></div>
+                    <a href="/2022/08/02/7.Shell脚本实现在Linux命令行开启代理/" class="has-link-black-ter is-size-6">Shell脚本实现在Linux命令行开启代理</a>
                     <p class="is-size-7 is-uppercase">
-                        <a class="has-link-grey -link" href="/categories/编程思想/">编程思想</a>
+                        <a class="has-link-grey -link" href="/categories/脚本工具/">脚本工具</a>
                     </p>
                 </div>
             </div>
@@ -654,18 +559,18 @@
         
         <article class="media">
             
-            <a href="/2019/04/30/2.CPython中函数的非本地变量/" class="media-left">
+            <a href="/2022/08/01/6.Python把HTML中的img元素的src转换成datauri/" class="media-left">
                 <p class="image is-64x64">
-                    <img class="thumbnail" src="https://cdn.pixabay.com/photo/2014/11/23/21/22/snake-543243_640.jpg" alt="CPython中函数的非本地变量">
+                    <img class="thumbnail" src="https://cdn.pixabay.com/photo/2015/11/03/13/20/snake-1020837_640.jpg" alt="Python把HTML中的img元素的src转换成datauri">
                 </p>
             </a>
             
             <div class="media-content">
                 <div class="content">
-                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2019-04-30T14:36:10.000Z">2019-04-30</time></div>
-                    <a href="/2019/04/30/2.CPython中函数的非本地变量/" class="has-link-black-ter is-size-6">CPython中函数的非本地变量</a>
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2022-08-01T12:30:00.000Z">2022-08-01</time></div>
+                    <a href="/2022/08/01/6.Python把HTML中的img元素的src转换成datauri/" class="has-link-black-ter is-size-6">Python把HTML中的img元素的src转换成datauri</a>
                     <p class="is-size-7 is-uppercase">
-                        <a class="has-link-grey -link" href="/categories/编程思想/">编程思想</a>
+                        <a class="has-link-grey -link" href="/categories/脚本工具/">脚本工具</a>
                     </p>
                 </div>
             </div>
@@ -689,7 +594,7 @@
                     <span class="level-item">八月 2022</span>
                 </span>
                 <span class="level-end">
-                    <span class="level-item tag">1</span>
+                    <span class="level-item tag">5</span>
                 </span>
             </a>
         </li>
@@ -743,13 +648,20 @@
                 <div class="control">
                     <a class="tags has-addons" href="/tags/Python/">
                         <span class="tag">Python</span>
-                        <span class="tag is-grey">4</span>
+                        <span class="tag is-grey">8</span>
                     </a>
                 </div>
                 
                 <div class="control">
-                    <a class="tags has-addons" href="/tags/Python-Script/">
-                        <span class="tag">Python,Script</span>
+                    <a class="tags has-addons" href="/tags/Script/">
+                        <span class="tag">Script</span>
+                        <span class="tag is-grey">5</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Shell/">
+                        <span class="tag">Shell</span>
                         <span class="tag is-grey">1</span>
                     </a>
                 </div>
@@ -788,7 +700,7 @@
         
         <article class="media">
             
-            <a href="/2022/08/27/Python脚本作为配置文件加载/" class="media-left">
+            <a href="/2022/08/27/10.Python脚本作为配置文件加载/" class="media-left">
                 <p class="image is-64x64">
                     <img class="thumbnail" src="https://cdn.pixabay.com/photo/2015/05/17/20/39/snake-771541_640.jpg" alt="Python脚本作为配置文件加载">
                 </p>
@@ -797,7 +709,7 @@
             <div class="media-content">
                 <div class="content">
                     <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2022-08-27T11:37:00.000Z">2022-08-27</time></div>
-                    <a href="/2022/08/27/Python脚本作为配置文件加载/" class="has-link-black-ter is-size-6">Python脚本作为配置文件加载</a>
+                    <a href="/2022/08/27/10.Python脚本作为配置文件加载/" class="has-link-black-ter is-size-6">Python脚本作为配置文件加载</a>
                     <p class="is-size-7 is-uppercase">
                         <a class="has-link-grey -link" href="/categories/脚本工具/">脚本工具</a>
                     </p>
@@ -807,18 +719,18 @@
         
         <article class="media">
             
-            <a href="/2019/07/12/5.CPython中函数引用它自身/" class="media-left">
+            <a href="/2022/08/26/9.Python在命令行修改Properties配置文件/" class="media-left">
                 <p class="image is-64x64">
-                    <img class="thumbnail" src="https://cdn.pixabay.com/photo/2017/04/02/06/21/python-2195106_960_720.jpg" alt="CPython中函数引用它自身">
+                    <img class="thumbnail" src="https://cdn.pixabay.com/photo/2014/08/15/21/40/snake-419043_640.jpg" alt="Python在命令行修改Properties配置文件">
                 </p>
             </a>
             
             <div class="media-content">
                 <div class="content">
-                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2019-07-12T03:33:08.000Z">2019-07-12</time></div>
-                    <a href="/2019/07/12/5.CPython中函数引用它自身/" class="has-link-black-ter is-size-6">CPython中函数引用它自身</a>
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2022-08-26T12:30:00.000Z">2022-08-26</time></div>
+                    <a href="/2022/08/26/9.Python在命令行修改Properties配置文件/" class="has-link-black-ter is-size-6">Python在命令行修改Properties配置文件</a>
                     <p class="is-size-7 is-uppercase">
-                        <a class="has-link-grey -link" href="/categories/编程思想/">编程思想</a>
+                        <a class="has-link-grey -link" href="/categories/脚本工具/">脚本工具</a>
                     </p>
                 </div>
             </div>
@@ -826,18 +738,18 @@
         
         <article class="media">
             
-            <a href="/2019/07/04/4.掩码（Python实现）/" class="media-left">
+            <a href="/2022/08/13/8.Python函数作为命令行使用/" class="media-left">
                 <p class="image is-64x64">
-                    <img class="thumbnail" src="https://static.boredpanda.com/blog/wp-content/uploads/2018/08/Naamloos-5b80200f6c2e5-png__700.jpg" alt="掩码（Python实现）">
+                    <img class="thumbnail" src="https://cdn.pixabay.com/photo/2022/04/15/14/18/python-7134564_640.jpg" alt="Python函数作为命令行使用">
                 </p>
             </a>
             
             <div class="media-content">
                 <div class="content">
-                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2019-07-04T10:02:35.000Z">2019-07-04</time></div>
-                    <a href="/2019/07/04/4.掩码（Python实现）/" class="has-link-black-ter is-size-6">掩码（Python实现）</a>
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2022-08-13T12:30:00.000Z">2022-08-13</time></div>
+                    <a href="/2022/08/13/8.Python函数作为命令行使用/" class="has-link-black-ter is-size-6">Python函数作为命令行使用</a>
                     <p class="is-size-7 is-uppercase">
-                        <a class="has-link-grey -link" href="/categories/编程思想/">编程思想</a>
+                        <a class="has-link-grey -link" href="/categories/脚本工具/">脚本工具</a>
                     </p>
                 </div>
             </div>
@@ -845,18 +757,18 @@
         
         <article class="media">
             
-            <a href="/2019/05/28/3.利用异常实现越级return（Python实现）/" class="media-left">
+            <a href="/2022/08/02/7.Shell脚本实现在Linux命令行开启代理/" class="media-left">
                 <p class="image is-64x64">
-                    <img class="thumbnail" src="https://cdn.pixabay.com/photo/2014/11/21/15/33/snake-540656_960_720.jpg" alt="利用异常实现越级return（Python实现）">
+                    <img class="thumbnail" src="https://cdn.pixabay.com/photo/2019/06/06/08/27/vpn-4255473_640.jpg" alt="Shell脚本实现在Linux命令行开启代理">
                 </p>
             </a>
             
             <div class="media-content">
                 <div class="content">
-                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2019-05-28T06:54:38.000Z">2019-05-28</time></div>
-                    <a href="/2019/05/28/3.利用异常实现越级return（Python实现）/" class="has-link-black-ter is-size-6">利用异常实现越级return（Python实现）</a>
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2022-08-02T12:30:00.000Z">2022-08-02</time></div>
+                    <a href="/2022/08/02/7.Shell脚本实现在Linux命令行开启代理/" class="has-link-black-ter is-size-6">Shell脚本实现在Linux命令行开启代理</a>
                     <p class="is-size-7 is-uppercase">
-                        <a class="has-link-grey -link" href="/categories/编程思想/">编程思想</a>
+                        <a class="has-link-grey -link" href="/categories/脚本工具/">脚本工具</a>
                     </p>
                 </div>
             </div>
@@ -864,18 +776,18 @@
         
         <article class="media">
             
-            <a href="/2019/04/30/2.CPython中函数的非本地变量/" class="media-left">
+            <a href="/2022/08/01/6.Python把HTML中的img元素的src转换成datauri/" class="media-left">
                 <p class="image is-64x64">
-                    <img class="thumbnail" src="https://cdn.pixabay.com/photo/2014/11/23/21/22/snake-543243_640.jpg" alt="CPython中函数的非本地变量">
+                    <img class="thumbnail" src="https://cdn.pixabay.com/photo/2015/11/03/13/20/snake-1020837_640.jpg" alt="Python把HTML中的img元素的src转换成datauri">
                 </p>
             </a>
             
             <div class="media-content">
                 <div class="content">
-                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2019-04-30T14:36:10.000Z">2019-04-30</time></div>
-                    <a href="/2019/04/30/2.CPython中函数的非本地变量/" class="has-link-black-ter is-size-6">CPython中函数的非本地变量</a>
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2022-08-01T12:30:00.000Z">2022-08-01</time></div>
+                    <a href="/2022/08/01/6.Python把HTML中的img元素的src转换成datauri/" class="has-link-black-ter is-size-6">Python把HTML中的img元素的src转换成datauri</a>
                     <p class="is-size-7 is-uppercase">
-                        <a class="has-link-grey -link" href="/categories/编程思想/">编程思想</a>
+                        <a class="has-link-grey -link" href="/categories/脚本工具/">脚本工具</a>
                     </p>
                 </div>
             </div>
@@ -899,7 +811,7 @@
                     <span class="level-item">八月 2022</span>
                 </span>
                 <span class="level-end">
-                    <span class="level-item tag">1</span>
+                    <span class="level-item tag">5</span>
                 </span>
             </a>
         </li>
@@ -953,13 +865,20 @@
                 <div class="control">
                     <a class="tags has-addons" href="/tags/Python/">
                         <span class="tag">Python</span>
-                        <span class="tag is-grey">4</span>
+                        <span class="tag is-grey">8</span>
                     </a>
                 </div>
                 
                 <div class="control">
-                    <a class="tags has-addons" href="/tags/Python-Script/">
-                        <span class="tag">Python,Script</span>
+                    <a class="tags has-addons" href="/tags/Script/">
+                        <span class="tag">Script</span>
+                        <span class="tag is-grey">5</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Shell/">
+                        <span class="tag">Shell</span>
                         <span class="tag is-grey">1</span>
                     </a>
                 </div>
