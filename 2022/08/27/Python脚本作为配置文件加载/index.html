@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head><meta name="generator" content="Hexo 3.8.0">
+    <meta charset="utf-8">
+<title>Python脚本作为配置文件加载 - 思考者</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+
+
+    <meta name="description" content="背景 在使用 Python 开发时，如果要把对象 obj 当作字典使用，可以直接操作 obj.__dict__（如果有的话），具体而言：     对象操作 字典操作     查 obj.foo obj.__dict__[&amp;quot;foo&amp;quot;]   改 obj.foo = &amp;quot;bar&amp;quot; obj.__dict__[&amp;quot;foo&amp;quot;] = &amp;quot;bar&amp;">
+<meta name="keywords" content="Python,Script">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Python脚本作为配置文件加载">
+<meta property="og:url" content="https://chenyanggao.github.io/2022/08/27/Python脚本作为配置文件加载/index.html">
+<meta property="og:site_name" content="思考者">
+<meta property="og:description" content="背景 在使用 Python 开发时，如果要把对象 obj 当作字典使用，可以直接操作 obj.__dict__（如果有的话），具体而言：     对象操作 字典操作     查 obj.foo obj.__dict__[&amp;quot;foo&amp;quot;]   改 obj.foo = &amp;quot;bar&amp;quot; obj.__dict__[&amp;quot;foo&amp;quot;] = &amp;quot;bar&amp;">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://cdn.pixabay.com/photo/2015/05/17/20/39/snake-771541_640.jpg">
+<meta property="og:updated_time" content="2022-08-27T11:47:11.554Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Python脚本作为配置文件加载">
+<meta name="twitter:description" content="背景 在使用 Python 开发时，如果要把对象 obj 当作字典使用，可以直接操作 obj.__dict__（如果有的话），具体而言：     对象操作 字典操作     查 obj.foo obj.__dict__[&amp;quot;foo&amp;quot;]   改 obj.foo = &amp;quot;bar&amp;quot; obj.__dict__[&amp;quot;foo&amp;quot;] = &amp;quot;bar&amp;">
+<meta name="twitter:image" content="https://cdn.pixabay.com/photo/2015/05/17/20/39/snake-771541_640.jpg">
+
+
+
+
+
+
+
+<link rel="icon" href="/images/favicon.svg">
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.7.2/css/bulma.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:400,600|Source+Code+Pro">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.12.0/styles/vs.css">
+
+
+    
+    
+    
+    <style>body>.footer,body>.navbar,body>.section{opacity:0}</style>
+    
+
+    
+    
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/css/lightgallery.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/css/justifiedGallery.min.css">
+    
+
+    
+    
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.css">
+
+
+    
+    
+    
+    
+
+<link rel="stylesheet" href="/css/back-to-top.css">
+
+
+    
+    
+
+    
+    
+    
+    
+
+    
+    
+<link rel="stylesheet" href="/css/progressbar.css">
+<script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+
+    
+    
+    
+
+    
+    
+    
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    
+
+    
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" integrity="sha384-yFRtMMDnQtDRO8rLpMIKrtPCD5jdktao2TV19YiZYWMDkUR5GQZR/NOVTdquEx1j" crossorigin="anonymous">
+
+<!-- The loading of KaTeX is deferred to speed up page rendering -->
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.js" integrity="sha384-9Nhn55MVVN0/4OFx7EE5kpFBPsEMZxKTCnA+4fqDmg12eCTqGi6+BB2LjY8brQxJ" crossorigin="anonymous"></script>
+
+<!-- To automatically render math in text elements, include the auto-render extension: -->
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/contrib/auto-render.min.js" integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI" crossorigin="anonymous" onload="renderMathInElement(document.body);"></script>
+
+    
+    
+<style>pre.mermaid {background-color:white;}</style>
+    
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+    
+<script>
+    if (window.mermaid) {
+        mermaid.initialize({"noteMargin":10}, "pre.mermaid");
+    }
+</script>
+
+    
+    
+    
+    
+<!-- require APlayer -->
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.css">
+<script src="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.js"></script>
+    
+<!-- require MetingJS -->
+
+<script src="https://cdn.jsdelivr.net/npm/meting/dist/Meting.min.js"></script>
+    
+<!-- main music player -->
+<meting-js server="netease" type="playlist" id="2818465505" order="random" autoplay="true" fixed="true"></meting-js>
+
+    
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+</head>
+<body class="is-3-column">
+    <nav class="navbar navbar-main">
+    <div class="container">
+        <div class="navbar-brand is-flex-center">
+            <a class="navbar-item navbar-logo" href="/">
+            
+                <img src="/images/logo.svg" alt="Python脚本作为配置文件加载" height="28">
+            
+            </a>
+        </div>
+        <div class="navbar-menu">
+            
+            <div class="navbar-start">
+                
+                <a class="navbar-item" href="/">Home</a>
+                
+                <a class="navbar-item" href="/archives">Archives</a>
+                
+                <a class="navbar-item" href="/categories">Categories</a>
+                
+                <a class="navbar-item" href="/tags">Tags</a>
+                
+            </div>
+            
+            <div class="navbar-end">
+                
+                    
+                    
+                    <a class="navbar-item" target="_blank" title="Download on GitHub" href="https://github.com/ppoffice/hexo-theme-icarus">
+                        
+                        <i class="fab fa-github"></i>
+                        
+                    </a>
+                    
+                
+                
+                
+                <a class="navbar-item search" title="搜索" href="javascript:;">
+                    <i class="fas fa-search"></i>
+                </a>
+                
+            </div>
+        </div>
+    </div>
+</nav>
+    
+    <section class="section">
+        <div class="container">
+            <div class="columns">
+                <div class="column is-8-tablet is-8-desktop is-6-widescreen has-order-2 column-main"><div class="card">
+    
+    <div class="card-image">
+        <span class="image is-7by1">
+            <img class="thumbnail" src="https://cdn.pixabay.com/photo/2015/05/17/20/39/snake-771541_640.jpg" alt="Python脚本作为配置文件加载">
+        </span>
+    </div>
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey" datetime="2022-08-27T11:37:00.000Z">2022-08-27</time>
+                
+                <div class="level-item">
+                <a class="has-link-grey -link" href="/categories/脚本工具/">脚本工具</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    15 分钟 读完 (大约 2306 个字)
+                </span>
+                
+                
+                <span class="level-item has-text-grey" id="busuanzi_container_page_pv">
+                    <i class="far fa-eye"></i>
+                    <span id="busuanzi_value_page_pv">0</span>次访问
+                </span>
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+                Python脚本作为配置文件加载
+            
+        </h1>
+        <div class="content">
+            <h2 id="背景"><a class="markdownIt-Anchor" href="#背景"></a> 背景</h2>
+<p>在使用 <code>Python</code> 开发时，如果要把对象 <code>obj</code> 当作字典使用，可以直接操作 <code>obj.__dict__</code>（如果有的话），具体而言：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>对象操作</th>
+<th>字典操作</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>查</td>
+<td><code>obj.foo</code></td>
+<td><code>obj.__dict__[&quot;foo&quot;]</code></td>
+</tr>
+<tr>
+<td>改</td>
+<td><code>obj.foo = &quot;bar&quot;</code></td>
+<td><code>obj.__dict__[&quot;foo&quot;] = &quot;bar&quot;</code></td>
+</tr>
+<tr>
+<td>删</td>
+<td><code>del obj.foo</code></td>
+<td><code>del obj.__dict__[&quot;foo&quot;]</code></td>
+</tr>
+</tbody>
+</table>
+<p>对象操作和字典（这里指的是对象的命名空间）操作并不等价，字典操作并不执行复杂的<strong>方法查找</strong>和<strong>描述符</strong>，步骤更少，一般而言更快。</p>
+<p>而要把字典 <code>d</code> 视为对象操作，则要专门包装一下</p>
+ <div class="highlight-wrap" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true" data-rel="PYTHON"><figure class="iseeu highlight /python hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DictAsObject</span>:</span></span><br><span class="line"> </span><br><span class="line">     <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">__init__</span><span class="hljs-params">(self, d)</span>:</span></span><br><span class="line">         self.__dict__ = d</span><br><span class="line"></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">__repr__</span><span class="hljs-params">(self)</span>:</span></span><br><span class="line">        <span class="hljs-keyword">return</span> <span class="hljs-string">f"<span class="hljs-subst">&#123;type(self).__qualname__&#125;</span>(<span class="hljs-subst">&#123;self.__dict__!r&#125;</span>)"</span></span><br><span class="line"></span><br><span class="line">dict_as_obj = DictAsObject</span><br></pre></td></tr></table></figure></div>
+<p>也可以直接用标准库中的包装，例如</p>
+<div class="highlight-wrap" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true" data-rel="PYTHON"><figure class="iseeu highlight /python hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">from</span> argparse <span class="hljs-keyword">import</span> Namespace</span><br><span class="line"></span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">dict_as_obj</span><span class="hljs-params">(d)</span>:</span></span><br><span class="line">    ns = Namespace()</span><br><span class="line">    ns.__dict__ = d</span><br><span class="line">    <span class="hljs-keyword">return</span> ns</span><br></pre></td></tr></table></figure></div>
+<p>令 <code>ns = dict_as_obj(d)</code>，具体而言：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>对象操作</th>
+<th>字典操作</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>查</td>
+<td><code>ns.foo</code></td>
+<td><code>d[&quot;foo&quot;]</code></td>
+</tr>
+<tr>
+<td>改</td>
+<td><code>ns.foo = &quot;bar&quot;</code></td>
+<td><code>d[&quot;foo&quot;] = &quot;bar&quot;</code></td>
+</tr>
+<tr>
+<td>删</td>
+<td><code>del ns.foo</code></td>
+<td><code>del d[&quot;foo&quot;]</code></td>
+</tr>
+</tbody>
+</table>
+<p>更一般地说，就是要把下列操作建立对应</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>对象操作</th>
+<th>字典操作</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>查</td>
+<td><code>__getattr__</code></td>
+<td><code>__getitem__</code></td>
+</tr>
+<tr>
+<td>改</td>
+<td><code>__setattr__</code></td>
+<td><code>__setitem__</code></td>
+</tr>
+<tr>
+<td>删</td>
+<td><code>__delattr__</code></td>
+<td><code>__delitem__</code></td>
+</tr>
+</tbody>
+</table>
+<p>有些不同的是，在抛异常时，对象操作抛出 <code>AttributeError</code>，字典操作抛出 <code>KeyError</code>。</p>
+<p>有一些第三方模块实现了上述对应关系的可相互替代，例如</p>
+<ul>
+<li><a href="https://pypi.org/project/attrdict/" target="_blank" rel="noopener">https://pypi.org/project/attrdict/</a></li>
+<li><a href="https://pypi.org/search/?q=attrdict" target="_blank" rel="noopener">https://pypi.org/search/?q=attrdict</a></li>
+<li><a href="https://github.com/mewwts/addict" target="_blank" rel="noopener">https://github.com/mewwts/addict</a></li>
+<li><a href="https://github.com/sanand0/orderedattrdict" target="_blank" rel="noopener">https://github.com/sanand0/orderedattrdict</a></li>
+</ul>
+<p>我有一个现实的需求，希望能直接以 <code>Python</code> 脚本作为配置文件：读取一个脚本，并以 <code>exec</code> 函数运行之，然后把脚本运行时的全局命名空间作为配置，如果里面用到了不存在的名字，应该自动把它设为空字典 <code>{}</code>。操作策略借鉴了 <a href="https://pypi.org/project/addict/" target="_blank" rel="noopener">addict</a>，操作如下</p>
+<div class="highlight-wrap" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true" data-rel="SHELL"><figure class="iseeu highlight /shell hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-meta">&gt;</span><span class="hljs-bash">&gt;&gt; from addict import Dict</span></span><br><span class="line"><span class="hljs-meta">&gt;</span><span class="hljs-bash">&gt;&gt; mapping = Dict()</span></span><br><span class="line"><span class="hljs-meta">&gt;</span><span class="hljs-bash">&gt;&gt; mapping.a.b.c.d.e = 2</span></span><br><span class="line"><span class="hljs-meta">&gt;</span><span class="hljs-bash">&gt;&gt; mapping</span></span><br><span class="line">&#123;'a': &#123;'b': &#123;'c': &#123;'d': &#123;'e': 2&#125;&#125;&#125;&#125;&#125;</span><br></pre></td></tr></table></figure></div>
+<p>为此，我专门写了一个模块，来适配我的需求，造轮子并非没有意义，它能加深我的思考，并且享受 DIY 的快乐。</p>
+<a id="more"></a>
+<h2 id="代码实现"><a class="markdownIt-Anchor" href="#代码实现"></a> 代码实现</h2>
+<blockquote>
+<p><strong>注意</strong>：使用下面的代码，请用 <code>Python</code> <kdb>3.9</kdb> 或者以上版本。</p>
+</blockquote>
+<p>文件名称是 <code>dictattr.py</code>，<code>Python</code> 实现代码如下：</p>
+<div class="highlight-wrap" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true" data-rel="PYTHON"><figure class="iseeu highlight /python hljs"><figcaption><span>dictattr</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">#!/usr/bin/env python3</span></span><br><span class="line"><span class="hljs-comment"># coding: utf-8</span></span><br><span class="line"></span><br><span class="line">__author__ = <span class="hljs-string">"ChenyangGao &lt;https://chenyanggao.github.io/&gt;"</span></span><br><span class="line">__version__ = (<span class="hljs-number">0</span>, <span class="hljs-number">1</span>)</span><br><span class="line">__all__ = [<span class="hljs-string">"AttrDict"</span>, <span class="hljs-string">"DictAttr"</span>, <span class="hljs-string">"Properties"</span>]</span><br><span class="line"></span><br><span class="line"><span class="hljs-keyword">import</span> builtins</span><br><span class="line"></span><br><span class="line"><span class="hljs-keyword">from</span> pathlib <span class="hljs-keyword">import</span> Path</span><br><span class="line"><span class="hljs-keyword">from</span> types <span class="hljs-keyword">import</span> CodeType</span><br><span class="line"><span class="hljs-keyword">from</span> typing <span class="hljs-keyword">import</span> MutableMapping</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AttrDict</span><span class="hljs-params">(dict)</span>:</span></span><br><span class="line">    <span class="hljs-string">"扩展的 dict 类型，它的实例的 __dict__ 属性（命名空间）就是该字典本身，因此执行 __getattr__、__setattr__、__delattr__ 操作的是该字典本身"</span></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">__init__</span><span class="hljs-params">(self, *args, **kwds)</span>:</span></span><br><span class="line">        super().__init__(*args, **kwds)</span><br><span class="line">        self.__dict__ = self</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="hljs-meta">@MutableMapping.register</span></span><br><span class="line"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DictAttr</span>:</span></span><br><span class="line">    <span class="hljs-string">"""这个类型实现了 collections.abc.MutableMapping 的接口，作为其结构子类型(structural subtyping)，即鸭子类型(duck typing)，而非名义子类型(nominal subtyping)。</span></span><br><span class="line"><span class="hljs-string">    :param init_dict: 如果不为 None，会用于替换实例的 __dict__ 属性</span></span><br><span class="line"><span class="hljs-string">  </span></span><br><span class="line"><span class="hljs-string">    :: doctest</span></span><br><span class="line"><span class="hljs-string">    &gt;&gt;&gt; d = dict(foo=&#123;&#125;)</span></span><br><span class="line"><span class="hljs-string">    &gt;&gt;&gt; da = DictAttr(d)</span></span><br><span class="line"><span class="hljs-string">    &gt;&gt;&gt; da</span></span><br><span class="line"><span class="hljs-string">    DictAttr(&#123;'foo': &#123;&#125;&#125;)</span></span><br><span class="line"><span class="hljs-string">    &gt;&gt;&gt; da.foo</span></span><br><span class="line"><span class="hljs-string">    DictAttr(&#123;&#125;)</span></span><br><span class="line"><span class="hljs-string">    &gt;&gt;&gt; da.foo.bar = 1</span></span><br><span class="line"><span class="hljs-string">    &gt;&gt;&gt; da</span></span><br><span class="line"><span class="hljs-string">    DictAttr(&#123;'foo': &#123;'bar': 1&#125;&#125;)</span></span><br><span class="line"><span class="hljs-string">    &gt;&gt;&gt; d</span></span><br><span class="line"><span class="hljs-string">    &#123;'foo': &#123;'bar': 1&#125;&#125;</span></span><br><span class="line"><span class="hljs-string">    &gt;&gt;&gt; da.__dict__ is d</span></span><br><span class="line"><span class="hljs-string">    True</span></span><br><span class="line"><span class="hljs-string">    """</span></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">__init__</span><span class="hljs-params">(self, init_dict: None | dict = None)</span>:</span></span><br><span class="line">        <span class="hljs-keyword">if</span> init_dict <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span>:</span><br><span class="line">            self.__dict__ = init_dict</span><br><span class="line"></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">__contains__</span><span class="hljs-params">(self, key)</span>:</span></span><br><span class="line">        <span class="hljs-keyword">return</span> key <span class="hljs-keyword">in</span> self.__dict__</span><br><span class="line"></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">__iter__</span><span class="hljs-params">(self)</span>:</span></span><br><span class="line">        <span class="hljs-keyword">return</span> iter(self.__dict__)</span><br><span class="line"></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">__len__</span><span class="hljs-params">(self)</span>:</span></span><br><span class="line">        <span class="hljs-keyword">return</span> len(self.__dict__)</span><br><span class="line"></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">__repr__</span><span class="hljs-params">(self)</span>:</span></span><br><span class="line">        <span class="hljs-keyword">return</span> <span class="hljs-string">f"<span class="hljs-subst">&#123;type(self).__qualname__&#125;</span>(<span class="hljs-subst">&#123;self.__dict__!r&#125;</span>)"</span></span><br><span class="line"></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">__getattribute__</span><span class="hljs-params">(self, attr)</span>:</span></span><br><span class="line">        <span class="hljs-string">"如果 attr 是字符串且前后都附缀两个下划线 __，则执行原始行为。否则行为相当于 __getitem__，但在取不到值时，会再执行原始行为。可能抛出 Attribute Error 异常。"</span></span><br><span class="line">        <span class="hljs-keyword">if</span> type(attr) <span class="hljs-keyword">is</span> str <span class="hljs-keyword">and</span> attr[:<span class="hljs-number">2</span>] == attr[<span class="hljs-number">-2</span>:] == <span class="hljs-string">"__"</span>:</span><br><span class="line">            <span class="hljs-keyword">return</span> super().__getattribute__(attr)</span><br><span class="line">        <span class="hljs-keyword">try</span>:</span><br><span class="line">            <span class="hljs-keyword">return</span> self[attr]</span><br><span class="line">        <span class="hljs-keyword">except</span> KeyError:</span><br><span class="line">            <span class="hljs-keyword">return</span> super().__getattribute__(attr)</span><br><span class="line"></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">__getitem__</span><span class="hljs-params">(self, key)</span>:</span></span><br><span class="line">        <span class="hljs-string">"从 __dict__ 中取值，当值是 dict 类型时，会被 type(self) 对应的类包装"</span></span><br><span class="line">        val = self.__dict__[key]</span><br><span class="line">        <span class="hljs-keyword">if</span> type(val) <span class="hljs-keyword">is</span> dict:</span><br><span class="line">            <span class="hljs-keyword">return</span> type(self)(val)</span><br><span class="line">        <span class="hljs-keyword">return</span> val</span><br><span class="line"></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">__setitem__</span><span class="hljs-params">(self, key, val)</span>:</span></span><br><span class="line">        <span class="hljs-string">"向 __dict__ 中设键值"</span></span><br><span class="line">        self.__dict__[key] = val</span><br><span class="line"></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">__delitem__</span><span class="hljs-params">(self, key)</span>:</span></span><br><span class="line">        <span class="hljs-string">"从 __dict__ 中删键"</span></span><br><span class="line">        <span class="hljs-keyword">del</span> self.__dict__[key]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Properties</span><span class="hljs-params">(DictAttr)</span>:</span></span><br><span class="line">    <span class="hljs-string">"""这个类型实现了 collections.abc.MutableMapping 的接口，作为其结构子类型(structural subtyping)，即鸭子类型(duck typing)，而非名义子类型(nominal subtyping)。</span></span><br><span class="line"><span class="hljs-string">    :param init_dict: 如果不为 None，会用于替换实例的 __dict__ 属性</span></span><br><span class="line"><span class="hljs-string">  </span></span><br><span class="line"><span class="hljs-string">    :: doctest</span></span><br><span class="line"><span class="hljs-string">    &gt;&gt;&gt; d = dict(foo=&#123;&#125;)</span></span><br><span class="line"><span class="hljs-string">    &gt;&gt;&gt; props = Properties(d)</span></span><br><span class="line"><span class="hljs-string">    &gt;&gt;&gt; props</span></span><br><span class="line"><span class="hljs-string">    Properties(&#123;'foo': &#123;&#125;&#125;)</span></span><br><span class="line"><span class="hljs-string">    &gt;&gt;&gt; props.foo</span></span><br><span class="line"><span class="hljs-string">    Properties(&#123;&#125;)</span></span><br><span class="line"><span class="hljs-string">    &gt;&gt;&gt; props.foo.bar = 1</span></span><br><span class="line"><span class="hljs-string">    &gt;&gt;&gt; props</span></span><br><span class="line"><span class="hljs-string">    Properties(&#123;'foo': &#123;'bar': 1&#125;&#125;)</span></span><br><span class="line"><span class="hljs-string">    &gt;&gt;&gt; props.bar</span></span><br><span class="line"><span class="hljs-string">    Properties(&#123;&#125;)</span></span><br><span class="line"><span class="hljs-string">    &gt;&gt;&gt; props</span></span><br><span class="line"><span class="hljs-string">    Properties(&#123;'foo': &#123;'bar': 1&#125;, 'bar': &#123;&#125;&#125;)</span></span><br><span class="line"><span class="hljs-string">    &gt;&gt;&gt; props.baz.bay.baz = 1</span></span><br><span class="line"><span class="hljs-string">    &gt;&gt;&gt; props</span></span><br><span class="line"><span class="hljs-string">    Properties(&#123;'foo': &#123;'bar': 1&#125;, 'bar': &#123;&#125;, 'baz': &#123;'bay': &#123;'baz': 1&#125;&#125;&#125;)</span></span><br><span class="line"><span class="hljs-string">    &gt;&gt;&gt; d</span></span><br><span class="line"><span class="hljs-string">    &#123;'foo': &#123;'bar': 1&#125;, 'bar': &#123;&#125;, 'baz': &#123;'bay': &#123;'baz': 1&#125;&#125;&#125;</span></span><br><span class="line"><span class="hljs-string">    &gt;&gt;&gt; props.__dict__ is d</span></span><br><span class="line"><span class="hljs-string">    True</span></span><br><span class="line"><span class="hljs-string">    """</span></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">__getitem__</span><span class="hljs-params">(self, key)</span>:</span></span><br><span class="line">        <span class="hljs-string">"从 __dict__ 中取值。首先执行基类 DictAttr 的原始行为；如果取不到值，再从 builtins.__dict__ 中取值；如果取不到，则对于非下划线前缀的字符串属性，把值设为 &#123;&#125;，再执行一次基类的原始行为，否则抛出 KeyError。"</span></span><br><span class="line">        <span class="hljs-keyword">try</span>:</span><br><span class="line">            <span class="hljs-keyword">return</span> super().__getitem__(key)</span><br><span class="line">        <span class="hljs-keyword">except</span> KeyError:</span><br><span class="line">            <span class="hljs-keyword">try</span>:</span><br><span class="line">                <span class="hljs-keyword">return</span> builtins.__dict__[key]</span><br><span class="line">            <span class="hljs-keyword">except</span> KeyError:</span><br><span class="line">                <span class="hljs-keyword">pass</span></span><br><span class="line">            <span class="hljs-keyword">if</span> type(key) <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> str <span class="hljs-keyword">or</span> key.startswith(<span class="hljs-string">"_"</span>):</span><br><span class="line">                <span class="hljs-keyword">raise</span></span><br><span class="line">            self[key] = &#123;&#125;</span><br><span class="line">            <span class="hljs-keyword">return</span> super().__getitem__(key)</span><br><span class="line"></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">__abs__</span><span class="hljs-params">(self)</span> -&gt; dict:</span></span><br><span class="line">        <span class="hljs-string">"创建一个 dict 副本，如果有 __all__ 字段，则筛选出所有在 __all__ 中的键，否则只筛选出键是字符串类型且非下划线前缀的键值对"</span></span><br><span class="line">        d = self.__dict__</span><br><span class="line">        <span class="hljs-keyword">if</span> <span class="hljs-string">"__all__"</span> <span class="hljs-keyword">in</span> d:</span><br><span class="line">            <span class="hljs-keyword">return</span> &#123;</span><br><span class="line">                k: abs(v) <span class="hljs-keyword">if</span> isinstance(v, Properties) <span class="hljs-keyword">else</span> v</span><br><span class="line">                <span class="hljs-keyword">for</span> k, v <span class="hljs-keyword">in</span> ((k, d[k]) <span class="hljs-keyword">for</span> k <span class="hljs-keyword">in</span> d[<span class="hljs-string">"__all__"</span>] <span class="hljs-keyword">if</span> k <span class="hljs-keyword">in</span> d)</span><br><span class="line">            &#125;</span><br><span class="line">        <span class="hljs-keyword">return</span> &#123;</span><br><span class="line">            k: abs(v) <span class="hljs-keyword">if</span> isinstance(v, Properties) <span class="hljs-keyword">else</span> v</span><br><span class="line">            <span class="hljs-keyword">for</span> k, v <span class="hljs-keyword">in</span> d.items()</span><br><span class="line">            <span class="hljs-keyword">if</span> type(k) <span class="hljs-keyword">is</span> str <span class="hljs-keyword">and</span> <span class="hljs-keyword">not</span> k.startswith(<span class="hljs-string">"_"</span>)</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">__call__</span><span class="hljs-params">(self, source: str | bytes | CodeType | Path)</span>:</span></span><br><span class="line">        <span class="hljs-string">"""执行一段 Python 代码，并更新 __dict__ 属性（命名空间）</span></span><br><span class="line"><span class="hljs-string">        :param source: Python 代码或者代码文件的路径</span></span><br><span class="line"><span class="hljs-string">        :return: 返回实例本身</span></span><br><span class="line"><span class="hljs-string"></span></span><br><span class="line"><span class="hljs-string">        :: tips</span></span><br><span class="line"><span class="hljs-string">        - 请将变量名提前注入 __dict__，否则缺失时自动设为 &#123;&#125;</span></span><br><span class="line"><span class="hljs-string">        - 如果代码中有 import 命令，请确保把需要的路径加到 sys.path 中，避免找不到模块</span></span><br><span class="line"><span class="hljs-string">        - 属性名有前缀下划线 _，用于说明想要过滤掉</span></span><br><span class="line"><span class="hljs-string"></span></span><br><span class="line"><span class="hljs-string">        :: doctest</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; # 构造一段 Python 代码</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; code = 'from math import nan as _nan, inf as _inf\\nz = _inf\\ny.z = _nan\\nx.y.z = y.z\\nfoo = sum([1,2, 3])\\nbar = abs(1+1j)'</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; print(code)</span></span><br><span class="line"><span class="hljs-string">        from math import nan as _nan, inf as _inf</span></span><br><span class="line"><span class="hljs-string">        z = _inf</span></span><br><span class="line"><span class="hljs-string">        y.z = _nan</span></span><br><span class="line"><span class="hljs-string">        x.y.z = y.z</span></span><br><span class="line"><span class="hljs-string">        foo = sum([1,2, 3])</span></span><br><span class="line"><span class="hljs-string">        bar = abs(1+1j)</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; props = Properties()</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; props</span></span><br><span class="line"><span class="hljs-string">        Properties(&#123;&#125;)</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; props(code)</span></span><br><span class="line"><span class="hljs-string">        Properties(&#123;'_nan': nan, '_inf': inf, 'z': inf, 'y': &#123;'z': nan&#125;, 'x': &#123;'y': &#123;'z': nan&#125;&#125;, 'foo': 6, 'bar': 1.4142135623730951&#125;)</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; print(abs(props))</span></span><br><span class="line"><span class="hljs-string">        &#123;'z': inf, 'y': &#123;'z': nan&#125;, 'x': &#123;'y': &#123;'z': nan&#125;&#125;, 'foo': 6, 'bar': 1.4142135623730951&#125;</span></span><br><span class="line"><span class="hljs-string">        """</span></span><br><span class="line">        code: str | bytes | CodeType</span><br><span class="line">        <span class="hljs-keyword">if</span> isinstance(source, Path):</span><br><span class="line">            code = source.open(encoding=<span class="hljs-string">"utf_8"</span>).read()</span><br><span class="line">        <span class="hljs-keyword">else</span>:</span><br><span class="line">            code = source</span><br><span class="line">        exec(code, <span class="hljs-literal">None</span>, self) <span class="hljs-comment"># type: ignore</span></span><br><span class="line">        <span class="hljs-keyword">return</span> self</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">"__main__"</span>:</span><br><span class="line">    <span class="hljs-keyword">import</span> doctest</span><br><span class="line">    doctest.testmod(verbose=<span class="hljs-literal">True</span>)</span><br></pre></td></tr></table></figure></div>
+<h2 id="使用说明"><a class="markdownIt-Anchor" href="#使用说明"></a> 使用说明</h2>
+<p>代码中有文档测试 <a href="https://docs.python.org/3/library/doctest.html" target="_blank" rel="noopener">doctest</a>，不妨运行一下</p>
+<div class="highlight-wrap" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true" data-rel="SHELL"><figure class="iseeu highlight /shell hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-meta">$</span><span class="hljs-bash"> python dictattr.py</span></span><br><span class="line">Trying:</span><br><span class="line">    d = dict(foo=&#123;&#125;)</span><br><span class="line">Expecting nothing</span><br><span class="line">ok</span><br><span class="line">Trying:</span><br><span class="line">    da = DictAttr(d)</span><br><span class="line">Expecting nothing</span><br><span class="line">ok</span><br><span class="line">Trying:</span><br><span class="line">    da</span><br><span class="line">Expecting:</span><br><span class="line">    DictAttr(&#123;'foo': &#123;&#125;&#125;)</span><br><span class="line">ok</span><br><span class="line">Trying:</span><br><span class="line">    da.foo</span><br><span class="line">Expecting:</span><br><span class="line">    DictAttr(&#123;&#125;)</span><br><span class="line">ok</span><br><span class="line">Trying:</span><br><span class="line">    da.foo.bar = 1</span><br><span class="line">Expecting nothing</span><br><span class="line">ok</span><br><span class="line">Trying:</span><br><span class="line">    da</span><br><span class="line">Expecting:</span><br><span class="line">    DictAttr(&#123;'foo': &#123;'bar': 1&#125;&#125;)</span><br><span class="line">ok</span><br><span class="line">Trying:</span><br><span class="line">    d</span><br><span class="line">Expecting:</span><br><span class="line">    &#123;'foo': &#123;'bar': 1&#125;&#125;</span><br><span class="line">ok</span><br><span class="line">Trying:</span><br><span class="line">    da.__dict__ is d</span><br><span class="line">Expecting:</span><br><span class="line">    True</span><br><span class="line">ok</span><br><span class="line">Trying:</span><br><span class="line">    d = dict(foo=&#123;&#125;)</span><br><span class="line">Expecting nothing</span><br><span class="line">ok</span><br><span class="line">Trying:</span><br><span class="line">    props = Properties(d)</span><br><span class="line">Expecting nothing</span><br><span class="line">ok</span><br><span class="line">Trying:</span><br><span class="line">    props</span><br><span class="line">Expecting:</span><br><span class="line">    Properties(&#123;'foo': &#123;&#125;&#125;)</span><br><span class="line">ok</span><br><span class="line">Trying:</span><br><span class="line">    props.foo</span><br><span class="line">Expecting:</span><br><span class="line">    Properties(&#123;&#125;)</span><br><span class="line">ok</span><br><span class="line">Trying:</span><br><span class="line">    props.foo.bar = 1</span><br><span class="line">Expecting nothing</span><br><span class="line">ok</span><br><span class="line">Trying:</span><br><span class="line">    props</span><br><span class="line">Expecting:</span><br><span class="line">    Properties(&#123;'foo': &#123;'bar': 1&#125;&#125;)</span><br><span class="line">ok</span><br><span class="line">Trying:</span><br><span class="line">    props.bar</span><br><span class="line">Expecting:</span><br><span class="line">    Properties(&#123;&#125;)</span><br><span class="line">ok</span><br><span class="line">Trying:</span><br><span class="line">    props</span><br><span class="line">Expecting:</span><br><span class="line">    Properties(&#123;'foo': &#123;'bar': 1&#125;, 'bar': &#123;&#125;&#125;)</span><br><span class="line">ok</span><br><span class="line">Trying:</span><br><span class="line">    props.baz.bay.baz = 1</span><br><span class="line">Expecting nothing</span><br><span class="line">ok</span><br><span class="line">Trying:</span><br><span class="line">    props</span><br><span class="line">Expecting:</span><br><span class="line">    Properties(&#123;'foo': &#123;'bar': 1&#125;, 'bar': &#123;&#125;, 'baz': &#123;'bay': &#123;'baz': 1&#125;&#125;&#125;)</span><br><span class="line">ok</span><br><span class="line">Trying:</span><br><span class="line">    d</span><br><span class="line">Expecting:</span><br><span class="line">    &#123;'foo': &#123;'bar': 1&#125;, 'bar': &#123;&#125;, 'baz': &#123;'bay': &#123;'baz': 1&#125;&#125;&#125;</span><br><span class="line">ok</span><br><span class="line">Trying:</span><br><span class="line">    props.__dict__ is d</span><br><span class="line">Expecting:</span><br><span class="line">    True</span><br><span class="line">ok</span><br><span class="line">Trying:</span><br><span class="line">    code = 'from math import nan as _nan, inf as _inf\nz = _inf\ny.z = _nan\nx.y.z = y.z\nfoo = sum([1,2, 3])\nbar = abs(1+1j)'</span><br><span class="line">Expecting nothing</span><br><span class="line">ok</span><br><span class="line">Trying:</span><br><span class="line">    print(code)</span><br><span class="line">Expecting:</span><br><span class="line">    from math import nan as _nan, inf as _inf</span><br><span class="line">    z = _inf</span><br><span class="line">    y.z = _nan</span><br><span class="line">    x.y.z = y.z</span><br><span class="line">    foo = sum([1,2, 3])</span><br><span class="line">    bar = abs(1+1j)</span><br><span class="line">ok</span><br><span class="line">Trying:</span><br><span class="line">    props = Properties()</span><br><span class="line">Expecting nothing</span><br><span class="line">ok</span><br><span class="line">Trying:</span><br><span class="line">    props</span><br><span class="line">Expecting:</span><br><span class="line">    Properties(&#123;&#125;)</span><br><span class="line">ok</span><br><span class="line">Trying:</span><br><span class="line">    props(code)</span><br><span class="line">Expecting:</span><br><span class="line">    Properties(&#123;'_nan': nan, '_inf': inf, 'z': inf, 'y': &#123;'z': nan&#125;, 'x': &#123;'y': &#123;'z': nan&#125;&#125;, 'foo': 6, 'bar': 1.4142135623730951&#125;)</span><br><span class="line">ok</span><br><span class="line">Trying:</span><br><span class="line">    print(abs(props))</span><br><span class="line">Expecting:</span><br><span class="line">    &#123;'z': inf, 'y': &#123;'z': nan&#125;, 'x': &#123;'y': &#123;'z': nan&#125;&#125;, 'foo': 6, 'bar': 1.4142135623730951&#125;</span><br><span class="line">ok</span><br><span class="line">14 items had no tests:</span><br><span class="line">    __main__</span><br><span class="line">    __main__.AttrDict</span><br><span class="line">    __main__.AttrDict.__init__</span><br><span class="line">    __main__.DictAttr.__contains__</span><br><span class="line">    __main__.DictAttr.__delitem__</span><br><span class="line">    __main__.DictAttr.__getattribute__</span><br><span class="line">    __main__.DictAttr.__getitem__</span><br><span class="line">    __main__.DictAttr.__init__</span><br><span class="line">    __main__.DictAttr.__iter__</span><br><span class="line">    __main__.DictAttr.__len__</span><br><span class="line">    __main__.DictAttr.__repr__</span><br><span class="line">    __main__.DictAttr.__setitem__</span><br><span class="line">    __main__.Properties.__abs__</span><br><span class="line">    __main__.Properties.__getitem__</span><br><span class="line">3 items passed all tests:</span><br><span class="line">   8 tests in __main__.DictAttr</span><br><span class="line">  12 tests in __main__.Properties</span><br><span class="line">   6 tests in __main__.Properties.__call__</span><br><span class="line">26 tests in 17 items.</span><br><span class="line">26 passed and 0 failed.</span><br></pre></td></tr></table></figure></div>
+<hr>
+<p>假设现在有个 <code>Python</code> 脚本 <code>config.py</code> 作为配置文件，内容如下</p>
+<div class="highlight-wrap" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true" data-rel="PYTHON"><figure class="iseeu highlight /python hljs"><figcaption><span>config.py</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">## 以下是数据库连接信息</span></span><br><span class="line"></span><br><span class="line"><span class="hljs-comment"># 数据库连接函数</span></span><br><span class="line">db.connect = __import__(<span class="hljs-string">"sqlite3"</span>).connect</span><br><span class="line"><span class="hljs-comment"># 主机</span></span><br><span class="line">db.host = <span class="hljs-literal">None</span></span><br><span class="line"><span class="hljs-comment"># 端口</span></span><br><span class="line">db.port = <span class="hljs-literal">None</span></span><br><span class="line"><span class="hljs-comment"># 用户名</span></span><br><span class="line">db.username = <span class="hljs-literal">None</span></span><br><span class="line"><span class="hljs-comment"># 密码</span></span><br><span class="line">db.password = <span class="hljs-literal">None</span></span><br><span class="line"><span class="hljs-comment"># 数据库</span></span><br><span class="line">db.database = <span class="hljs-string">":memory:"</span></span><br><span class="line"></span><br><span class="line"><span class="hljs-comment">## 下面是日志的相关配置</span></span><br><span class="line"> </span><br><span class="line"><span class="hljs-comment"># 日志输出的最低级别</span></span><br><span class="line">log.level=__import__(<span class="hljs-string">"logging"</span>).INFO</span><br><span class="line"><span class="hljs-comment"># 日志的输出格式</span></span><br><span class="line">log.format=<span class="hljs-string">"[\x1b[1m%(asctime)-15s\x1b[0m] \x1b[36;1m%(name)s\x1b[0m(\x1b[31;1m%(levelname)s\x1b[0m) ➜ %(message)s"</span></span><br><span class="line"></span><br><span class="line"><span class="hljs-comment">## json 的相关配置</span></span><br><span class="line"></span><br><span class="line"><span class="hljs-comment"># json 序列化函数</span></span><br><span class="line">json.serialize = __import__(<span class="hljs-string">"json"</span>).dumps</span><br><span class="line"><span class="hljs-comment"># json 反序列化函数</span></span><br><span class="line">json.deserialize = __import__(<span class="hljs-string">"json"</span>).loads</span><br><span class="line"></span><br><span class="line"><span class="hljs-comment">## 一些需要的 64 位浮点数常量</span></span><br><span class="line"></span><br><span class="line"><span class="hljs-keyword">from</span> math <span class="hljs-keyword">import</span> nan <span class="hljs-keyword">as</span> _nan, inf <span class="hljs-keyword">as</span> _inf</span><br><span class="line"></span><br><span class="line">Number.SQRT_2 = abs(<span class="hljs-number">1</span>+<span class="hljs-number">1j</span>)</span><br><span class="line">Number.EPSILON = <span class="hljs-number">2.0</span> ** <span class="hljs-number">-52</span></span><br><span class="line">Number.MIN_VALUE = <span class="hljs-number">2.0</span> ** <span class="hljs-number">-1074</span></span><br><span class="line">Number.MAX_VALUE = sum(<span class="hljs-number">2.0</span> ** (<span class="hljs-number">1023</span> - i) <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> range(<span class="hljs-number">53</span>))</span><br><span class="line">Number.MAX_SAFE_INTEGER = <span class="hljs-number">2.0</span> ** <span class="hljs-number">53</span> - <span class="hljs-number">1</span></span><br><span class="line">Number.MIN_SAFE_INTEGER = -Number.MAX_SAFE_INTEGER</span><br><span class="line">Number.NaN = _nan</span><br><span class="line">Number.POSITIVE_INFINITY = _inf</span><br><span class="line">Number.NEGATIVE_INFINITY = -_inf</span><br></pre></td></tr></table></figure></div>
+<p>可以运行下面代码进行加载</p>
+<div class="highlight-wrap" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true" data-rel="SHELL"><figure class="iseeu highlight /shell hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-meta">&gt;</span><span class="hljs-bash">&gt;&gt; from dictattr import Properties</span></span><br><span class="line"><span class="hljs-meta">&gt;</span><span class="hljs-bash">&gt;&gt; props = Properties()</span></span><br><span class="line"><span class="hljs-meta">&gt;</span><span class="hljs-bash">&gt;&gt; props(<span class="hljs-string">"config.py"</span>)</span></span><br><span class="line">Properties(&#123;'db': &#123;'connect': &lt;built-in function connect&gt;, 'host': None, 'port': None, 'username': None, 'password': None, 'database': ':memory:'&#125;, 'log': &#123;'level': 20, 'format': '[\x1b[1m%(asctime)-15s\x1b[0m] \x1b[36;1m%(name)s\x1b[0m(\x1b[31;1m%(levelname)s\x1b[0m) ➜ %(message)s'&#125;, 'json': &#123;'serialize': &lt;function dumps at 0x76829bcf70&gt;, 'deserialize': &lt;function loads at 0x76829bd480&gt;&#125;, '_nan': nan, '_inf': inf, 'Number': &#123;'SQRT_2': 1.4142135623730951, 'EPSILON': 2.220446049250313e-16, 'MIN_VALUE': 5e-324, 'MAX_VALUE': 1.7976931348623157e+308, 'MAX_SAFE_INTEGER': 9007199254740991.0, 'MIN_SAFE_INTEGER': -9007199254740991.0, 'NaN': Properties(&#123;&#125;), 'POSITIVE_INFINITY': inf, 'NEGATIVE_INFINITY': -inf&#125;, 'nan': &#123;&#125;&#125;)</span><br></pre></td></tr></table></figure></div>
+<p>然后就可以根据需要取用属性了</p>
+<div class="highlight-wrap" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true" data-rel="SHELL"><figure class="iseeu highlight /shell hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-meta">&gt;</span><span class="hljs-bash">&gt;&gt; props.Number</span></span><br><span class="line">Properties(&#123;'SQRT_2': 1.4142135623730951, 'EPSILON': 2.220446049250313e-16, 'MIN_VALUE': 5e-324, 'MAX_VALUE': 1.7976931348623157e+308, 'MAX_SAFE_INTEGER': 9007199254740991.0, 'MIN_SAFE_INTEGER': -9007199254740991.0, 'NaN': Properties(&#123;&#125;), 'POSITIVE_INFINITY': inf, 'NEGATIVE_INFINITY': -inf&#125;)</span><br><span class="line"><span class="hljs-meta">&gt;</span><span class="hljs-bash">&gt;&gt; props[<span class="hljs-string">"Number"</span>].SQRT_2</span></span><br><span class="line">1.4142135623730951</span><br><span class="line"><span class="hljs-meta">&gt;</span><span class="hljs-bash">&gt;&gt; props.db</span></span><br><span class="line">Properties(&#123;'connect': &lt;built-in function connect&gt;, 'host': None, 'port': None, 'username': None, 'password': None, 'database': ':memory:'&#125;)</span><br><span class="line"><span class="hljs-meta">&gt;</span><span class="hljs-bash">&gt;&gt; props[<span class="hljs-string">"json"</span>]</span></span><br><span class="line">Properties(&#123;'serialize': &lt;function dumps at 0x76829bcf70&gt;, 'deserialize': &lt;function loads at 0x76829bd480&gt;&#125;)</span><br></pre></td></tr></table></figure></div>
+
+        </div>
+        
+        <div class="level is-size-7 is-uppercase">
+            <div class="level-start">
+                <div class="level-item">
+                    <span class="is-size-6 has-text-grey has-mr-7">#</span>
+                    <a class="has-link-grey -link" href="/tags/Python-Script/">Python,Script</a>
+                </div>
+            </div>
+        </div>
+        
+        
+        
+    </div>
+</div>
+
+
+
+
+
+<div class="card card-transparent">
+    <div class="level post-navigation is-flex-wrap is-mobile">
+        
+        
+        <div class="level-end">
+            <a class="level level-item has-link-grey  article-nav-next" href="/2019/07/12/5.CPython中函数引用它自身/">
+                <span class="level-item">CPython中函数引用它自身</span>
+                <i class="level-item fas fa-chevron-right"></i>
+            </a>
+        </div>
+        
+    </div>
+</div>
+
+
+
+    
+        
+<div class="card">
+    <div class="card-content">
+        <h3 class="title is-5 has-text-weight-normal">评论</h3>
+        
+<div id="comment-container"></div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1.4.1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1.4.1/dist/gitalk.min.js"></script>
+<script>
+    var gitalk = new Gitalk({
+        clientID: '0c4d63f8312662c8e0ef',
+        clientSecret: '85fac375ae5f908d13add1e7289e689b5cc905ec',
+        id: 'd3a4e2f44f3637cbcaa7a4de3ad7f515',
+        repo: 'ChenyangGao.github.io',
+        owner: 'ChenyangGao',
+        admin: ["ChenyangGao"]
+    })
+    gitalk.render('comment-container')
+</script>
+
+    </div>
+</div>
+        
+    
+        
+<div class="card">
+    <div class="card-content">
+        <h3 class="title is-5 has-text-weight-normal">评论</h3>
+        
+<script>
+    var disqus_config = function () {
+        this.page.url = 'https://chenyanggao.github.io/2022/08/27/Python脚本作为配置文件加载/';
+        this.page.identifier = '2022/08/27/Python脚本作为配置文件加载/';
+    };
+    (function() {
+        var d = document, s = d.createElement('script');  
+        s.src = '//' + 'chenyanggao-blog' + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+
+<div id="disqus_thread">
+    
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+    </div>
+</div>
+        
+    
+</div>
+                
+
+
+
+
+<div class="column is-4-tablet is-4-desktop is-3-widescreen  has-order-1 column-left ">
+    
+        
+<div class="card widget">
+    <div class="card-content">
+        <nav class="level">
+            <div class="level-item has-text-centered">
+                <div>
+                    
+                        <img class="image is-128x128 has-mb-6" src="https://octodex.github.com/images/hula_loop_octodex03.gif" alt="ChenyangGao">
+                    
+                    
+                    <p class="is-size-4 is-block">
+                        ChenyangGao
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-block">
+                        数据分析师
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-flex is-flex-center has-text-grey">
+                        <i class="fas fa-map-marker-alt has-mr-7"></i>
+                        <span>China</span>
+                    </p>
+                    
+                </div>
+            </div>
+        </nav>
+        <nav class="level is-mobile">
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        文章
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        6
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        分类
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        4
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        标签
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        3
+                    </p>
+                </div>
+            </div>
+        </nav>
+        <div class="level">
+            <a class="level-item button is-link is-rounded" href="https://github.com/ChenyangGao" target="_blank">
+                关注我</a>
+        </div>
+        
+        
+        <div class="level is-mobile">
+            
+            <a class="level-item button is-white is-marginless" target="_blank" title="Github" href="https://github.com/ChenyangGao">
+                
+                <i class="fab fa-github"></i>
+                
+            </a>
+            
+            <a class="level-item button is-white is-marginless" target="_blank" title="Facebook" href="https://facebook.com">
+                
+                <i class="fab fa-facebook"></i>
+                
+            </a>
+            
+            <a class="level-item button is-white is-marginless" target="_blank" title="Twitter" href="https://twitter.com">
+                
+                <i class="fab fa-twitter"></i>
+                
+            </a>
+            
+            <a class="level-item button is-white is-marginless" target="_blank" title="Dribbble" href="https://dribbble.com">
+                
+                <i class="fab fa-dribbble"></i>
+                
+            </a>
+            
+            <a class="level-item button is-white is-marginless" target="_blank" title="RSS" href="/">
+                
+                <i class="fas fa-rss"></i>
+                
+            </a>
+            
+        </div>
+        
+    </div>
+</div>
+    
+        
+
+<div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+        <h3 class="menu-label">
+            链接
+        </h3>
+        <ul class="menu-list">
+        
+            <li>
+                <a class="level is-mobile" href="https://hexo.io" target="_blank">
+                    <span class="level-left">
+                        <span class="level-item">Hexo</span>
+                    </span>
+                    <span class="level-right">
+                        <span class="level-item tag">hexo.io</span>
+                    </span>
+                </a>
+            </li>
+        
+            <li>
+                <a class="level is-mobile" href="https://github.com/ppoffice" target="_blank">
+                    <span class="level-left">
+                        <span class="level-item">PPOffice</span>
+                    </span>
+                    <span class="level-right">
+                        <span class="level-item tag">github.com</span>
+                    </span>
+                </a>
+            </li>
+        
+            <li>
+                <a class="level is-mobile" href="https://community.motifsing.com" target="_blank">
+                    <span class="level-left">
+                        <span class="level-item">资源分享</span>
+                    </span>
+                    <span class="level-right">
+                        <span class="level-item tag">community.motifsing.com</span>
+                    </span>
+                </a>
+            </li>
+        
+        </ul>
+        </div>
+    </div>
+</div>
+
+
+    
+        
+<div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                分类
+            </h3>
+            <ul class="menu-list">
+            <li>
+        <a class="level is-marginless" href="/categories/数学/">
+            <span class="level-start">
+                <span class="level-item">数学</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">1</span>
+            </span>
+        </a><ul><li>
+        <a class="level is-marginless" href="/categories/数学/经济学/">
+            <span class="level-start">
+                <span class="level-item">经济学</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">1</span>
+            </span>
+        </a></li></ul></li><li>
+        <a class="level is-marginless" href="/categories/编程思想/">
+            <span class="level-start">
+                <span class="level-item">编程思想</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">4</span>
+            </span>
+        </a></li><li>
+        <a class="level is-marginless" href="/categories/脚本工具/">
+            <span class="level-start">
+                <span class="level-item">脚本工具</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">1</span>
+            </span>
+        </a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+    
+        
+<div class="card widget">
+    <div class="card-content">
+        <h3 class="menu-label">
+            标签云
+        </h3>
+        <a href="/tags/Python/" style="font-size: 20px;">Python</a> <a href="/tags/Python-Script/" style="font-size: 10px;">Python,Script</a> <a href="/tags/博弈论/" style="font-size: 10px;">博弈论</a>
+    </div>
+</div>
+
+    
+    
+        <div class="column-right-shadow is-hidden-widescreen ">
+        
+            
+        
+            
+<div class="card widget">
+    <div class="card-content">
+        <h3 class="menu-label">
+            最新文章
+        </h3>
+        
+        <article class="media">
+            
+            <a href="/2022/08/27/Python脚本作为配置文件加载/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://cdn.pixabay.com/photo/2015/05/17/20/39/snake-771541_640.jpg" alt="Python脚本作为配置文件加载">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2022-08-27T11:37:00.000Z">2022-08-27</time></div>
+                    <a href="/2022/08/27/Python脚本作为配置文件加载/" class="has-link-black-ter is-size-6">Python脚本作为配置文件加载</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/脚本工具/">脚本工具</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2019/07/12/5.CPython中函数引用它自身/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://cdn.pixabay.com/photo/2017/04/02/06/21/python-2195106_960_720.jpg" alt="CPython中函数引用它自身">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2019-07-12T03:33:08.000Z">2019-07-12</time></div>
+                    <a href="/2019/07/12/5.CPython中函数引用它自身/" class="has-link-black-ter is-size-6">CPython中函数引用它自身</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/编程思想/">编程思想</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2019/07/04/4.掩码（Python实现）/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://static.boredpanda.com/blog/wp-content/uploads/2018/08/Naamloos-5b80200f6c2e5-png__700.jpg" alt="掩码（Python实现）">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2019-07-04T10:02:35.000Z">2019-07-04</time></div>
+                    <a href="/2019/07/04/4.掩码（Python实现）/" class="has-link-black-ter is-size-6">掩码（Python实现）</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/编程思想/">编程思想</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2019/05/28/3.利用异常实现越级return（Python实现）/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://cdn.pixabay.com/photo/2014/11/21/15/33/snake-540656_960_720.jpg" alt="利用异常实现越级return（Python实现）">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2019-05-28T06:54:38.000Z">2019-05-28</time></div>
+                    <a href="/2019/05/28/3.利用异常实现越级return（Python实现）/" class="has-link-black-ter is-size-6">利用异常实现越级return（Python实现）</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/编程思想/">编程思想</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2019/04/30/2.CPython中函数的非本地变量/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://cdn.pixabay.com/photo/2014/11/23/21/22/snake-543243_640.jpg" alt="CPython中函数的非本地变量">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2019-04-30T14:36:10.000Z">2019-04-30</time></div>
+                    <a href="/2019/04/30/2.CPython中函数的非本地变量/" class="has-link-black-ter is-size-6">CPython中函数的非本地变量</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/编程思想/">编程思想</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+    </div>
+</div>
+
+        
+            <div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+        <h3 class="menu-label">
+            归档
+        </h3>
+        <ul class="menu-list">
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2022/08/">
+                <span class="level-start">
+                    <span class="level-item">八月 2022</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">1</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2019/07/">
+                <span class="level-start">
+                    <span class="level-item">七月 2019</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">2</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2019/05/">
+                <span class="level-start">
+                    <span class="level-item">五月 2019</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">1</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2019/04/">
+                <span class="level-start">
+                    <span class="level-item">四月 2019</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">2</span>
+                </span>
+            </a>
+        </li>
+        
+        </ul>
+        </div>
+    </div>
+</div>
+        
+            <div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                标签
+            </h3>
+            <div class="field is-grouped is-grouped-multiline">
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Python/">
+                        <span class="tag">Python</span>
+                        <span class="tag is-grey">4</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Python-Script/">
+                        <span class="tag">Python,Script</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/博弈论/">
+                        <span class="tag">博弈论</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+</div>
+        
+        </div>
+    
+</div>
+
+                
+
+
+
+
+<div class="column is-4-tablet is-4-desktop is-3-widescreen is-hidden-touch is-hidden-desktop-only has-order-3 column-right ">
+    
+        
+    
+        
+<div class="card widget">
+    <div class="card-content">
+        <h3 class="menu-label">
+            最新文章
+        </h3>
+        
+        <article class="media">
+            
+            <a href="/2022/08/27/Python脚本作为配置文件加载/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://cdn.pixabay.com/photo/2015/05/17/20/39/snake-771541_640.jpg" alt="Python脚本作为配置文件加载">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2022-08-27T11:37:00.000Z">2022-08-27</time></div>
+                    <a href="/2022/08/27/Python脚本作为配置文件加载/" class="has-link-black-ter is-size-6">Python脚本作为配置文件加载</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/脚本工具/">脚本工具</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2019/07/12/5.CPython中函数引用它自身/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://cdn.pixabay.com/photo/2017/04/02/06/21/python-2195106_960_720.jpg" alt="CPython中函数引用它自身">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2019-07-12T03:33:08.000Z">2019-07-12</time></div>
+                    <a href="/2019/07/12/5.CPython中函数引用它自身/" class="has-link-black-ter is-size-6">CPython中函数引用它自身</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/编程思想/">编程思想</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2019/07/04/4.掩码（Python实现）/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://static.boredpanda.com/blog/wp-content/uploads/2018/08/Naamloos-5b80200f6c2e5-png__700.jpg" alt="掩码（Python实现）">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2019-07-04T10:02:35.000Z">2019-07-04</time></div>
+                    <a href="/2019/07/04/4.掩码（Python实现）/" class="has-link-black-ter is-size-6">掩码（Python实现）</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/编程思想/">编程思想</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2019/05/28/3.利用异常实现越级return（Python实现）/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://cdn.pixabay.com/photo/2014/11/21/15/33/snake-540656_960_720.jpg" alt="利用异常实现越级return（Python实现）">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2019-05-28T06:54:38.000Z">2019-05-28</time></div>
+                    <a href="/2019/05/28/3.利用异常实现越级return（Python实现）/" class="has-link-black-ter is-size-6">利用异常实现越级return（Python实现）</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/编程思想/">编程思想</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2019/04/30/2.CPython中函数的非本地变量/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://cdn.pixabay.com/photo/2014/11/23/21/22/snake-543243_640.jpg" alt="CPython中函数的非本地变量">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2019-04-30T14:36:10.000Z">2019-04-30</time></div>
+                    <a href="/2019/04/30/2.CPython中函数的非本地变量/" class="has-link-black-ter is-size-6">CPython中函数的非本地变量</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/编程思想/">编程思想</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+    </div>
+</div>
+
+    
+        <div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+        <h3 class="menu-label">
+            归档
+        </h3>
+        <ul class="menu-list">
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2022/08/">
+                <span class="level-start">
+                    <span class="level-item">八月 2022</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">1</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2019/07/">
+                <span class="level-start">
+                    <span class="level-item">七月 2019</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">2</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2019/05/">
+                <span class="level-start">
+                    <span class="level-item">五月 2019</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">1</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2019/04/">
+                <span class="level-start">
+                    <span class="level-item">四月 2019</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">2</span>
+                </span>
+            </a>
+        </li>
+        
+        </ul>
+        </div>
+    </div>
+</div>
+    
+        <div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                标签
+            </h3>
+            <div class="field is-grouped is-grouped-multiline">
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Python/">
+                        <span class="tag">Python</span>
+                        <span class="tag is-grey">4</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Python-Script/">
+                        <span class="tag">Python,Script</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/博弈论/">
+                        <span class="tag">博弈论</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+</div>
+    
+    
+</div>
+
+            </div>
+        </div>
+    </section>
+    <footer class="footer">
+    <div class="container">
+        <div class="level">
+            <div class="level-start has-text-centered-mobile">
+                <a class="footer-logo is-block has-mb-6" href="/">
+                
+                    <img src="/images/logo.svg" alt="Python脚本作为配置文件加载" height="28">
+                
+                </a>
+                <p class="is-size-7">
+                &copy; 2022 ChenyangGao&nbsp;
+                Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> & <a href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank">Icarus</a>
+                
+                <br>
+                <span id="busuanzi_container_site_uv">
+                共<span id="busuanzi_value_site_uv">0</span>个访客
+                </span>
+                
+                </p>
+            </div>
+            <div class="level-end">
+            
+                <div class="field has-addons is-flex-center-mobile has-mt-5-mobile is-flex-wrap is-flex-middle">
+                
+                
+                <p class="control">
+                    <a class="button is-white is-large" target="_blank" title="Creative Commons" href="https://creativecommons.org/">
+                        
+                        <i class="fab fa-creative-commons"></i>
+                        
+                    </a>
+                </p>
+                
+                <p class="control">
+                    <a class="button is-white is-large" target="_blank" title="Attribution 4.0 International" href="https://creativecommons.org/licenses/by/4.0/">
+                        
+                        <i class="fab fa-creative-commons-by"></i>
+                        
+                    </a>
+                </p>
+                
+                <p class="control">
+                    <a class="button is-white is-large" target="_blank" title="Download on GitHub" href="https://github.com/ppoffice/hexo-theme-icarus">
+                        
+                        <i class="fab fa-github"></i>
+                        
+                    </a>
+                </p>
+                
+                </div>
+            
+            </div>
+        </div>
+    </div>
+</footer>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script>
+<script>moment.locale("zh-CN");</script>
+
+
+    
+    
+    
+    <script src="/js/animation.js"></script>
+    
+
+    
+    
+    
+    <script src="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/js/lightgallery.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js" defer></script>
+    <script src="/js/gallery.js" defer></script>
+    
+
+    
+    
+
+<div id="outdated">
+    <h6>Your browser is out-of-date!</h6>
+    <p>Update your browser to view this website correctly. <a id="btnUpdateBrowser" href="http://outdatedbrowser.com/">Update
+            my browser now </a></p>
+    <p class="last"><a href="#" id="btnCloseUpdateBrowser" title="Close">&times;</a></p>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.js" defer></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        outdatedBrowser({
+            bgColor: '#f25648',
+            color: '#ffffff',
+            lowerThan: 'flex'
+        });
+    });
+</script>
+
+
+    
+    
+    
+    
+
+<a id="back-to-top" title="回到顶端" href="javascript:;">
+    <i class="fas fa-chevron-up"></i>
+</a>
+<script src="/js/back-to-top.js" defer></script>
+
+
+    
+    
+
+    
+    
+    
+    
+
+    
+    
+    
+    
+    
+    <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script>
+    <script src="/js/clipboard.js" defer></script>
+    
+
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+
+<script src="/js/main.js" defer></script>
+
+    
+    <div class="searchbox ins-search">
+    <div class="searchbox-container ins-search-container">
+        <div class="searchbox-input-wrapper">
+            <input type="text" class="searchbox-input ins-search-input" placeholder="想要查找什么...">
+            <span class="searchbox-close ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="searchbox-result-wrapper ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+    (function (window) {
+        var INSIGHT_CONFIG = {
+            TRANSLATION: {
+                POSTS: '文章',
+                PAGES: '页面',
+                CATEGORIES: '分类',
+                TAGS: '标签',
+                UNTITLED: '(无标题)',
+            },
+            CONTENT_URL: '/content.json',
+        };
+        window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+    })(window);
+</script>
+<script src="/js/insight.js" defer></script>
+<link rel="stylesheet" href="/css/search.css">
+<link rel="stylesheet" href="/css/insight.css">
+    
+</body>
+</html>
