@@ -1,0 +1,1201 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head><meta name="generator" content="Hexo 3.8.0">
+    <meta charset="utf-8">
+<title>Python模块-打包多个参数于一体 - 思考者</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+
+
+    <meta name="description" content="背景 在调用 Python 函数的时候，往往需要传入一些参数。函数所需的参数被称为形式参数 parameter，传入的参数被称为实际参数 argument。  See also the FAQ question on the difference between arguments and parameters, the inspect.Parameter class, the Function">
+<meta name="keywords" content="Python,Module">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Python模块-打包多个参数于一体">
+<meta property="og:url" content="https://chenyanggao.github.io/2022/09/01/12.Python模块-打包多个参数于一体/index.html">
+<meta property="og:site_name" content="思考者">
+<meta property="og:description" content="背景 在调用 Python 函数的时候，往往需要传入一些参数。函数所需的参数被称为形式参数 parameter，传入的参数被称为实际参数 argument。  See also the FAQ question on the difference between arguments and parameters, the inspect.Parameter class, the Function">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://cdn.pixabay.com/photo/2014/12/11/22/10/python-564817_1280.jpg">
+<meta property="og:updated_time" content="2022-09-01T10:51:42.556Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Python模块-打包多个参数于一体">
+<meta name="twitter:description" content="背景 在调用 Python 函数的时候，往往需要传入一些参数。函数所需的参数被称为形式参数 parameter，传入的参数被称为实际参数 argument。  See also the FAQ question on the difference between arguments and parameters, the inspect.Parameter class, the Function">
+<meta name="twitter:image" content="https://cdn.pixabay.com/photo/2014/12/11/22/10/python-564817_1280.jpg">
+
+
+
+
+
+
+
+<link rel="icon" href="/images/favicon.svg">
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.7.2/css/bulma.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:400,600|Source+Code+Pro">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.12.0/styles/vs.css">
+
+
+    
+    
+    
+    <style>body>.footer,body>.navbar,body>.section{opacity:0}</style>
+    
+
+    
+    
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/css/lightgallery.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/css/justifiedGallery.min.css">
+    
+
+    
+    
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.css">
+
+
+    
+    
+    
+    
+
+<link rel="stylesheet" href="/css/back-to-top.css">
+
+
+    
+    
+
+    
+    
+    
+    
+
+    
+    
+<link rel="stylesheet" href="/css/progressbar.css">
+<script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+
+    
+    
+    
+
+    
+    
+    
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    
+
+    
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" integrity="sha384-yFRtMMDnQtDRO8rLpMIKrtPCD5jdktao2TV19YiZYWMDkUR5GQZR/NOVTdquEx1j" crossorigin="anonymous">
+
+<!-- The loading of KaTeX is deferred to speed up page rendering -->
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.js" integrity="sha384-9Nhn55MVVN0/4OFx7EE5kpFBPsEMZxKTCnA+4fqDmg12eCTqGi6+BB2LjY8brQxJ" crossorigin="anonymous"></script>
+
+<!-- To automatically render math in text elements, include the auto-render extension: -->
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/contrib/auto-render.min.js" integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI" crossorigin="anonymous" onload="renderMathInElement(document.body);"></script>
+
+    
+    
+<style>pre.mermaid {background-color:white;}</style>
+    
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+    
+<script>
+    if (window.mermaid) {
+        mermaid.initialize({"noteMargin":10}, "pre.mermaid");
+    }
+</script>
+
+    
+    
+    
+    
+<!-- require APlayer -->
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.css">
+<script src="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.js"></script>
+    
+<!-- require MetingJS -->
+
+<script src="https://cdn.jsdelivr.net/npm/meting/dist/Meting.min.js"></script>
+    
+<!-- main music player -->
+<meting-js server="netease" type="playlist" id="2818465505" order="random" autoplay="true" fixed="true"></meting-js>
+
+    
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+</head>
+<body class="is-3-column">
+    <nav class="navbar navbar-main">
+    <div class="container">
+        <div class="navbar-brand is-flex-center">
+            <a class="navbar-item navbar-logo" href="/">
+            
+                <img src="/images/logo.svg" alt="Python模块-打包多个参数于一体" height="28">
+            
+            </a>
+        </div>
+        <div class="navbar-menu">
+            
+            <div class="navbar-start">
+                
+                <a class="navbar-item" href="/">Home</a>
+                
+                <a class="navbar-item" href="/archives">Archives</a>
+                
+                <a class="navbar-item" href="/categories">Categories</a>
+                
+                <a class="navbar-item" href="/tags">Tags</a>
+                
+            </div>
+            
+            <div class="navbar-end">
+                
+                    
+                    
+                    <a class="navbar-item" target="_blank" title="Download on GitHub" href="https://github.com/ppoffice/hexo-theme-icarus">
+                        
+                        <i class="fab fa-github"></i>
+                        
+                    </a>
+                    
+                
+                
+                
+                <a class="navbar-item search" title="搜索" href="javascript:;">
+                    <i class="fas fa-search"></i>
+                </a>
+                
+            </div>
+        </div>
+    </div>
+</nav>
+    
+    <section class="section">
+        <div class="container">
+            <div class="columns">
+                <div class="column is-8-tablet is-8-desktop is-6-widescreen has-order-2 column-main"><div class="card">
+    
+    <div class="card-image">
+        <span class="image is-7by1">
+            <img class="thumbnail" src="https://cdn.pixabay.com/photo/2014/12/11/22/10/python-564817_1280.jpg" alt="Python模块-打包多个参数于一体">
+        </span>
+    </div>
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey" datetime="2022-09-01T08:00:00.000Z">2022-09-01</time>
+                
+                <div class="level-item">
+                <a class="has-link-grey -link" href="/categories/通用模块/">通用模块</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    10 分钟 读完 (大约 1463 个字)
+                </span>
+                
+                
+                <span class="level-item has-text-grey" id="busuanzi_container_page_pv">
+                    <i class="far fa-eye"></i>
+                    <span id="busuanzi_value_page_pv">0</span>次访问
+                </span>
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+                Python模块-打包多个参数于一体
+            
+        </h1>
+        <div class="content">
+            <h2 id="背景"><a class="markdownIt-Anchor" href="#背景"></a> 背景</h2>
+<p>在调用 <a href="https://www.python.org" target="_blank" rel="noopener">Python</a> 函数的时候，往往需要传入一些参数。函数所需的参数被称为形式参数 <a href="https://docs.python.org/3/glossary.html#term-parameter" target="_blank" rel="noopener">parameter</a>，传入的参数被称为实际参数 <a href="https://docs.python.org/3/glossary.html#term-argument" target="_blank" rel="noopener">argument</a>。</p>
+<blockquote>
+<p>See also the FAQ question on <a href="https://docs.python.org/3/faq/programming.html#faq-argument-vs-parameter" target="_blank" rel="noopener">the difference between arguments and parameters</a>, the <a href="https://docs.python.org/3/library/inspect.html#inspect.Parameter" target="_blank" rel="noopener">inspect.Parameter</a> class, the <a href="https://docs.python.org/3/reference/compound_stmts.html#function" target="_blank" rel="noopener">Function definitions</a> section, and <a href="https://www.python.org/dev/peps/pep-0362" target="_blank" rel="noopener">PEP 362</a>.</p>
+</blockquote>
+<p>我常常需要把一些实际参数收集起来，可能后续还要进行一些更新，并在需要的时候反复使用。有一种办法是使用偏函数 <a href="https://docs.python.org/3/library/functools.html#functools.partial" target="_blank" rel="noopener">functools.partial</a>，但这需要绑定具体的函数。</p>
+<div class="highlight-wrap" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true" data-rel="PYTHON"><figure class="iseeu highlight /python hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">from</span> functools <span class="hljs-keyword">import</span> partial</span><br><span class="line"><span class="hljs-meta">&gt;&gt;&gt; </span>basetwo = partial(int, base=<span class="hljs-number">2</span>)</span><br><span class="line"><span class="hljs-meta">&gt;&gt;&gt; </span>basetwo.__doc__ = <span class="hljs-string">'Convert base 2 string to an int.'</span></span><br><span class="line"><span class="hljs-meta">&gt;&gt;&gt; </span>basetwo(<span class="hljs-string">'10010'</span>)</span><br><span class="line"><span class="hljs-number">18</span></span><br><span class="line"><span class="hljs-meta">&gt;&gt;&gt; </span>basethree = partial(basetwo, base=<span class="hljs-number">3</span>)</span><br><span class="line"><span class="hljs-meta">&gt;&gt;&gt; </span>basethree.__doc__ = <span class="hljs-string">'Convert base 3 string to an int.'</span></span><br><span class="line"><span class="hljs-meta">&gt;&gt;&gt; </span>basethree(<span class="hljs-string">'10010'</span>)</span><br><span class="line"><span class="hljs-number">84</span></span><br></pre></td></tr></table></figure></div>
+<p>于是我实现了一个类 <code>Args</code>，它可以一次性收集一些位置参数(positional argument)和关键字参数(keyword argument)，并在以后需要时，反复直接使用。</p>
+<div class="highlight-wrap" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true" data-rel="PYTHON"><figure class="iseeu highlight /python hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">from</span> args <span class="hljs-keyword">import</span> UpdativeArgs</span><br><span class="line"><span class="hljs-meta">&gt;&gt;&gt; </span>args = UpdativeArgs(<span class="hljs-string">'10010'</span>, base=<span class="hljs-number">2</span>)</span><br><span class="line"><span class="hljs-meta">&gt;&gt;&gt; </span>args(int)</span><br><span class="line"><span class="hljs-number">18</span></span><br><span class="line"><span class="hljs-meta">&gt;&gt;&gt; </span>args.update(base=<span class="hljs-number">3</span>)</span><br><span class="line"><span class="hljs-meta">&gt;&gt;&gt; </span>args(int)</span><br><span class="line"><span class="hljs-number">84</span></span><br></pre></td></tr></table></figure></div>
+<a id="more"></a>
+<p><code>Args</code> 类更可以简化其它函数的定义，例如下面的创建数据库游标 （See <a href="https://peps.python.org/pep-0249/" target="_blank" rel="noopener">PEP 249 – Python Database API Specification v2.0</a>）的代码片段</p>
+<div class="highlight-wrap" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true" data-rel="PYTHON"><figure class="iseeu highlight /python hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">from</span> args <span class="hljs-keyword">import</span> Args</span><br><span class="line"></span><br><span class="line"><span class="hljs-keyword">from</span> contextlib <span class="hljs-keyword">import</span> closing, contextmanager</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="hljs-meta">@contextmanager</span></span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">ctx_cursor</span><span class="hljs-params">(</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">    connect, </span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">    con_args, </span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">    cur_args = <span class="hljs-params">()</span>, </span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">    do_tsac: bool = False, </span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">)</span>:</span></span><br><span class="line">    <span class="hljs-string">"""创建一个上下文管理器，返回数据库的游标对象</span></span><br><span class="line"><span class="hljs-string">    :param connect: 创建连接的函数，返回一个数据库连接对象</span></span><br><span class="line"><span class="hljs-string">    :param con_args: 创建连接对象时的参数</span></span><br><span class="line"><span class="hljs-string">    :param cur_args: 创建游标对象时的参数</span></span><br><span class="line"><span class="hljs-string">    :param do_tsac: 是否提交事务</span></span><br><span class="line"><span class="hljs-string"></span></span><br><span class="line"><span class="hljs-string">    :return: 上下文管理器，返回游标对象</span></span><br><span class="line"><span class="hljs-string">    """</span></span><br><span class="line">    <span class="hljs-keyword">with</span> closing(Args.call(connect, con_args)) <span class="hljs-keyword">as</span> con:</span><br><span class="line">        <span class="hljs-keyword">with</span> closing(Args.call(con.cursor)) <span class="hljs-keyword">as</span> cur:</span><br><span class="line">            <span class="hljs-keyword">if</span> do_tsac:</span><br><span class="line">                <span class="hljs-keyword">try</span>:</span><br><span class="line">                    <span class="hljs-keyword">yield</span> cur</span><br><span class="line">                    con.commit()</span><br><span class="line">                <span class="hljs-keyword">except</span> BaseException:</span><br><span class="line">                    con.rollback()</span><br><span class="line">                    <span class="hljs-keyword">raise</span></span><br><span class="line">            <span class="hljs-keyword">else</span>:</span><br><span class="line">                <span class="hljs-keyword">yield</span> cur</span><br></pre></td></tr></table></figure></div>
+<p>示例：创建和使用一个 <a href="https://www.sqlite.org/index.html" target="_blank" rel="noopener">sqlite</a> 游标</p>
+<div class="highlight-wrap" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true" data-rel="PYTHON"><figure class="iseeu highlight /python hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">import</span> sqlite3</span><br><span class="line"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">with</span> ctx_cursor(sqlite3.connect, <span class="hljs-string">":memory:"</span>) <span class="hljs-keyword">as</span> cur: ...</span><br></pre></td></tr></table></figure></div>
+<p>示例：创建和使用一个 <a href="https://www.mysql.com" target="_blank" rel="noopener">mysql</a> 游标</p>
+<div class="highlight-wrap" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true" data-rel="PYTHON"><figure class="iseeu highlight /python hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">import</span> pymysql</span><br><span class="line"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">from</span> args <span class="hljs-keyword">import</span> Args</span><br><span class="line"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">with</span> ctx_cursor(pymysql.connect, Args(user=<span class="hljs-string">"root"</span>， password=<span class="hljs-string">"12345"</span>, database=<span class="hljs-string">"test"</span>), Args(pymysql.cursors.DictCursor)) <span class="hljs-keyword">as</span> cur: ...</span><br></pre></td></tr></table></figure></div>
+<h2 id="代码实现"><a class="markdownIt-Anchor" href="#代码实现"></a> 代码实现</h2>
+<blockquote>
+<p><strong>TIPS</strong> 代码的最新版本在 <a href="https://gist.github.com/ChenyangGao" target="_blank" rel="noopener">GitHub Gist</a> 中维护<br>
+<a href="https://gist.github.com/ChenyangGao/6cd16d7aa29adfc852c3f3d9a39c0b81" target="_blank" rel="noopener">https://gist.github.com/ChenyangGao/6cd16d7aa29adfc852c3f3d9a39c0b81</a></p>
+</blockquote>
+<p>文件名称是 <code>args.py</code>，<kbd>Python</kbd> 实现代码如下：</p>
+<div class="highlight-wrap" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true" data-rel="PYTHON"><figure class="iseeu highlight /python hljs"><figcaption><span>args.py</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br><span class="line">251</span><br><span class="line">252</span><br><span class="line">253</span><br><span class="line">254</span><br><span class="line">255</span><br><span class="line">256</span><br><span class="line">257</span><br><span class="line">258</span><br><span class="line">259</span><br><span class="line">260</span><br><span class="line">261</span><br><span class="line">262</span><br><span class="line">263</span><br><span class="line">264</span><br><span class="line">265</span><br><span class="line">266</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">#!/usr/bin/env python3</span></span><br><span class="line"><span class="hljs-comment"># coding: utf-8</span></span><br><span class="line"></span><br><span class="line"><span class="hljs-string">"""This module provides several classes, which are used to collect </span></span><br><span class="line"><span class="hljs-string">some arguments at one time and then use them repeatedly later."""</span></span><br><span class="line"></span><br><span class="line">__author__ = <span class="hljs-string">"ChenyangGao &lt;https://chenyanggao.github.io/&gt;"</span></span><br><span class="line">__version__ = (<span class="hljs-number">0</span>, <span class="hljs-number">1</span>)</span><br><span class="line">__all__ = [<span class="hljs-string">"Args"</span>, <span class="hljs-string">"UpdativeArgs"</span>]</span><br><span class="line"></span><br><span class="line"><span class="hljs-keyword">from</span> copy <span class="hljs-keyword">import</span> copy</span><br><span class="line"><span class="hljs-keyword">from</span> typing <span class="hljs-keyword">import</span> Any, Callable, Generic, TypeVar</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">T = TypeVar(<span class="hljs-string">"T"</span>)</span><br><span class="line">P = TypeVar(<span class="hljs-string">"P"</span>, bound=tuple)</span><br><span class="line">K = TypeVar(<span class="hljs-string">"K"</span>, bound=dict)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Args</span><span class="hljs-params">(Generic[T, P])</span>:</span></span><br><span class="line">    <span class="hljs-string">"""Takes some positional arguments and keyword arguments, </span></span><br><span class="line"><span class="hljs-string">    and put them into an instance, which can be used repeatedly </span></span><br><span class="line"><span class="hljs-string">    every next time.</span></span><br><span class="line"><span class="hljs-string"></span></span><br><span class="line"><span class="hljs-string">    Fields::</span></span><br><span class="line"><span class="hljs-string">        self.pargs: the collected positional arguments</span></span><br><span class="line"><span class="hljs-string">        self.kargs: the collected keyword arguments</span></span><br><span class="line"><span class="hljs-string">    """</span></span><br><span class="line">    __slots__ = (<span class="hljs-string">"pargs"</span>, <span class="hljs-string">"kargs"</span>)</span><br><span class="line"></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">__init__</span><span class="hljs-params">(self, /, *pargs, **kargs)</span>:</span></span><br><span class="line">        self.pargs: P = pargs</span><br><span class="line">        self.kargs: K = kargs</span><br><span class="line"></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">__call__</span><span class="hljs-params">(self, /, func: Callable[..., T])</span> -&gt; T:</span></span><br><span class="line">        <span class="hljs-string">"""Pass in the collected positional arguments and keyword </span></span><br><span class="line"><span class="hljs-string">        arguments when calling the callable `func`."""</span></span><br><span class="line">        <span class="hljs-keyword">return</span> func(*self.pargs, **self.kargs)</span><br><span class="line"></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">__copy__</span><span class="hljs-params">(self, /)</span>:</span></span><br><span class="line">        <span class="hljs-keyword">return</span> type(self)(*self.pargs, **self.kargs)</span><br><span class="line"></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">__eq__</span><span class="hljs-params">(self, other)</span>:</span></span><br><span class="line">        <span class="hljs-keyword">if</span> isinstance(other, Args):</span><br><span class="line">            <span class="hljs-keyword">return</span> self.pargs == other.pargs <span class="hljs-keyword">and</span> self.kargs == other.kargs</span><br><span class="line">        <span class="hljs-keyword">return</span> <span class="hljs-literal">False</span></span><br><span class="line"></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">__iter__</span><span class="hljs-params">(self, /)</span>:</span></span><br><span class="line">        <span class="hljs-keyword">return</span> iter((self.pargs, self.kargs))</span><br><span class="line"></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">__repr__</span><span class="hljs-params">(self)</span>:</span></span><br><span class="line">        <span class="hljs-keyword">return</span> <span class="hljs-string">"%s(%s)"</span> % (</span><br><span class="line">            type(self).__qualname__,</span><br><span class="line">            <span class="hljs-string">", "</span>.join((</span><br><span class="line">                *map(repr, self.pargs),</span><br><span class="line">                *(<span class="hljs-string">"%s=%r"</span> % e <span class="hljs-keyword">for</span> e <span class="hljs-keyword">in</span> self.kargs.items()),</span><br><span class="line">            )),</span><br><span class="line">        )</span><br><span class="line"></span><br><span class="line"><span class="hljs-meta">    @classmethod</span></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">call</span><span class="hljs-params">(cls, /, func: Callable[..., T], args: Any = <span class="hljs-params">()</span>)</span> -&gt; T:</span></span><br><span class="line">        <span class="hljs-string">"""Call the callable `func` and pass in the arguments `args`.</span></span><br><span class="line"><span class="hljs-string"></span></span><br><span class="line"><span class="hljs-string">        The actual behavior as below:</span></span><br><span class="line"><span class="hljs-string">            if isinstance(args, Args):</span></span><br><span class="line"><span class="hljs-string">                return args(func)</span></span><br><span class="line"><span class="hljs-string">            elif type(args) is tuple:</span></span><br><span class="line"><span class="hljs-string">                return func(*args)</span></span><br><span class="line"><span class="hljs-string">            elif type(args) is dict:</span></span><br><span class="line"><span class="hljs-string">                return func(**args)</span></span><br><span class="line"><span class="hljs-string">            return func(args)</span></span><br><span class="line"><span class="hljs-string">        """</span></span><br><span class="line">        <span class="hljs-keyword">if</span> isinstance(args, Args):</span><br><span class="line">            <span class="hljs-keyword">return</span> args(func)</span><br><span class="line">        type_ = type(args)</span><br><span class="line">        <span class="hljs-keyword">if</span> type_ <span class="hljs-keyword">is</span> tuple:</span><br><span class="line">            <span class="hljs-keyword">return</span> func(*args)</span><br><span class="line">        <span class="hljs-keyword">elif</span> type_ <span class="hljs-keyword">is</span> dict:</span><br><span class="line">            <span class="hljs-keyword">return</span> func(**args)</span><br><span class="line">        <span class="hljs-keyword">return</span> func(args)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">UpdativeArgs</span><span class="hljs-params">(Args)</span>:</span></span><br><span class="line">    <span class="hljs-string">"""Takes some positional arguments and keyword arguments, </span></span><br><span class="line"><span class="hljs-string">    and put them into an instance, which can be used repeatedly </span></span><br><span class="line"><span class="hljs-string">    every next time.</span></span><br><span class="line"><span class="hljs-string">    This derived class provides some methods to update the</span></span><br><span class="line"><span class="hljs-string">    collected arguments.</span></span><br><span class="line"><span class="hljs-string"></span></span><br><span class="line"><span class="hljs-string">    Fields::</span></span><br><span class="line"><span class="hljs-string">        self.pargs: the collected positional arguments</span></span><br><span class="line"><span class="hljs-string">        self.kargs: the collected keyword arguments</span></span><br><span class="line"><span class="hljs-string">    """</span></span><br><span class="line">    __slots__ = (<span class="hljs-string">"pargs"</span>, <span class="hljs-string">"kargs"</span>)</span><br><span class="line"></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">extend</span><span class="hljs-params">(self, /, *pargs, **kargs)</span>:</span></span><br><span class="line">        <span class="hljs-string">"""Extend the collected arguments.</span></span><br><span class="line"><span class="hljs-string"></span></span><br><span class="line"><span class="hljs-string">        Examples::</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; args = UpdativeArgs(1, 2, 3, x=4, y=5, z=6)</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; args2 = args.extend(7, 8, x=9, r=0)</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; args2</span></span><br><span class="line"><span class="hljs-string">        UpdativeArgs(1, 2, 3, 7, 8, x=4, y=5, z=6, r=0)</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; args is args2</span></span><br><span class="line"><span class="hljs-string">        True</span></span><br><span class="line"><span class="hljs-string">        """</span></span><br><span class="line">        <span class="hljs-keyword">if</span> pargs:</span><br><span class="line">            self.pargs += pargs</span><br><span class="line">        <span class="hljs-keyword">if</span> kargs:</span><br><span class="line">            kargs0 = self.kargs</span><br><span class="line">            kargs0.update(</span><br><span class="line">                (k, kargs[k])</span><br><span class="line">                <span class="hljs-keyword">for</span> k <span class="hljs-keyword">in</span> kargs.keys() - kargs0.keys()</span><br><span class="line">            )</span><br><span class="line">        <span class="hljs-keyword">return</span> self</span><br><span class="line"></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">copy_extend</span><span class="hljs-params">(self, /, *pargs, **kargs)</span>:</span></span><br><span class="line">        <span class="hljs-string">"""Extend the collected arguments in a copied instance.</span></span><br><span class="line"><span class="hljs-string"></span></span><br><span class="line"><span class="hljs-string">        Examples::</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; args = UpdativeArgs(1, 2, 3, x=4, y=5, z=6)</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; args2 = args.copy_extend(7, 8, x=9, r=0)</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; args2</span></span><br><span class="line"><span class="hljs-string">        UpdativeArgs(1, 2, 3, 7, 8, x=4, y=5, z=6, r=0)</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; args is args2</span></span><br><span class="line"><span class="hljs-string">        False</span></span><br><span class="line"><span class="hljs-string">        """</span></span><br><span class="line">        <span class="hljs-keyword">return</span> copy(self).extend(*pargs, **kargs)</span><br><span class="line"></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">prepend</span><span class="hljs-params">(self, /, *pargs, **kargs)</span>:</span></span><br><span class="line">        <span class="hljs-string">"""Prepend the collected arguments.</span></span><br><span class="line"><span class="hljs-string"></span></span><br><span class="line"><span class="hljs-string">        Examples::</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; args = UpdativeArgs(1, 2, 3, x=4, y=5, z=6)</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; args2 = args.prepend(7, 8, x=9, r=0)</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; args2</span></span><br><span class="line"><span class="hljs-string">        UpdativeArgs(7, 8, 1, 2, 3, x=9, y=5, z=6, r=0)</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; args is args2</span></span><br><span class="line"><span class="hljs-string">        True</span></span><br><span class="line"><span class="hljs-string">        """</span></span><br><span class="line">        <span class="hljs-keyword">if</span> pargs:</span><br><span class="line">            self.pargs = pargs + self.pargs</span><br><span class="line">        <span class="hljs-keyword">if</span> kargs:</span><br><span class="line">            self.kargs.update(kargs)</span><br><span class="line">        <span class="hljs-keyword">return</span> self</span><br><span class="line"></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">copy_prepend</span><span class="hljs-params">(self, /, *pargs, **kargs)</span>:</span></span><br><span class="line">        <span class="hljs-string">"""Prepend the collected arguments in a copied instance.</span></span><br><span class="line"><span class="hljs-string"></span></span><br><span class="line"><span class="hljs-string">        Examples::</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; args = UpdativeArgs(1, 2, 3, x=4, y=5, z=6)</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; args2 = args.copy_prepend(7, 8, x=9, r=0)</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; args2</span></span><br><span class="line"><span class="hljs-string">        UpdativeArgs(7, 8, 1, 2, 3, x=9, y=5, z=6, r=0)</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; args is args2</span></span><br><span class="line"><span class="hljs-string">        False</span></span><br><span class="line"><span class="hljs-string">        """</span></span><br><span class="line">        <span class="hljs-keyword">return</span> copy(self).prepend(*pargs, **kargs)</span><br><span class="line"></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">update</span><span class="hljs-params">(self, /, *pargs, **kargs)</span>:</span></span><br><span class="line">        <span class="hljs-string">"""Update the collected arguments.</span></span><br><span class="line"><span class="hljs-string"></span></span><br><span class="line"><span class="hljs-string">        Examples::</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; args = UpdativeArgs(1, 2, 3, x=4, y=5, z=6)</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; args2 = args.update(7, 8, x=9, r=0)</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; args2</span></span><br><span class="line"><span class="hljs-string">        UpdativeArgs(7, 8, 3, x=9, y=5, z=6, r=0)</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; args is args2</span></span><br><span class="line"><span class="hljs-string">        True</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; args = UpdativeArgs(1, 2, 3, x=4, y=5, z=6)</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; args.update(7, 8, 10, 11, x=9, r=0)</span></span><br><span class="line"><span class="hljs-string">        UpdativeArgs(7, 8, 10, 11, x=9, y=5, z=6, r=0)</span></span><br><span class="line"><span class="hljs-string">        """</span></span><br><span class="line">        <span class="hljs-keyword">if</span> pargs:</span><br><span class="line">            n = len(pargs) - len(self.pargs)</span><br><span class="line">            <span class="hljs-keyword">if</span> n &gt;= <span class="hljs-number">0</span>:</span><br><span class="line">                self.pargs = pargs</span><br><span class="line">            <span class="hljs-keyword">else</span>:</span><br><span class="line">                self.pargs = pargs + self.pargs[n:]</span><br><span class="line">        <span class="hljs-keyword">if</span> kargs:</span><br><span class="line">            self.kargs.update(kargs)</span><br><span class="line">        <span class="hljs-keyword">return</span> self</span><br><span class="line"></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">copy_update</span><span class="hljs-params">(self, /, *pargs, **kargs)</span>:</span></span><br><span class="line">        <span class="hljs-string">"""Update the collected arguments in a copied instance.</span></span><br><span class="line"><span class="hljs-string"></span></span><br><span class="line"><span class="hljs-string">        Examples::</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; args = UpdativeArgs(1, 2, 3, x=4, y=5, z=6)</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; args2 = args.copy_update(7, 8, x=9, r=0)</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; args2</span></span><br><span class="line"><span class="hljs-string">        UpdativeArgs(7, 8, 3, x=9, y=5, z=6, r=0)</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; args is args2</span></span><br><span class="line"><span class="hljs-string">        False</span></span><br><span class="line"><span class="hljs-string"></span></span><br><span class="line"><span class="hljs-string">        Idempotence</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; args3 = args2.copy_update(7, 8, x=9, r=0)</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; args2 == args3</span></span><br><span class="line"><span class="hljs-string">        True</span></span><br><span class="line"><span class="hljs-string"></span></span><br><span class="line"><span class="hljs-string">        Idempotence</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; args = UpdativeArgs(1, 2, 3, x=4, y=5, z=6)</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; args2 = args.copy_update(7, 8, 10, 11, x=9, r=0)</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; args3 = args2.copy_update(7, 8, 10, 11, x=9, r=0)</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; args2 == args3</span></span><br><span class="line"><span class="hljs-string">        True</span></span><br><span class="line"><span class="hljs-string">        """</span></span><br><span class="line">        <span class="hljs-keyword">return</span> copy(self).update(*pargs, **kargs)</span><br><span class="line"></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">update_extend</span><span class="hljs-params">(self, /, *pargs, **kargs)</span>:</span></span><br><span class="line">        <span class="hljs-string">"""Update and entend the collected arguments.</span></span><br><span class="line"><span class="hljs-string"></span></span><br><span class="line"><span class="hljs-string">        Examples::</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; args = UpdativeArgs(1, 2, 3, x=4, y=5, z=6)</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; args2 = args.update_extend(7, 8, 10, 11, x=9, r=0)</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; args2</span></span><br><span class="line"><span class="hljs-string">        UpdativeArgs(1, 2, 3, 11, x=4, y=5, z=6, r=0)</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; args is args2</span></span><br><span class="line"><span class="hljs-string">        True</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; args = UpdativeArgs(1, 2, 3, x=4, y=5, z=6)</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; args.update_extend(7, 8, x=9, r=0)</span></span><br><span class="line"><span class="hljs-string">        UpdativeArgs(1, 2, 3, x=4, y=5, z=6, r=0)</span></span><br><span class="line"><span class="hljs-string">        """</span></span><br><span class="line">        <span class="hljs-keyword">if</span> pargs:</span><br><span class="line">            n = len(self.pargs) - len(pargs)</span><br><span class="line">            <span class="hljs-keyword">if</span> n &lt; <span class="hljs-number">0</span>:</span><br><span class="line">                self.pargs += pargs[n:]</span><br><span class="line">        <span class="hljs-keyword">if</span> kargs:</span><br><span class="line">            kargs0 = self.kargs</span><br><span class="line">            kargs0.update(</span><br><span class="line">                (k, kargs[k])</span><br><span class="line">                <span class="hljs-keyword">for</span> k <span class="hljs-keyword">in</span> kargs.keys() - kargs0.keys()</span><br><span class="line">            )</span><br><span class="line">        <span class="hljs-keyword">return</span> self</span><br><span class="line"></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">copy_update_extend</span><span class="hljs-params">(self, /, *pargs, **kargs)</span>:</span></span><br><span class="line">        <span class="hljs-string">"""Update and extend the collected arguments in</span></span><br><span class="line"><span class="hljs-string">        a copied instance.</span></span><br><span class="line"><span class="hljs-string"></span></span><br><span class="line"><span class="hljs-string">        Examples::</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; args = UpdativeArgs(1, 2, 3, x=4, y=5, z=6)</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; args2 = args.copy_update_extend(7, 8, 10, 11, x=9, r=0)</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; args2</span></span><br><span class="line"><span class="hljs-string">        UpdativeArgs(1, 2, 3, 11, x=4, y=5, z=6, r=0)</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; args is args2</span></span><br><span class="line"><span class="hljs-string">        False</span></span><br><span class="line"><span class="hljs-string"></span></span><br><span class="line"><span class="hljs-string">        Idempotence</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; args3 = args2.copy_update_extend(7, 8, 10, 11, x=9, r=0)</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; args2 == args3</span></span><br><span class="line"><span class="hljs-string">        True</span></span><br><span class="line"><span class="hljs-string"></span></span><br><span class="line"><span class="hljs-string">        Idempotence</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; args = UpdativeArgs(1, 2, 3, x=4, y=5, z=6)</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; args2 = args.copy_update_extend(7, 8, x=9, r=0)</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; args2</span></span><br><span class="line"><span class="hljs-string">        UpdativeArgs(1, 2, 3, x=4, y=5, z=6, r=0)</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; args3 = args2.copy_update_extend(7, 8, x=9, r=0)</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; args2 == args3</span></span><br><span class="line"><span class="hljs-string">        True</span></span><br><span class="line"><span class="hljs-string">        """</span></span><br><span class="line">        <span class="hljs-keyword">return</span> copy(self).update_extend(*pargs, **kargs)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">"__main__"</span>:</span><br><span class="line">    <span class="hljs-keyword">import</span> doctest</span><br><span class="line">    doctest.testmod()</span><br></pre></td></tr></table></figure></div>
+
+        </div>
+        
+        <div class="level is-size-7 is-uppercase">
+            <div class="level-start">
+                <div class="level-item">
+                    <span class="is-size-6 has-text-grey has-mr-7">#</span>
+                    <a class="has-link-grey -link" href="/tags/Module/">Module</a>, <a class="has-link-grey -link" href="/tags/Python/">Python</a>
+                </div>
+            </div>
+        </div>
+        
+        
+        
+    </div>
+</div>
+
+
+
+
+
+<div class="card card-transparent">
+    <div class="level post-navigation is-flex-wrap is-mobile">
+        
+        
+        <div class="level-end">
+            <a class="level level-item has-link-grey  article-nav-next" href="/2022/08/30/11.Python脚本设置pip索引源/">
+                <span class="level-item">Python脚本设置pip索引源</span>
+                <i class="level-item fas fa-chevron-right"></i>
+            </a>
+        </div>
+        
+    </div>
+</div>
+
+
+
+    
+        
+<div class="card">
+    <div class="card-content">
+        <h3 class="title is-5 has-text-weight-normal">评论</h3>
+        
+<div id="comment-container"></div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1.4.1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1.4.1/dist/gitalk.min.js"></script>
+<script>
+    var gitalk = new Gitalk({
+        clientID: '0c4d63f8312662c8e0ef',
+        clientSecret: '02c284fe7dccd50cc1e02ed5431bf86d351fe255',
+        id: '5903ea5b4da142dfea51576984cd2856',
+        repo: 'ChenyangGao.github.io',
+        owner: 'ChenyangGao',
+        admin: ["ChenyangGao"]
+    })
+    gitalk.render('comment-container')
+</script>
+
+    </div>
+</div>
+        
+    
+        
+<div class="card">
+    <div class="card-content">
+        <h3 class="title is-5 has-text-weight-normal">评论</h3>
+        
+<script>
+    var disqus_config = function () {
+        this.page.url = 'https://chenyanggao.github.io/2022/09/01/12.Python模块-打包多个参数于一体/';
+        this.page.identifier = '2022/09/01/12.Python模块-打包多个参数于一体/';
+    };
+    (function() {
+        var d = document, s = d.createElement('script');  
+        s.src = '//' + 'chenyanggao-blog' + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+
+<div id="disqus_thread">
+    
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+    </div>
+</div>
+        
+    
+</div>
+                
+
+
+
+
+<div class="column is-4-tablet is-4-desktop is-3-widescreen  has-order-1 column-left ">
+    
+        
+<div class="card widget">
+    <div class="card-content">
+        <nav class="level">
+            <div class="level-item has-text-centered">
+                <div>
+                    
+                        <img class="image is-128x128 has-mb-6" src="https://octodex.github.com/images/hula_loop_octodex03.gif" alt="ChenyangGao">
+                    
+                    
+                    <p class="is-size-4 is-block">
+                        ChenyangGao
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-block">
+                        数据分析师
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-flex is-flex-center has-text-grey">
+                        <i class="fas fa-map-marker-alt has-mr-7"></i>
+                        <span>China</span>
+                    </p>
+                    
+                </div>
+            </div>
+        </nav>
+        <nav class="level is-mobile">
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        文章
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        12
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        分类
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        5
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        标签
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        5
+                    </p>
+                </div>
+            </div>
+        </nav>
+        <div class="level">
+            <a class="level-item button is-link is-rounded" href="https://github.com/ChenyangGao" target="_blank">
+                关注我</a>
+        </div>
+        
+        
+        <div class="level is-mobile">
+            
+            <a class="level-item button is-white is-marginless" target="_blank" title="Github" href="https://github.com/ChenyangGao">
+                
+                <i class="fab fa-github"></i>
+                
+            </a>
+            
+            <a class="level-item button is-white is-marginless" target="_blank" title="Facebook" href="https://facebook.com">
+                
+                <i class="fab fa-facebook"></i>
+                
+            </a>
+            
+            <a class="level-item button is-white is-marginless" target="_blank" title="Twitter" href="https://twitter.com">
+                
+                <i class="fab fa-twitter"></i>
+                
+            </a>
+            
+            <a class="level-item button is-white is-marginless" target="_blank" title="Dribbble" href="https://dribbble.com">
+                
+                <i class="fab fa-dribbble"></i>
+                
+            </a>
+            
+            <a class="level-item button is-white is-marginless" target="_blank" title="RSS" href="/">
+                
+                <i class="fas fa-rss"></i>
+                
+            </a>
+            
+        </div>
+        
+    </div>
+</div>
+    
+        
+
+<div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+        <h3 class="menu-label">
+            链接
+        </h3>
+        <ul class="menu-list">
+        
+            <li>
+                <a class="level is-mobile" href="https://hexo.io" target="_blank">
+                    <span class="level-left">
+                        <span class="level-item">Hexo</span>
+                    </span>
+                    <span class="level-right">
+                        <span class="level-item tag">hexo.io</span>
+                    </span>
+                </a>
+            </li>
+        
+            <li>
+                <a class="level is-mobile" href="https://github.com/ppoffice" target="_blank">
+                    <span class="level-left">
+                        <span class="level-item">PPOffice</span>
+                    </span>
+                    <span class="level-right">
+                        <span class="level-item tag">github.com</span>
+                    </span>
+                </a>
+            </li>
+        
+            <li>
+                <a class="level is-mobile" href="https://community.motifsing.com" target="_blank">
+                    <span class="level-left">
+                        <span class="level-item">资源分享</span>
+                    </span>
+                    <span class="level-right">
+                        <span class="level-item tag">community.motifsing.com</span>
+                    </span>
+                </a>
+            </li>
+        
+        </ul>
+        </div>
+    </div>
+</div>
+
+
+    
+        
+<div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                分类
+            </h3>
+            <ul class="menu-list">
+            <li>
+        <a class="level is-marginless" href="/categories/数学/">
+            <span class="level-start">
+                <span class="level-item">数学</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">1</span>
+            </span>
+        </a><ul><li>
+        <a class="level is-marginless" href="/categories/数学/经济学/">
+            <span class="level-start">
+                <span class="level-item">经济学</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">1</span>
+            </span>
+        </a></li></ul></li><li>
+        <a class="level is-marginless" href="/categories/编程思想/">
+            <span class="level-start">
+                <span class="level-item">编程思想</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">4</span>
+            </span>
+        </a></li><li>
+        <a class="level is-marginless" href="/categories/脚本工具/">
+            <span class="level-start">
+                <span class="level-item">脚本工具</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">6</span>
+            </span>
+        </a></li><li>
+        <a class="level is-marginless" href="/categories/通用模块/">
+            <span class="level-start">
+                <span class="level-item">通用模块</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">1</span>
+            </span>
+        </a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+    
+        
+<div class="card widget">
+    <div class="card-content">
+        <h3 class="menu-label">
+            标签云
+        </h3>
+        <a href="/tags/Module/" style="font-size: 10px;">Module</a> <a href="/tags/Python/" style="font-size: 20px;">Python</a> <a href="/tags/Script/" style="font-size: 15px;">Script</a> <a href="/tags/Shell/" style="font-size: 10px;">Shell</a> <a href="/tags/博弈论/" style="font-size: 10px;">博弈论</a>
+    </div>
+</div>
+
+    
+    
+        <div class="column-right-shadow is-hidden-widescreen ">
+        
+            
+        
+            
+<div class="card widget">
+    <div class="card-content">
+        <h3 class="menu-label">
+            最新文章
+        </h3>
+        
+        <article class="media">
+            
+            <a href="/2022/09/01/12.Python模块-打包多个参数于一体/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://cdn.pixabay.com/photo/2014/12/11/22/10/python-564817_1280.jpg" alt="Python模块-打包多个参数于一体">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2022-09-01T08:00:00.000Z">2022-09-01</time></div>
+                    <a href="/2022/09/01/12.Python模块-打包多个参数于一体/" class="has-link-black-ter is-size-6">Python模块-打包多个参数于一体</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/通用模块/">通用模块</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2022/08/30/11.Python脚本设置pip索引源/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://cdn.pixabay.com/photo/2016/02/27/10/26/snake-1225370_1280.jpg" alt="Python脚本设置pip索引源">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2022-08-30T07:00:00.000Z">2022-08-30</time></div>
+                    <a href="/2022/08/30/11.Python脚本设置pip索引源/" class="has-link-black-ter is-size-6">Python脚本设置pip索引源</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/脚本工具/">脚本工具</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2022/08/27/10.Python脚本作为配置文件加载/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://cdn.pixabay.com/photo/2015/05/17/20/39/snake-771541_640.jpg" alt="Python脚本作为配置文件加载">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2022-08-27T11:37:00.000Z">2022-08-27</time></div>
+                    <a href="/2022/08/27/10.Python脚本作为配置文件加载/" class="has-link-black-ter is-size-6">Python脚本作为配置文件加载</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/脚本工具/">脚本工具</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2022/08/26/9.Python在命令行修改Properties配置文件/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://cdn.pixabay.com/photo/2014/08/15/21/40/snake-419043_640.jpg" alt="Python在命令行修改Properties配置文件">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2022-08-26T12:30:00.000Z">2022-08-26</time></div>
+                    <a href="/2022/08/26/9.Python在命令行修改Properties配置文件/" class="has-link-black-ter is-size-6">Python在命令行修改Properties配置文件</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/脚本工具/">脚本工具</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2022/08/13/8.Python函数作为命令行使用/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://cdn.pixabay.com/photo/2022/04/15/14/18/python-7134564_640.jpg" alt="Python函数作为命令行使用">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2022-08-13T12:30:00.000Z">2022-08-13</time></div>
+                    <a href="/2022/08/13/8.Python函数作为命令行使用/" class="has-link-black-ter is-size-6">Python函数作为命令行使用</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/脚本工具/">脚本工具</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+    </div>
+</div>
+
+        
+            <div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+        <h3 class="menu-label">
+            归档
+        </h3>
+        <ul class="menu-list">
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2022/09/">
+                <span class="level-start">
+                    <span class="level-item">九月 2022</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">1</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2022/08/">
+                <span class="level-start">
+                    <span class="level-item">八月 2022</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">6</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2019/07/">
+                <span class="level-start">
+                    <span class="level-item">七月 2019</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">2</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2019/05/">
+                <span class="level-start">
+                    <span class="level-item">五月 2019</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">1</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2019/04/">
+                <span class="level-start">
+                    <span class="level-item">四月 2019</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">2</span>
+                </span>
+            </a>
+        </li>
+        
+        </ul>
+        </div>
+    </div>
+</div>
+        
+            <div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                标签
+            </h3>
+            <div class="field is-grouped is-grouped-multiline">
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Module/">
+                        <span class="tag">Module</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Python/">
+                        <span class="tag">Python</span>
+                        <span class="tag is-grey">10</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Script/">
+                        <span class="tag">Script</span>
+                        <span class="tag is-grey">6</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Shell/">
+                        <span class="tag">Shell</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/博弈论/">
+                        <span class="tag">博弈论</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+</div>
+        
+        </div>
+    
+</div>
+
+                
+
+
+
+
+<div class="column is-4-tablet is-4-desktop is-3-widescreen is-hidden-touch is-hidden-desktop-only has-order-3 column-right ">
+    
+        
+    
+        
+<div class="card widget">
+    <div class="card-content">
+        <h3 class="menu-label">
+            最新文章
+        </h3>
+        
+        <article class="media">
+            
+            <a href="/2022/09/01/12.Python模块-打包多个参数于一体/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://cdn.pixabay.com/photo/2014/12/11/22/10/python-564817_1280.jpg" alt="Python模块-打包多个参数于一体">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2022-09-01T08:00:00.000Z">2022-09-01</time></div>
+                    <a href="/2022/09/01/12.Python模块-打包多个参数于一体/" class="has-link-black-ter is-size-6">Python模块-打包多个参数于一体</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/通用模块/">通用模块</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2022/08/30/11.Python脚本设置pip索引源/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://cdn.pixabay.com/photo/2016/02/27/10/26/snake-1225370_1280.jpg" alt="Python脚本设置pip索引源">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2022-08-30T07:00:00.000Z">2022-08-30</time></div>
+                    <a href="/2022/08/30/11.Python脚本设置pip索引源/" class="has-link-black-ter is-size-6">Python脚本设置pip索引源</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/脚本工具/">脚本工具</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2022/08/27/10.Python脚本作为配置文件加载/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://cdn.pixabay.com/photo/2015/05/17/20/39/snake-771541_640.jpg" alt="Python脚本作为配置文件加载">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2022-08-27T11:37:00.000Z">2022-08-27</time></div>
+                    <a href="/2022/08/27/10.Python脚本作为配置文件加载/" class="has-link-black-ter is-size-6">Python脚本作为配置文件加载</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/脚本工具/">脚本工具</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2022/08/26/9.Python在命令行修改Properties配置文件/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://cdn.pixabay.com/photo/2014/08/15/21/40/snake-419043_640.jpg" alt="Python在命令行修改Properties配置文件">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2022-08-26T12:30:00.000Z">2022-08-26</time></div>
+                    <a href="/2022/08/26/9.Python在命令行修改Properties配置文件/" class="has-link-black-ter is-size-6">Python在命令行修改Properties配置文件</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/脚本工具/">脚本工具</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2022/08/13/8.Python函数作为命令行使用/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://cdn.pixabay.com/photo/2022/04/15/14/18/python-7134564_640.jpg" alt="Python函数作为命令行使用">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2022-08-13T12:30:00.000Z">2022-08-13</time></div>
+                    <a href="/2022/08/13/8.Python函数作为命令行使用/" class="has-link-black-ter is-size-6">Python函数作为命令行使用</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/脚本工具/">脚本工具</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+    </div>
+</div>
+
+    
+        <div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+        <h3 class="menu-label">
+            归档
+        </h3>
+        <ul class="menu-list">
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2022/09/">
+                <span class="level-start">
+                    <span class="level-item">九月 2022</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">1</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2022/08/">
+                <span class="level-start">
+                    <span class="level-item">八月 2022</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">6</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2019/07/">
+                <span class="level-start">
+                    <span class="level-item">七月 2019</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">2</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2019/05/">
+                <span class="level-start">
+                    <span class="level-item">五月 2019</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">1</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2019/04/">
+                <span class="level-start">
+                    <span class="level-item">四月 2019</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">2</span>
+                </span>
+            </a>
+        </li>
+        
+        </ul>
+        </div>
+    </div>
+</div>
+    
+        <div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                标签
+            </h3>
+            <div class="field is-grouped is-grouped-multiline">
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Module/">
+                        <span class="tag">Module</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Python/">
+                        <span class="tag">Python</span>
+                        <span class="tag is-grey">10</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Script/">
+                        <span class="tag">Script</span>
+                        <span class="tag is-grey">6</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Shell/">
+                        <span class="tag">Shell</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/博弈论/">
+                        <span class="tag">博弈论</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+</div>
+    
+    
+</div>
+
+            </div>
+        </div>
+    </section>
+    <footer class="footer">
+    <div class="container">
+        <div class="level">
+            <div class="level-start has-text-centered-mobile">
+                <a class="footer-logo is-block has-mb-6" href="/">
+                
+                    <img src="/images/logo.svg" alt="Python模块-打包多个参数于一体" height="28">
+                
+                </a>
+                <p class="is-size-7">
+                &copy; 2022 ChenyangGao&nbsp;
+                Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> & <a href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank">Icarus</a>
+                
+                <br>
+                <span id="busuanzi_container_site_uv">
+                共<span id="busuanzi_value_site_uv">0</span>个访客
+                </span>
+                
+                </p>
+            </div>
+            <div class="level-end">
+            
+                <div class="field has-addons is-flex-center-mobile has-mt-5-mobile is-flex-wrap is-flex-middle">
+                
+                
+                <p class="control">
+                    <a class="button is-white is-large" target="_blank" title="Creative Commons" href="https://creativecommons.org/">
+                        
+                        <i class="fab fa-creative-commons"></i>
+                        
+                    </a>
+                </p>
+                
+                <p class="control">
+                    <a class="button is-white is-large" target="_blank" title="Attribution 4.0 International" href="https://creativecommons.org/licenses/by/4.0/">
+                        
+                        <i class="fab fa-creative-commons-by"></i>
+                        
+                    </a>
+                </p>
+                
+                <p class="control">
+                    <a class="button is-white is-large" target="_blank" title="Download on GitHub" href="https://github.com/ppoffice/hexo-theme-icarus">
+                        
+                        <i class="fab fa-github"></i>
+                        
+                    </a>
+                </p>
+                
+                </div>
+            
+            </div>
+        </div>
+    </div>
+</footer>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script>
+<script>moment.locale("zh-CN");</script>
+
+
+    
+    
+    
+    <script src="/js/animation.js"></script>
+    
+
+    
+    
+    
+    <script src="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/js/lightgallery.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js" defer></script>
+    <script src="/js/gallery.js" defer></script>
+    
+
+    
+    
+
+<div id="outdated">
+    <h6>Your browser is out-of-date!</h6>
+    <p>Update your browser to view this website correctly. <a id="btnUpdateBrowser" href="http://outdatedbrowser.com/">Update
+            my browser now </a></p>
+    <p class="last"><a href="#" id="btnCloseUpdateBrowser" title="Close">&times;</a></p>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.js" defer></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        outdatedBrowser({
+            bgColor: '#f25648',
+            color: '#ffffff',
+            lowerThan: 'flex'
+        });
+    });
+</script>
+
+
+    
+    
+    
+    
+
+<a id="back-to-top" title="回到顶端" href="javascript:;">
+    <i class="fas fa-chevron-up"></i>
+</a>
+<script src="/js/back-to-top.js" defer></script>
+
+
+    
+    
+
+    
+    
+    
+    
+
+    
+    
+    
+    
+    
+    <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script>
+    <script src="/js/clipboard.js" defer></script>
+    
+
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+
+<script src="/js/main.js" defer></script>
+
+    
+    <div class="searchbox ins-search">
+    <div class="searchbox-container ins-search-container">
+        <div class="searchbox-input-wrapper">
+            <input type="text" class="searchbox-input ins-search-input" placeholder="想要查找什么...">
+            <span class="searchbox-close ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="searchbox-result-wrapper ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+    (function (window) {
+        var INSIGHT_CONFIG = {
+            TRANSLATION: {
+                POSTS: '文章',
+                PAGES: '页面',
+                CATEGORIES: '分类',
+                TAGS: '标签',
+                UNTITLED: '(无标题)',
+            },
+            CONTENT_URL: '/content.json',
+        };
+        window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+    })(window);
+</script>
+<script src="/js/insight.js" defer></script>
+<link rel="stylesheet" href="/css/search.css">
+<link rel="stylesheet" href="/css/insight.css">
+    
+</body>
+</html>

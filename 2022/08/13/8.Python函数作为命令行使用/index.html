@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head><meta name="generator" content="Hexo 3.8.0">
+    <meta charset="utf-8">
+<title>Python函数作为命令行使用 - 思考者</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+
+
+    <meta name="description" content="背景 我最近了解了一个快速构建命令行的工具 typer，受到了一些启发。 它可以把一组带有类型注解的 Python 函数，快速地转换成命令行工具。我尝试只用 Python 的内建包，不引入第三方依赖，也实现一个类似的命令行快速构建工具。代码会持续更新，之后会加入更强的功能。">
+<meta name="keywords" content="Python,Script">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Python函数作为命令行使用">
+<meta property="og:url" content="https://chenyanggao.github.io/2022/08/13/8.Python函数作为命令行使用/index.html">
+<meta property="og:site_name" content="思考者">
+<meta property="og:description" content="背景 我最近了解了一个快速构建命令行的工具 typer，受到了一些启发。 它可以把一组带有类型注解的 Python 函数，快速地转换成命令行工具。我尝试只用 Python 的内建包，不引入第三方依赖，也实现一个类似的命令行快速构建工具。代码会持续更新，之后会加入更强的功能。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://cdn.pixabay.com/photo/2022/04/15/14/18/python-7134564_640.jpg">
+<meta property="og:updated_time" content="2022-08-27T13:16:50.893Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Python函数作为命令行使用">
+<meta name="twitter:description" content="背景 我最近了解了一个快速构建命令行的工具 typer，受到了一些启发。 它可以把一组带有类型注解的 Python 函数，快速地转换成命令行工具。我尝试只用 Python 的内建包，不引入第三方依赖，也实现一个类似的命令行快速构建工具。代码会持续更新，之后会加入更强的功能。">
+<meta name="twitter:image" content="https://cdn.pixabay.com/photo/2022/04/15/14/18/python-7134564_640.jpg">
+
+
+
+
+
+
+
+<link rel="icon" href="/images/favicon.svg">
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.7.2/css/bulma.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:400,600|Source+Code+Pro">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.12.0/styles/vs.css">
+
+
+    
+    
+    
+    <style>body>.footer,body>.navbar,body>.section{opacity:0}</style>
+    
+
+    
+    
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/css/lightgallery.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/css/justifiedGallery.min.css">
+    
+
+    
+    
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.css">
+
+
+    
+    
+    
+    
+
+<link rel="stylesheet" href="/css/back-to-top.css">
+
+
+    
+    
+
+    
+    
+    
+    
+
+    
+    
+<link rel="stylesheet" href="/css/progressbar.css">
+<script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+
+    
+    
+    
+
+    
+    
+    
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    
+
+    
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" integrity="sha384-yFRtMMDnQtDRO8rLpMIKrtPCD5jdktao2TV19YiZYWMDkUR5GQZR/NOVTdquEx1j" crossorigin="anonymous">
+
+<!-- The loading of KaTeX is deferred to speed up page rendering -->
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.js" integrity="sha384-9Nhn55MVVN0/4OFx7EE5kpFBPsEMZxKTCnA+4fqDmg12eCTqGi6+BB2LjY8brQxJ" crossorigin="anonymous"></script>
+
+<!-- To automatically render math in text elements, include the auto-render extension: -->
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/contrib/auto-render.min.js" integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI" crossorigin="anonymous" onload="renderMathInElement(document.body);"></script>
+
+    
+    
+<style>pre.mermaid {background-color:white;}</style>
+    
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+    
+<script>
+    if (window.mermaid) {
+        mermaid.initialize({"noteMargin":10}, "pre.mermaid");
+    }
+</script>
+
+    
+    
+    
+    
+<!-- require APlayer -->
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.css">
+<script src="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.js"></script>
+    
+<!-- require MetingJS -->
+
+<script src="https://cdn.jsdelivr.net/npm/meting/dist/Meting.min.js"></script>
+    
+<!-- main music player -->
+<meting-js server="netease" type="playlist" id="2818465505" order="random" autoplay="true" fixed="true"></meting-js>
+
+    
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+</head>
+<body class="is-3-column">
+    <nav class="navbar navbar-main">
+    <div class="container">
+        <div class="navbar-brand is-flex-center">
+            <a class="navbar-item navbar-logo" href="/">
+            
+                <img src="/images/logo.svg" alt="Python函数作为命令行使用" height="28">
+            
+            </a>
+        </div>
+        <div class="navbar-menu">
+            
+            <div class="navbar-start">
+                
+                <a class="navbar-item" href="/">Home</a>
+                
+                <a class="navbar-item" href="/archives">Archives</a>
+                
+                <a class="navbar-item" href="/categories">Categories</a>
+                
+                <a class="navbar-item" href="/tags">Tags</a>
+                
+            </div>
+            
+            <div class="navbar-end">
+                
+                    
+                    
+                    <a class="navbar-item" target="_blank" title="Download on GitHub" href="https://github.com/ppoffice/hexo-theme-icarus">
+                        
+                        <i class="fab fa-github"></i>
+                        
+                    </a>
+                    
+                
+                
+                
+                <a class="navbar-item search" title="搜索" href="javascript:;">
+                    <i class="fas fa-search"></i>
+                </a>
+                
+            </div>
+        </div>
+    </div>
+</nav>
+    
+    <section class="section">
+        <div class="container">
+            <div class="columns">
+                <div class="column is-8-tablet is-8-desktop is-6-widescreen has-order-2 column-main"><div class="card">
+    
+    <div class="card-image">
+        <span class="image is-7by1">
+            <img class="thumbnail" src="https://cdn.pixabay.com/photo/2022/04/15/14/18/python-7134564_640.jpg" alt="Python函数作为命令行使用">
+        </span>
+    </div>
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey" datetime="2022-08-13T12:30:00.000Z">2022-08-13</time>
+                
+                <div class="level-item">
+                <a class="has-link-grey -link" href="/categories/脚本工具/">脚本工具</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    8 分钟 读完 (大约 1211 个字)
+                </span>
+                
+                
+                <span class="level-item has-text-grey" id="busuanzi_container_page_pv">
+                    <i class="far fa-eye"></i>
+                    <span id="busuanzi_value_page_pv">0</span>次访问
+                </span>
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+                Python函数作为命令行使用
+            
+        </h1>
+        <div class="content">
+            <h2 id="背景"><a class="markdownIt-Anchor" href="#背景"></a> 背景</h2>
+<p>我最近了解了一个快速构建命令行的工具 <a href="https://pypi.org/project/typer/" target="_blank" rel="noopener">typer</a>，受到了一些启发。<br>
+它可以把一组带有类型注解的 <code>Python</code> 函数，快速地转换成命令行工具。我尝试只用 <code>Python</code> 的内建包，不引入第三方依赖，也实现一个类似的命令行快速构建工具。代码会持续更新，之后会加入更强的功能。</p>
+<a id="more"></a>
+<h2 id="代码实现"><a class="markdownIt-Anchor" href="#代码实现"></a> 代码实现</h2>
+<blockquote>
+<p><strong>TIPS</strong> 代码的最新版本在 <a href="https://gist.github.com/ChenyangGao" target="_blank" rel="noopener">GitHub Gist</a> 中维护<br>
+<a href="https://gist.github.com/ChenyangGao/da8b5dc4370425edaef87237cd27fd15" target="_blank" rel="noopener">https://gist.github.com/ChenyangGao/da8b5dc4370425edaef87237cd27fd15</a></p>
+</blockquote>
+<blockquote>
+<p><strong>注意</strong>：使用下面的代码，请用 <code>Python</code> <kdb>3.8</kdb> 或者以上版本。</p>
+</blockquote>
+<p>文件名称是 <code>func_cmdline.py</code>，<code>Python</code> 实现代码如下：</p>
+<div class="highlight-wrap" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true" data-rel="PYTHON"><figure class="iseeu highlight /python hljs"><figcaption><span>func_cmdline.py</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">#!/usr/bin/env python3</span></span><br><span class="line"><span class="hljs-comment"># coding: utf-8</span></span><br><span class="line"></span><br><span class="line">__author__ = <span class="hljs-string">"ChenyangGao &lt;https://chenyanggao.github.io/&gt;"</span></span><br><span class="line">__version__ = (<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>)</span><br><span class="line">__all__ = [<span class="hljs-string">"func_cmdline"</span>]</span><br><span class="line"></span><br><span class="line"><span class="hljs-comment"># Inspired by:</span></span><br><span class="line"><span class="hljs-comment"># - https://pypi.org/project/typer/</span></span><br><span class="line"></span><br><span class="line"><span class="hljs-keyword">import</span> inspect</span><br><span class="line"></span><br><span class="line"><span class="hljs-keyword">from</span> argparse <span class="hljs-keyword">import</span> ArgumentParser, Namespace, RawDescriptionHelpFormatter</span><br><span class="line"><span class="hljs-keyword">from</span> functools <span class="hljs-keyword">import</span> partial</span><br><span class="line"><span class="hljs-keyword">from</span> textwrap <span class="hljs-keyword">import</span> dedent, indent</span><br><span class="line"><span class="hljs-keyword">from</span> typing <span class="hljs-keyword">import</span> cast, Callable, Optional</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">func_cmdline</span><span class="hljs-params">(</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">    fn: Optional[Callable] = None, </span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">    /, </span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">    parser: Optional[ArgumentParser] = None, </span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">    parse_map: dict[type, Callable] = &#123;&#125;, </span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">    helpinfo_map: dict[str, str] = &#123;&#125;, </span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">)</span> -&gt; Callable:</span></span><br><span class="line">    <span class="hljs-string">"""装饰器让一个函数，可以作为命令行使用</span></span><br><span class="line"><span class="hljs-string"></span></span><br><span class="line"><span class="hljs-string">    :param fn: 被装饰的函数</span></span><br><span class="line"><span class="hljs-string">    :param parser: 命令行解析器对象</span></span><br><span class="line"><span class="hljs-string">    :param parse_map: 不同类型的解析函数的映射，</span></span><br><span class="line"><span class="hljs-string">        字符串通过相应的解析函数来转换成对应对象，</span></span><br><span class="line"><span class="hljs-string">        如果没有相应的解析函数，则尝试用对象本身</span></span><br><span class="line"><span class="hljs-string">        （它的构造器）</span></span><br><span class="line"><span class="hljs-string">    :param helpinfo_map: 不同参数的帮助说明，</span></span><br><span class="line"><span class="hljs-string">        用于命令行的帮助信息</span></span><br><span class="line"><span class="hljs-string">    :param: 返函数`fn`本身，只是它身上绑定了几个属性</span></span><br><span class="line"><span class="hljs-string">        .parser 字段，使用的命令行解析器对象</span></span><br><span class="line"><span class="hljs-string">        .parse() 方法，解析命令行参数</span></span><br><span class="line"><span class="hljs-string">        .run() 方法，解析命令行参数并运行函数`fn`，</span></span><br><span class="line"><span class="hljs-string">            返回函数`fn`的执行结果</span></span><br><span class="line"><span class="hljs-string"></span></span><br><span class="line"><span class="hljs-string">    :return: 被装饰函数本身，添加了几个属性</span></span><br><span class="line"><span class="hljs-string">    """</span></span><br><span class="line">    <span class="hljs-keyword">if</span> fn <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:</span><br><span class="line">        <span class="hljs-keyword">return</span> partial(</span><br><span class="line">            func_cmdline, </span><br><span class="line">            parser=parser, </span><br><span class="line">            parse_map=parse_map, </span><br><span class="line">            helpinfo_map=helpinfo_map, </span><br><span class="line">        )</span><br><span class="line">    fn = cast(Callable, fn)</span><br><span class="line">    params = inspect.signature(fn).parameters</span><br><span class="line">    <span class="hljs-keyword">if</span> parser <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:</span><br><span class="line">        parser = ArgumentParser(</span><br><span class="line">            formatter_class=RawDescriptionHelpFormatter)</span><br><span class="line">    parser = cast(ArgumentParser, parser)</span><br><span class="line">    <span class="hljs-keyword">if</span> parser.epilog <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:</span><br><span class="line">        parser.epilog = <span class="hljs-string">""</span></span><br><span class="line">        <span class="hljs-keyword">if</span> fn.__doc__ <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span>:</span><br><span class="line">            parser.epilog += <span class="hljs-string">"documentation:\n"</span> + \</span><br><span class="line">                indent(fn.__doc__, <span class="hljs-string">"    "</span>)</span><br><span class="line">        parser.epilog += <span class="hljs-string">"\n\nsource code:\n"</span> + \</span><br><span class="line">            indent(dedent(inspect.getsource(fn)), <span class="hljs-string">"    "</span>)</span><br><span class="line">    abbrs: dict[str, int] = &#123;&#125;</span><br><span class="line">    <span class="hljs-keyword">for</span> name, param <span class="hljs-keyword">in</span> params.items():</span><br><span class="line">        kargs: dict = &#123;<span class="hljs-string">"dest"</span>: name, <span class="hljs-string">"help"</span>: helpinfo_map.get(name)&#125;</span><br><span class="line">        kind = param.kind</span><br><span class="line">        <span class="hljs-keyword">if</span> kind <span class="hljs-keyword">is</span> inspect._ParameterKind.VAR_POSITIONAL:</span><br><span class="line">            kargs[<span class="hljs-string">"required"</span>] = <span class="hljs-literal">False</span></span><br><span class="line">            kargs[<span class="hljs-string">"nargs"</span>] = <span class="hljs-string">"*"</span></span><br><span class="line">            kargs[<span class="hljs-string">"default"</span>] = []</span><br><span class="line">        <span class="hljs-keyword">elif</span> kind <span class="hljs-keyword">is</span> inspect._ParameterKind.VAR_KEYWORD:</span><br><span class="line">            <span class="hljs-keyword">continue</span></span><br><span class="line">        default = param.default</span><br><span class="line">        <span class="hljs-keyword">if</span> default <span class="hljs-keyword">is</span> inspect._empty:</span><br><span class="line">            kargs.setdefault(<span class="hljs-string">"required"</span>, <span class="hljs-literal">True</span>)</span><br><span class="line">        <span class="hljs-keyword">else</span>:</span><br><span class="line">            kargs[<span class="hljs-string">"default"</span>] = default</span><br><span class="line">        anno = param.annotation</span><br><span class="line">        <span class="hljs-keyword">if</span> anno <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> inspect._empty:</span><br><span class="line">            <span class="hljs-keyword">if</span> anno <span class="hljs-keyword">is</span> bool:</span><br><span class="line">                kargs[<span class="hljs-string">"required"</span>] = <span class="hljs-literal">False</span></span><br><span class="line">                <span class="hljs-keyword">if</span> <span class="hljs-string">"default"</span> <span class="hljs-keyword">in</span> kargs:</span><br><span class="line">                    <span class="hljs-keyword">if</span> kargs[<span class="hljs-string">"default"</span>]:</span><br><span class="line">                        kargs[<span class="hljs-string">"action"</span>] = <span class="hljs-string">"store_false"</span></span><br><span class="line">                    <span class="hljs-keyword">else</span>:</span><br><span class="line">                        kargs[<span class="hljs-string">"action"</span>] = <span class="hljs-string">"store_true"</span></span><br><span class="line">                <span class="hljs-keyword">else</span>:</span><br><span class="line">                    kargs[<span class="hljs-string">"action"</span>] = <span class="hljs-string">"store_true"</span></span><br><span class="line">            <span class="hljs-keyword">elif</span> anno <span class="hljs-keyword">is</span> list:</span><br><span class="line">                kargs[<span class="hljs-string">"nargs"</span>] = <span class="hljs-string">"*"</span></span><br><span class="line">            <span class="hljs-keyword">elif</span> getattr(anno, <span class="hljs-string">"__origin__"</span>, <span class="hljs-literal">None</span>) <span class="hljs-keyword">is</span> list <span class="hljs-keyword">and</span> len(anno.__args__) == <span class="hljs-number">1</span>:</span><br><span class="line">                kargs[<span class="hljs-string">"nargs"</span>] = <span class="hljs-string">"*"</span></span><br><span class="line">                kargs[<span class="hljs-string">"type"</span>] = parse_map.get(anno.__args__[<span class="hljs-number">0</span>], anno.__args__[<span class="hljs-number">0</span>])</span><br><span class="line">            <span class="hljs-keyword">else</span>:</span><br><span class="line">                kargs[<span class="hljs-string">"type"</span>] = parse_map.get(anno, anno)</span><br><span class="line">        names = []</span><br><span class="line">        first_letter = name[<span class="hljs-number">0</span>]</span><br><span class="line">        n = abbrs.setdefault(first_letter, <span class="hljs-number">0</span>)</span><br><span class="line">        <span class="hljs-keyword">if</span> n == <span class="hljs-number">0</span>:</span><br><span class="line">            abbr = first_letter</span><br><span class="line">        <span class="hljs-keyword">else</span>:</span><br><span class="line">            abbr = <span class="hljs-string">f"<span class="hljs-subst">&#123;first_letter&#125;</span><span class="hljs-subst">&#123;n&#125;</span>"</span></span><br><span class="line">            abbrs[first_letter] += <span class="hljs-number">1</span></span><br><span class="line">        names.append(<span class="hljs-string">f"-<span class="hljs-subst">&#123;abbr&#125;</span>"</span>)</span><br><span class="line">        names.append(<span class="hljs-string">f"--<span class="hljs-subst">&#123;name&#125;</span>"</span>)</span><br><span class="line">        <span class="hljs-keyword">if</span> <span class="hljs-string">"_"</span> <span class="hljs-keyword">in</span> name:</span><br><span class="line">            names.append(<span class="hljs-string">f"--<span class="hljs-subst">&#123;name.replace(<span class="hljs-string">'_'</span>, <span class="hljs-string">'-'</span>)&#125;</span>"</span>)</span><br><span class="line">        parser.add_argument(*names, **kargs)</span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">parse</span><span class="hljs-params">(argv: Optional[list[str]] = None)</span> -&gt; Namespace:</span></span><br><span class="line">        <span class="hljs-keyword">nonlocal</span> parser</span><br><span class="line">        parser = cast(ArgumentParser, parser)</span><br><span class="line">        <span class="hljs-keyword">return</span> parser.parse_args(argv)</span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">run</span><span class="hljs-params">(argv: Optional[list[str]] = None)</span>:</span></span><br><span class="line">        <span class="hljs-string">"解析命令行参数，默认使用"</span></span><br><span class="line">        <span class="hljs-keyword">nonlocal</span> fn, parser</span><br><span class="line">        fn = cast(Callable, fn)</span><br><span class="line">        parser = cast(ArgumentParser, parser)</span><br><span class="line">        args = parser.parse_args(argv).__dict__</span><br><span class="line">        pargs = []</span><br><span class="line">        kargs = &#123;&#125;</span><br><span class="line">        <span class="hljs-keyword">for</span> name, param <span class="hljs-keyword">in</span> params.items():</span><br><span class="line">            kind = param.kind</span><br><span class="line">            <span class="hljs-keyword">if</span> name <span class="hljs-keyword">in</span> args:</span><br><span class="line">                <span class="hljs-keyword">if</span> kind.value &lt; <span class="hljs-number">2</span>:</span><br><span class="line">                    pargs.append(args[name])</span><br><span class="line">                <span class="hljs-keyword">elif</span> kind.value == <span class="hljs-number">2</span>:</span><br><span class="line">                    pargs.extend(args[name])</span><br><span class="line">                <span class="hljs-keyword">else</span>:</span><br><span class="line">                    kargs[name] = args[name]</span><br><span class="line">        <span class="hljs-keyword">return</span> fn(*pargs, **kargs)</span><br><span class="line">    setattr(fn, <span class="hljs-string">"parser"</span>, parser)</span><br><span class="line">    setattr(fn, <span class="hljs-string">"parse"</span>, parse)</span><br><span class="line">    setattr(fn, <span class="hljs-string">"run"</span>, run)</span><br><span class="line">    <span class="hljs-keyword">return</span> fn</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">"__main__"</span>:</span><br><span class="line">    <span class="hljs-keyword">from</span> datetime <span class="hljs-keyword">import</span> datetime</span><br><span class="line"></span><br><span class="line"><span class="hljs-meta">    @func_cmdline(</span></span><br><span class="line">        parse_map=&#123;</span><br><span class="line">            datetime: <span class="hljs-keyword">lambda</span> s: datetime.strptime(s, <span class="hljs-string">"%Y-%m-%d %H:%M:%S"</span>), </span><br><span class="line">        &#125;, </span><br><span class="line">        helpinfo_map=dict(</span><br><span class="line">            a=<span class="hljs-string">"参数a"</span>, b=<span class="hljs-string">"参数b"</span>, c=<span class="hljs-string">"参数c"</span>, </span><br><span class="line">            d=<span class="hljs-string">"参数d"</span>, e=<span class="hljs-string">"参数e"</span>, </span><br><span class="line">        )</span><br><span class="line">    )</span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">        a: int, /, b: bool = False, *c: float, </span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">        d: list[datetime], e: complex = <span class="hljs-number">4</span>, </span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">    )</span>:</span></span><br><span class="line">        <span class="hljs-string">"Example for function as command line."</span></span><br><span class="line">        print(locals())</span><br><span class="line"></span><br><span class="line">    foo.run()</span><br></pre></td></tr></table></figure></div>
+<h2 id="使用说明"><a class="markdownIt-Anchor" href="#使用说明"></a> 使用说明</h2>
+<p>模块 <code>func_cmdline.py</code> 自带了一个实例：</p>
+<div class="highlight-wrap" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true" data-rel="PYTHON"><figure class="iseeu highlight /python hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">from</span> datetime <span class="hljs-keyword">import</span> datetime</span><br><span class="line"></span><br><span class="line"><span class="hljs-meta">@func_cmdline(</span></span><br><span class="line">    parse_map=&#123;</span><br><span class="line">        datetime: <span class="hljs-keyword">lambda</span> s: datetime.strptime(s, <span class="hljs-string">"%Y-%m-%d %H:%M:%S"</span>), </span><br><span class="line">    &#125;, </span><br><span class="line">    helpinfo_map=dict(</span><br><span class="line">        a=<span class="hljs-string">"参数a"</span>, b=<span class="hljs-string">"参数b"</span>, c=<span class="hljs-string">"参数c"</span>, </span><br><span class="line">        d=<span class="hljs-string">"参数d"</span>, e=<span class="hljs-string">"参数e"</span>, </span><br><span class="line">    )</span><br><span class="line">)</span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">    a: int, /, b: bool = True, *c: float, </span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">    d: list[datetime], e: complex = <span class="hljs-number">1j</span>, </span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">)</span>:</span></span><br><span class="line">    <span class="hljs-string">"Example for function as command line."</span></span><br><span class="line">    print(locals())</span><br><span class="line"></span><br><span class="line">foo.run()</span><br></pre></td></tr></table></figure></div>
+<p>直接运行模块，输出如下：</p>
+<div class="highlight-wrap" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true" data-rel="SHELL"><figure class="iseeu highlight /shell hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-meta">$</span><span class="hljs-bash"> python func_cmdline.py -h</span></span><br><span class="line">usage: func_cmdline.py [-h] -a A [-b] [-c [C ...]] -d [D ...] [-e E]</span><br><span class="line"></span><br><span class="line">optional arguments:</span><br><span class="line">  -h, --help            show this help message and exit</span><br><span class="line">  -a A, --a A           参数a</span><br><span class="line">  -b, --b               参数b</span><br><span class="line">  -c [C ...], --c [C ...]</span><br><span class="line">                        参数c</span><br><span class="line">  -d [D ...], --d [D ...]</span><br><span class="line">                        参数d</span><br><span class="line">  -e E, --e E           参数e</span><br><span class="line"></span><br><span class="line">documentation:</span><br><span class="line">    Example for function as command line.</span><br><span class="line"></span><br><span class="line">source code:</span><br><span class="line">    @func_cmdline(</span><br><span class="line">        parse_map=&#123;</span><br><span class="line">            datetime: lambda s: datetime.strptime(s, "%Y-%m-%d %H:%M:%S"),</span><br><span class="line">        &#125;,</span><br><span class="line">        helpinfo_map=dict(</span><br><span class="line">            a="参数a", b="参数b", c="参数c",</span><br><span class="line">            d="参数d", e="参数e",</span><br><span class="line">        )</span><br><span class="line">    )</span><br><span class="line">    def foo(</span><br><span class="line">        a: int, /, b: bool = False, *c: float,</span><br><span class="line">        d: list[datetime], e: complex = 1j,</span><br><span class="line">    ):</span><br><span class="line">        "Example for function as command line."</span><br><span class="line">        print(locals())</span><br></pre></td></tr></table></figure></div>
+<p>随便传入一些必需的参数，不传可选参数：</p>
+<div class="highlight-wrap" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true" data-rel="SHELL"><figure class="iseeu highlight /shell hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-meta">$</span><span class="hljs-bash"> python func_cmdline.py --a 1 --d <span class="hljs-string">'2021-01-01 00:00:00'</span> <span class="hljs-string">'2021-02-01 00:00:00'</span> <span class="hljs-string">'2021-03-01 00:00:00'</span></span></span><br><span class="line">&#123;'a': 1, 'b': False, 'd': [datetime.datetime(2021, 1, 1, 0, 0), datetime.datetime(2021, 2, 1, 0, 0), datetime.datetime(2021, 3, 1, 0, 0)], 'e': 1j, 'c': ()&#125;</span><br></pre></td></tr></table></figure></div>
+<p>对各个参数随便传入一些可用的值：</p>
+<div class="highlight-wrap" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true" data-rel="SHELL"><figure class="iseeu highlight /shell hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-meta">$</span><span class="hljs-bash"> python func_cmdline.py --a 1 -b -c 2 3 4 --d <span class="hljs-string">'2021-01-01 00:00:00'</span> <span class="hljs-string">'2021-02-01 00:00:00'</span> <span class="hljs-string">'2021-03-01 00:00:00'</span> -e <span class="hljs-string">'5+6j'</span></span></span><br><span class="line">&#123;'a': 1, 'b': True, 'd': [datetime.datetime(2021, 1, 1, 0, 0), datetime.datetime(2021, 2, 1, 0, 0), datetime.datetime(2021, 3, 1, 0, 0)], 'e': (5+6j), 'c': (2.0, 3.0, 4.0)&#125;</span><br></pre></td></tr></table></figure></div>
+
+        </div>
+        
+        <div class="level is-size-7 is-uppercase">
+            <div class="level-start">
+                <div class="level-item">
+                    <span class="is-size-6 has-text-grey has-mr-7">#</span>
+                    <a class="has-link-grey -link" href="/tags/Python/">Python</a>, <a class="has-link-grey -link" href="/tags/Script/">Script</a>
+                </div>
+            </div>
+        </div>
+        
+        
+        
+    </div>
+</div>
+
+
+
+
+
+<div class="card card-transparent">
+    <div class="level post-navigation is-flex-wrap is-mobile">
+        
+        <div class="level-start">
+            <a class="level level-item has-link-grey  article-nav-prev" href="/2022/08/26/9.Python在命令行修改Properties配置文件/">
+                <i class="level-item fas fa-chevron-left"></i>
+                <span class="level-item">Python在命令行修改Properties配置文件</span>
+            </a>
+        </div>
+        
+        
+        <div class="level-end">
+            <a class="level level-item has-link-grey  article-nav-next" href="/2022/08/02/7.Shell脚本实现在Linux命令行开启代理/">
+                <span class="level-item">Shell脚本实现在Linux命令行开启代理</span>
+                <i class="level-item fas fa-chevron-right"></i>
+            </a>
+        </div>
+        
+    </div>
+</div>
+
+
+
+    
+        
+<div class="card">
+    <div class="card-content">
+        <h3 class="title is-5 has-text-weight-normal">评论</h3>
+        
+<div id="comment-container"></div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1.4.1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1.4.1/dist/gitalk.min.js"></script>
+<script>
+    var gitalk = new Gitalk({
+        clientID: '0c4d63f8312662c8e0ef',
+        clientSecret: '02c284fe7dccd50cc1e02ed5431bf86d351fe255',
+        id: 'bc9c4aab88bb0757bbd614ccd790073a',
+        repo: 'ChenyangGao.github.io',
+        owner: 'ChenyangGao',
+        admin: ["ChenyangGao"]
+    })
+    gitalk.render('comment-container')
+</script>
+
+    </div>
+</div>
+        
+    
+        
+<div class="card">
+    <div class="card-content">
+        <h3 class="title is-5 has-text-weight-normal">评论</h3>
+        
+<script>
+    var disqus_config = function () {
+        this.page.url = 'https://chenyanggao.github.io/2022/08/13/8.Python函数作为命令行使用/';
+        this.page.identifier = '2022/08/13/8.Python函数作为命令行使用/';
+    };
+    (function() {
+        var d = document, s = d.createElement('script');  
+        s.src = '//' + 'chenyanggao-blog' + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+
+<div id="disqus_thread">
+    
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+    </div>
+</div>
+        
+    
+</div>
+                
+
+
+
+
+<div class="column is-4-tablet is-4-desktop is-3-widescreen  has-order-1 column-left ">
+    
+        
+<div class="card widget">
+    <div class="card-content">
+        <nav class="level">
+            <div class="level-item has-text-centered">
+                <div>
+                    
+                        <img class="image is-128x128 has-mb-6" src="https://octodex.github.com/images/hula_loop_octodex03.gif" alt="ChenyangGao">
+                    
+                    
+                    <p class="is-size-4 is-block">
+                        ChenyangGao
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-block">
+                        数据分析师
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-flex is-flex-center has-text-grey">
+                        <i class="fas fa-map-marker-alt has-mr-7"></i>
+                        <span>China</span>
+                    </p>
+                    
+                </div>
+            </div>
+        </nav>
+        <nav class="level is-mobile">
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        文章
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        12
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        分类
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        5
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        标签
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        5
+                    </p>
+                </div>
+            </div>
+        </nav>
+        <div class="level">
+            <a class="level-item button is-link is-rounded" href="https://github.com/ChenyangGao" target="_blank">
+                关注我</a>
+        </div>
+        
+        
+        <div class="level is-mobile">
+            
+            <a class="level-item button is-white is-marginless" target="_blank" title="Github" href="https://github.com/ChenyangGao">
+                
+                <i class="fab fa-github"></i>
+                
+            </a>
+            
+            <a class="level-item button is-white is-marginless" target="_blank" title="Facebook" href="https://facebook.com">
+                
+                <i class="fab fa-facebook"></i>
+                
+            </a>
+            
+            <a class="level-item button is-white is-marginless" target="_blank" title="Twitter" href="https://twitter.com">
+                
+                <i class="fab fa-twitter"></i>
+                
+            </a>
+            
+            <a class="level-item button is-white is-marginless" target="_blank" title="Dribbble" href="https://dribbble.com">
+                
+                <i class="fab fa-dribbble"></i>
+                
+            </a>
+            
+            <a class="level-item button is-white is-marginless" target="_blank" title="RSS" href="/">
+                
+                <i class="fas fa-rss"></i>
+                
+            </a>
+            
+        </div>
+        
+    </div>
+</div>
+    
+        
+
+<div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+        <h3 class="menu-label">
+            链接
+        </h3>
+        <ul class="menu-list">
+        
+            <li>
+                <a class="level is-mobile" href="https://hexo.io" target="_blank">
+                    <span class="level-left">
+                        <span class="level-item">Hexo</span>
+                    </span>
+                    <span class="level-right">
+                        <span class="level-item tag">hexo.io</span>
+                    </span>
+                </a>
+            </li>
+        
+            <li>
+                <a class="level is-mobile" href="https://github.com/ppoffice" target="_blank">
+                    <span class="level-left">
+                        <span class="level-item">PPOffice</span>
+                    </span>
+                    <span class="level-right">
+                        <span class="level-item tag">github.com</span>
+                    </span>
+                </a>
+            </li>
+        
+            <li>
+                <a class="level is-mobile" href="https://community.motifsing.com" target="_blank">
+                    <span class="level-left">
+                        <span class="level-item">资源分享</span>
+                    </span>
+                    <span class="level-right">
+                        <span class="level-item tag">community.motifsing.com</span>
+                    </span>
+                </a>
+            </li>
+        
+        </ul>
+        </div>
+    </div>
+</div>
+
+
+    
+        
+<div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                分类
+            </h3>
+            <ul class="menu-list">
+            <li>
+        <a class="level is-marginless" href="/categories/数学/">
+            <span class="level-start">
+                <span class="level-item">数学</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">1</span>
+            </span>
+        </a><ul><li>
+        <a class="level is-marginless" href="/categories/数学/经济学/">
+            <span class="level-start">
+                <span class="level-item">经济学</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">1</span>
+            </span>
+        </a></li></ul></li><li>
+        <a class="level is-marginless" href="/categories/编程思想/">
+            <span class="level-start">
+                <span class="level-item">编程思想</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">4</span>
+            </span>
+        </a></li><li>
+        <a class="level is-marginless" href="/categories/脚本工具/">
+            <span class="level-start">
+                <span class="level-item">脚本工具</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">6</span>
+            </span>
+        </a></li><li>
+        <a class="level is-marginless" href="/categories/通用模块/">
+            <span class="level-start">
+                <span class="level-item">通用模块</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">1</span>
+            </span>
+        </a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+    
+        
+<div class="card widget">
+    <div class="card-content">
+        <h3 class="menu-label">
+            标签云
+        </h3>
+        <a href="/tags/Module/" style="font-size: 10px;">Module</a> <a href="/tags/Python/" style="font-size: 20px;">Python</a> <a href="/tags/Script/" style="font-size: 15px;">Script</a> <a href="/tags/Shell/" style="font-size: 10px;">Shell</a> <a href="/tags/博弈论/" style="font-size: 10px;">博弈论</a>
+    </div>
+</div>
+
+    
+    
+        <div class="column-right-shadow is-hidden-widescreen ">
+        
+            
+        
+            
+<div class="card widget">
+    <div class="card-content">
+        <h3 class="menu-label">
+            最新文章
+        </h3>
+        
+        <article class="media">
+            
+            <a href="/2022/09/01/12.Python模块-打包多个参数于一体/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://cdn.pixabay.com/photo/2014/12/11/22/10/python-564817_1280.jpg" alt="Python模块-打包多个参数于一体">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2022-09-01T08:00:00.000Z">2022-09-01</time></div>
+                    <a href="/2022/09/01/12.Python模块-打包多个参数于一体/" class="has-link-black-ter is-size-6">Python模块-打包多个参数于一体</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/通用模块/">通用模块</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2022/08/30/11.Python脚本设置pip索引源/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://cdn.pixabay.com/photo/2016/02/27/10/26/snake-1225370_1280.jpg" alt="Python脚本设置pip索引源">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2022-08-30T07:00:00.000Z">2022-08-30</time></div>
+                    <a href="/2022/08/30/11.Python脚本设置pip索引源/" class="has-link-black-ter is-size-6">Python脚本设置pip索引源</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/脚本工具/">脚本工具</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2022/08/27/10.Python脚本作为配置文件加载/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://cdn.pixabay.com/photo/2015/05/17/20/39/snake-771541_640.jpg" alt="Python脚本作为配置文件加载">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2022-08-27T11:37:00.000Z">2022-08-27</time></div>
+                    <a href="/2022/08/27/10.Python脚本作为配置文件加载/" class="has-link-black-ter is-size-6">Python脚本作为配置文件加载</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/脚本工具/">脚本工具</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2022/08/26/9.Python在命令行修改Properties配置文件/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://cdn.pixabay.com/photo/2014/08/15/21/40/snake-419043_640.jpg" alt="Python在命令行修改Properties配置文件">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2022-08-26T12:30:00.000Z">2022-08-26</time></div>
+                    <a href="/2022/08/26/9.Python在命令行修改Properties配置文件/" class="has-link-black-ter is-size-6">Python在命令行修改Properties配置文件</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/脚本工具/">脚本工具</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2022/08/13/8.Python函数作为命令行使用/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://cdn.pixabay.com/photo/2022/04/15/14/18/python-7134564_640.jpg" alt="Python函数作为命令行使用">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2022-08-13T12:30:00.000Z">2022-08-13</time></div>
+                    <a href="/2022/08/13/8.Python函数作为命令行使用/" class="has-link-black-ter is-size-6">Python函数作为命令行使用</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/脚本工具/">脚本工具</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+    </div>
+</div>
+
+        
+            <div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+        <h3 class="menu-label">
+            归档
+        </h3>
+        <ul class="menu-list">
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2022/09/">
+                <span class="level-start">
+                    <span class="level-item">九月 2022</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">1</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2022/08/">
+                <span class="level-start">
+                    <span class="level-item">八月 2022</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">6</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2019/07/">
+                <span class="level-start">
+                    <span class="level-item">七月 2019</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">2</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2019/05/">
+                <span class="level-start">
+                    <span class="level-item">五月 2019</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">1</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2019/04/">
+                <span class="level-start">
+                    <span class="level-item">四月 2019</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">2</span>
+                </span>
+            </a>
+        </li>
+        
+        </ul>
+        </div>
+    </div>
+</div>
+        
+            <div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                标签
+            </h3>
+            <div class="field is-grouped is-grouped-multiline">
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Module/">
+                        <span class="tag">Module</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Python/">
+                        <span class="tag">Python</span>
+                        <span class="tag is-grey">10</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Script/">
+                        <span class="tag">Script</span>
+                        <span class="tag is-grey">6</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Shell/">
+                        <span class="tag">Shell</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/博弈论/">
+                        <span class="tag">博弈论</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+</div>
+        
+        </div>
+    
+</div>
+
+                
+
+
+
+
+<div class="column is-4-tablet is-4-desktop is-3-widescreen is-hidden-touch is-hidden-desktop-only has-order-3 column-right ">
+    
+        
+    
+        
+<div class="card widget">
+    <div class="card-content">
+        <h3 class="menu-label">
+            最新文章
+        </h3>
+        
+        <article class="media">
+            
+            <a href="/2022/09/01/12.Python模块-打包多个参数于一体/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://cdn.pixabay.com/photo/2014/12/11/22/10/python-564817_1280.jpg" alt="Python模块-打包多个参数于一体">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2022-09-01T08:00:00.000Z">2022-09-01</time></div>
+                    <a href="/2022/09/01/12.Python模块-打包多个参数于一体/" class="has-link-black-ter is-size-6">Python模块-打包多个参数于一体</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/通用模块/">通用模块</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2022/08/30/11.Python脚本设置pip索引源/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://cdn.pixabay.com/photo/2016/02/27/10/26/snake-1225370_1280.jpg" alt="Python脚本设置pip索引源">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2022-08-30T07:00:00.000Z">2022-08-30</time></div>
+                    <a href="/2022/08/30/11.Python脚本设置pip索引源/" class="has-link-black-ter is-size-6">Python脚本设置pip索引源</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/脚本工具/">脚本工具</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2022/08/27/10.Python脚本作为配置文件加载/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://cdn.pixabay.com/photo/2015/05/17/20/39/snake-771541_640.jpg" alt="Python脚本作为配置文件加载">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2022-08-27T11:37:00.000Z">2022-08-27</time></div>
+                    <a href="/2022/08/27/10.Python脚本作为配置文件加载/" class="has-link-black-ter is-size-6">Python脚本作为配置文件加载</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/脚本工具/">脚本工具</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2022/08/26/9.Python在命令行修改Properties配置文件/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://cdn.pixabay.com/photo/2014/08/15/21/40/snake-419043_640.jpg" alt="Python在命令行修改Properties配置文件">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2022-08-26T12:30:00.000Z">2022-08-26</time></div>
+                    <a href="/2022/08/26/9.Python在命令行修改Properties配置文件/" class="has-link-black-ter is-size-6">Python在命令行修改Properties配置文件</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/脚本工具/">脚本工具</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2022/08/13/8.Python函数作为命令行使用/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://cdn.pixabay.com/photo/2022/04/15/14/18/python-7134564_640.jpg" alt="Python函数作为命令行使用">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2022-08-13T12:30:00.000Z">2022-08-13</time></div>
+                    <a href="/2022/08/13/8.Python函数作为命令行使用/" class="has-link-black-ter is-size-6">Python函数作为命令行使用</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/脚本工具/">脚本工具</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+    </div>
+</div>
+
+    
+        <div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+        <h3 class="menu-label">
+            归档
+        </h3>
+        <ul class="menu-list">
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2022/09/">
+                <span class="level-start">
+                    <span class="level-item">九月 2022</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">1</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2022/08/">
+                <span class="level-start">
+                    <span class="level-item">八月 2022</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">6</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2019/07/">
+                <span class="level-start">
+                    <span class="level-item">七月 2019</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">2</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2019/05/">
+                <span class="level-start">
+                    <span class="level-item">五月 2019</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">1</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2019/04/">
+                <span class="level-start">
+                    <span class="level-item">四月 2019</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">2</span>
+                </span>
+            </a>
+        </li>
+        
+        </ul>
+        </div>
+    </div>
+</div>
+    
+        <div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                标签
+            </h3>
+            <div class="field is-grouped is-grouped-multiline">
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Module/">
+                        <span class="tag">Module</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Python/">
+                        <span class="tag">Python</span>
+                        <span class="tag is-grey">10</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Script/">
+                        <span class="tag">Script</span>
+                        <span class="tag is-grey">6</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Shell/">
+                        <span class="tag">Shell</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/博弈论/">
+                        <span class="tag">博弈论</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+</div>
+    
+    
+</div>
+
+            </div>
+        </div>
+    </section>
+    <footer class="footer">
+    <div class="container">
+        <div class="level">
+            <div class="level-start has-text-centered-mobile">
+                <a class="footer-logo is-block has-mb-6" href="/">
+                
+                    <img src="/images/logo.svg" alt="Python函数作为命令行使用" height="28">
+                
+                </a>
+                <p class="is-size-7">
+                &copy; 2022 ChenyangGao&nbsp;
+                Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> & <a href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank">Icarus</a>
+                
+                <br>
+                <span id="busuanzi_container_site_uv">
+                共<span id="busuanzi_value_site_uv">0</span>个访客
+                </span>
+                
+                </p>
+            </div>
+            <div class="level-end">
+            
+                <div class="field has-addons is-flex-center-mobile has-mt-5-mobile is-flex-wrap is-flex-middle">
+                
+                
+                <p class="control">
+                    <a class="button is-white is-large" target="_blank" title="Creative Commons" href="https://creativecommons.org/">
+                        
+                        <i class="fab fa-creative-commons"></i>
+                        
+                    </a>
+                </p>
+                
+                <p class="control">
+                    <a class="button is-white is-large" target="_blank" title="Attribution 4.0 International" href="https://creativecommons.org/licenses/by/4.0/">
+                        
+                        <i class="fab fa-creative-commons-by"></i>
+                        
+                    </a>
+                </p>
+                
+                <p class="control">
+                    <a class="button is-white is-large" target="_blank" title="Download on GitHub" href="https://github.com/ppoffice/hexo-theme-icarus">
+                        
+                        <i class="fab fa-github"></i>
+                        
+                    </a>
+                </p>
+                
+                </div>
+            
+            </div>
+        </div>
+    </div>
+</footer>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script>
+<script>moment.locale("zh-CN");</script>
+
+
+    
+    
+    
+    <script src="/js/animation.js"></script>
+    
+
+    
+    
+    
+    <script src="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/js/lightgallery.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js" defer></script>
+    <script src="/js/gallery.js" defer></script>
+    
+
+    
+    
+
+<div id="outdated">
+    <h6>Your browser is out-of-date!</h6>
+    <p>Update your browser to view this website correctly. <a id="btnUpdateBrowser" href="http://outdatedbrowser.com/">Update
+            my browser now </a></p>
+    <p class="last"><a href="#" id="btnCloseUpdateBrowser" title="Close">&times;</a></p>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.js" defer></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        outdatedBrowser({
+            bgColor: '#f25648',
+            color: '#ffffff',
+            lowerThan: 'flex'
+        });
+    });
+</script>
+
+
+    
+    
+    
+    
+
+<a id="back-to-top" title="回到顶端" href="javascript:;">
+    <i class="fas fa-chevron-up"></i>
+</a>
+<script src="/js/back-to-top.js" defer></script>
+
+
+    
+    
+
+    
+    
+    
+    
+
+    
+    
+    
+    
+    
+    <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script>
+    <script src="/js/clipboard.js" defer></script>
+    
+
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+
+<script src="/js/main.js" defer></script>
+
+    
+    <div class="searchbox ins-search">
+    <div class="searchbox-container ins-search-container">
+        <div class="searchbox-input-wrapper">
+            <input type="text" class="searchbox-input ins-search-input" placeholder="想要查找什么...">
+            <span class="searchbox-close ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="searchbox-result-wrapper ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+    (function (window) {
+        var INSIGHT_CONFIG = {
+            TRANSLATION: {
+                POSTS: '文章',
+                PAGES: '页面',
+                CATEGORIES: '分类',
+                TAGS: '标签',
+                UNTITLED: '(无标题)',
+            },
+            CONTENT_URL: '/content.json',
+        };
+        window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+    })(window);
+</script>
+<script src="/js/insight.js" defer></script>
+<link rel="stylesheet" href="/css/search.css">
+<link rel="stylesheet" href="/css/insight.css">
+    
+</body>
+</html>
