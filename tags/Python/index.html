@@ -213,7 +213,7 @@
                 <span class="level-item has-text-grey">
                     
                     
-                    23 分钟 读完 (大约 3453 个字)
+                    29 分钟 读完 (大约 4308 个字)
                 </span>
                 
                 
@@ -230,13 +230,13 @@
 <blockquote>
 <p><a href="https://pandas.pydata.org" target="_blank" rel="noopener">pandas</a> is an open source, <a href="https://en.wikipedia.org/wiki/BSD_licenses" target="_blank" rel="noopener">BSD-licensed</a> library providing high-performance, easy-to-use data structures and data analysis tools for the <a href="https://www.python.org/" target="_blank" rel="noopener">Python</a> programming language.</p>
 </blockquote>
-<p>数据分析工具包 <kbd>pandas</kbd>，是利用 <kbd>Python</kbd> 进行数据分析时，一个难以割舍的选项。它的文档 <a href="https://pandas.pydata.org/docs/" target="_blank" rel="noopener">pandas/docs</a> 示例非常丰富，而且它的作者 <a href="https://wesmckinney.com" target="_blank" rel="noopener">Wes McKinney</a> 另外还写了一本书 <a href="https://wesmckinney.com/book/" target="_blank" rel="noopener">Python for Data Analysis</a>，截至目前已经更新到第 3 版，<a href="https://salttiger.com/python-for-data-analysis-3rd-edition/" target="_blank" rel="noopener">👆点击下载</a>。<br>
+<p>数据分析工具包 <kbd>pandas</kbd>，是利用 <kbd>Python</kbd> 进行数据分析时，一个难以割舍的选项。它的官方文档 <a href="https://pandas.pydata.org/docs/" target="_blank" rel="noopener">pandas/docs</a> 示例非常丰富，而且它的作者 <a href="https://wesmckinney.com" target="_blank" rel="noopener">Wes McKinney</a> 另外还写了一本书 <a href="https://wesmckinney.com/book/" target="_blank" rel="noopener">Python for Data Analysis</a>，截至目前已经更新到第 3 版，<a href="https://salttiger.com/python-for-data-analysis-3rd-edition/" target="_blank" rel="noopener">👆点击下载</a>。<br>
 中国国内也有热心网友做了免费的翻译分享，这是第 2 版，<a href="https://www.jianshu.com/p/fad9e41c1a42" target="_blank" rel="noopener">简书-《Python数据分析》2nd</a>。<br>
 <img src="https://learning.oreilly.com/library/cover/9781098104023/1200w/" alt="Python for Data Analysis, 3rd Edition"></p>
 <p>我曾经实现过一个单机部署的 <a href="https://en.wikipedia.org/wiki/Extract,_transform,_load" target="_blank" rel="noopener">ETL (extract, transform, load)</a> 程序，三个步骤都基于 <kbd>pandas</kbd> 实现。不过这个程序最常用的功能，却仅仅是定时读取一批 <a href="https://en.wikipedia.org/wiki/SQL" target="_blank" rel="noopener">SQL</a>，然后写入 <a href="https://www.microsoft.com/en-us/microsoft-365/excel" target="_blank" rel="noopener">Excel</a>，最后把这些 Excel 文件作为邮件附件进行发送，真是杀鸡用牛刀😂。</p>
-<p>其实，我个人并不太喜欢使用 Excel 文件，先不论 Excel 那缓慢的打开速度，它的一个工作表最多也只能有 <strong>1048576</strong>（2^20） 行和 <strong>16384</strong>（2^14） 列，工作表名字最多 31 个字符。所以在我看来，<a href="https://en.wikipedia.org/wiki/Comma-separated_values" target="_blank" rel="noopener">CSV</a> 才是更好的选项。</p>
+<p>其实，我个人并不太喜欢使用 Excel 文件，先不论 Excel 那缓慢的打开速度，它的一个工作表最多也只能有 <strong>1048576</strong>（2^20） 行和 <strong>16384</strong>（2^14） 列，工作表名字最多 <strong>31</strong> 个字符。所以在我看来，<a href="https://en.wikipedia.org/wiki/Comma-separated_values" target="_blank" rel="noopener">CSV</a> 才是更好的选项。</p>
 <p>在那个 <code>ETL</code> 中，只允许从每个源读取一个 <kbd>pandas</kbd> 的 <code>DataFrame</code>，但在输出时，可以把多个 <code>DataFrame</code> 输出到一个目标里面。对于一种这类情况，即把多个 <code>DataFrame</code> 输出到同一个 <code>Excel</code> 工作簿，如果这个目标之后再作为一个源时，就不好处理了。如果这是最终的输出，而不是管道的一个中间环节，却是可以接受的。</p>
-<p><code>Excel</code> 最大的问题是工作表的规模有限，如果你的表格的规格超出 <strong>1048576</strong>×<strong>16384</strong>，也就是这个矩形不能把你数据表格完全盖住，你就得对 <code>DataFrame</code> 进行拆分。一般来说，我个人是不推荐做拆分的，我个人的建议是，一个工作簿，只开一个工作表，如果一个工作表存储不下，那就用 <code>CSV</code> 或者 <a href="https://en.wikipedia.org/wiki/Hierarchical_Data_Format" target="_blank" rel="noopener">hdf5</a> 格式。</p>
+<p><code>Excel</code> 最大的问题是工作表的规模有限，如果你的表格的规格超出 <strong>1048576</strong>×<strong>16384</strong>，也就是这个矩形不能把你数据表格完全盖住，你就得对 <code>DataFrame</code> 进行拆分。一般来说，我个人是不推荐做拆分的。我的建议是，一个工作簿，只开一个工作表，如果一个工作表存储不下，那就用 <code>CSV</code> 或者 <a href="https://en.wikipedia.org/wiki/Hierarchical_Data_Format" target="_blank" rel="noopener">hdf5</a> 格式。</p>
         </div>
         
         
