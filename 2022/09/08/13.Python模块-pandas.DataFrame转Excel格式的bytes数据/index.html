@@ -1,0 +1,1437 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head><meta name="generator" content="Hexo 3.8.0">
+    <meta charset="utf-8">
+<title>Python模块-pandas.DataFrame转Excel格式的bytes数据 - 思考者</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+
+
+    <meta name="description" content="背景  pandas is an open source, BSD-licensed library providing high-performance, easy-to-use data structures and data analysis tools for the Python programming language.  数据分析工具包 pandas，是利用 Python 进行数据">
+<meta name="keywords" content="Python,Module">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Python模块-pandas.DataFrame转Excel格式的bytes数据">
+<meta property="og:url" content="https://chenyanggao.github.io/2022/09/08/13.Python模块-pandas.DataFrame转Excel格式的bytes数据/index.html">
+<meta property="og:site_name" content="思考者">
+<meta property="og:description" content="背景  pandas is an open source, BSD-licensed library providing high-performance, easy-to-use data structures and data analysis tools for the Python programming language.  数据分析工具包 pandas，是利用 Python 进行数据">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://cdn.pixabay.com/photo/2013/12/10/18/22/green-tree-python-226553_1280.jpg">
+<meta property="og:updated_time" content="2022-09-08T11:19:42.234Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Python模块-pandas.DataFrame转Excel格式的bytes数据">
+<meta name="twitter:description" content="背景  pandas is an open source, BSD-licensed library providing high-performance, easy-to-use data structures and data analysis tools for the Python programming language.  数据分析工具包 pandas，是利用 Python 进行数据">
+<meta name="twitter:image" content="https://cdn.pixabay.com/photo/2013/12/10/18/22/green-tree-python-226553_1280.jpg">
+
+
+
+
+
+
+
+<link rel="icon" href="/images/favicon.svg">
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.7.2/css/bulma.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:400,600|Source+Code+Pro">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.12.0/styles/vs.css">
+
+
+    
+    
+    
+    <style>body>.footer,body>.navbar,body>.section{opacity:0}</style>
+    
+
+    
+    
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/css/lightgallery.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/css/justifiedGallery.min.css">
+    
+
+    
+    
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.css">
+
+
+    
+    
+    
+    
+
+<link rel="stylesheet" href="/css/back-to-top.css">
+
+
+    
+    
+
+    
+    
+    
+    
+
+    
+    
+<link rel="stylesheet" href="/css/progressbar.css">
+<script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+
+    
+    
+    
+
+    
+    
+    
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    
+
+    
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" integrity="sha384-yFRtMMDnQtDRO8rLpMIKrtPCD5jdktao2TV19YiZYWMDkUR5GQZR/NOVTdquEx1j" crossorigin="anonymous">
+
+<!-- The loading of KaTeX is deferred to speed up page rendering -->
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.js" integrity="sha384-9Nhn55MVVN0/4OFx7EE5kpFBPsEMZxKTCnA+4fqDmg12eCTqGi6+BB2LjY8brQxJ" crossorigin="anonymous"></script>
+
+<!-- To automatically render math in text elements, include the auto-render extension: -->
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/contrib/auto-render.min.js" integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI" crossorigin="anonymous" onload="renderMathInElement(document.body);"></script>
+
+    
+    
+<style>pre.mermaid {background-color:white;}</style>
+    
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+    
+<script>
+    if (window.mermaid) {
+        mermaid.initialize({"noteMargin":10}, "pre.mermaid");
+    }
+</script>
+
+    
+    
+    
+    
+<!-- require APlayer -->
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.css">
+<script src="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.js"></script>
+    
+<!-- require MetingJS -->
+
+<script src="https://cdn.jsdelivr.net/npm/meting/dist/Meting.min.js"></script>
+    
+<!-- main music player -->
+<meting-js server="netease" type="playlist" id="2818465505" order="random" autoplay="true" fixed="true"></meting-js>
+
+    
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+</head>
+<body class="is-3-column">
+    <nav class="navbar navbar-main">
+    <div class="container">
+        <div class="navbar-brand is-flex-center">
+            <a class="navbar-item navbar-logo" href="/">
+            
+                <img src="/images/logo.svg" alt="Python模块-pandas.DataFrame转Excel格式的bytes数据" height="28">
+            
+            </a>
+        </div>
+        <div class="navbar-menu">
+            
+            <div class="navbar-start">
+                
+                <a class="navbar-item" href="/">Home</a>
+                
+                <a class="navbar-item" href="/archives">Archives</a>
+                
+                <a class="navbar-item" href="/categories">Categories</a>
+                
+                <a class="navbar-item" href="/tags">Tags</a>
+                
+            </div>
+            
+            <div class="navbar-end">
+                
+                    
+                    
+                    <a class="navbar-item" target="_blank" title="Download on GitHub" href="https://github.com/ppoffice/hexo-theme-icarus">
+                        
+                        <i class="fab fa-github"></i>
+                        
+                    </a>
+                    
+                
+                
+                
+                <a class="navbar-item search" title="搜索" href="javascript:;">
+                    <i class="fas fa-search"></i>
+                </a>
+                
+            </div>
+        </div>
+    </div>
+</nav>
+    
+    <section class="section">
+        <div class="container">
+            <div class="columns">
+                <div class="column is-8-tablet is-8-desktop is-6-widescreen has-order-2 column-main"><div class="card">
+    
+    <div class="card-image">
+        <span class="image is-7by1">
+            <img class="thumbnail" src="https://cdn.pixabay.com/photo/2013/12/10/18/22/green-tree-python-226553_1280.jpg" alt="Python模块-pandas.DataFrame转Excel格式的bytes数据">
+        </span>
+    </div>
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey" datetime="2022-09-08T10:00:00.000Z">2022-09-08</time>
+                
+                <div class="level-item">
+                <a class="has-link-grey -link" href="/categories/通用模块/">通用模块</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    23 分钟 读完 (大约 3453 个字)
+                </span>
+                
+                
+                <span class="level-item has-text-grey" id="busuanzi_container_page_pv">
+                    <i class="far fa-eye"></i>
+                    <span id="busuanzi_value_page_pv">0</span>次访问
+                </span>
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+                Python模块-pandas.DataFrame转Excel格式的bytes数据
+            
+        </h1>
+        <div class="content">
+            <h2 id="背景"><a class="markdownIt-Anchor" href="#背景"></a> 背景</h2>
+<blockquote>
+<p><a href="https://pandas.pydata.org" target="_blank" rel="noopener">pandas</a> is an open source, <a href="https://en.wikipedia.org/wiki/BSD_licenses" target="_blank" rel="noopener">BSD-licensed</a> library providing high-performance, easy-to-use data structures and data analysis tools for the <a href="https://www.python.org/" target="_blank" rel="noopener">Python</a> programming language.</p>
+</blockquote>
+<p>数据分析工具包 <kbd>pandas</kbd>，是利用 <kbd>Python</kbd> 进行数据分析时，一个难以割舍的选项。它的文档 <a href="https://pandas.pydata.org/docs/" target="_blank" rel="noopener">pandas/docs</a> 示例非常丰富，而且它的作者 <a href="https://wesmckinney.com" target="_blank" rel="noopener">Wes McKinney</a> 另外还写了一本书 <a href="https://wesmckinney.com/book/" target="_blank" rel="noopener">Python for Data Analysis</a>，截至目前已经更新到第 3 版，<a href="https://salttiger.com/python-for-data-analysis-3rd-edition/" target="_blank" rel="noopener">👆点击下载</a>。<br>
+中国国内也有热心网友做了免费的翻译分享，这是第 2 版，<a href="https://www.jianshu.com/p/fad9e41c1a42" target="_blank" rel="noopener">简书-《Python数据分析》2nd</a>。<br>
+<img src="https://learning.oreilly.com/library/cover/9781098104023/1200w/" alt="Python for Data Analysis, 3rd Edition"></p>
+<p>我曾经实现过一个单机部署的 <a href="https://en.wikipedia.org/wiki/Extract,_transform,_load" target="_blank" rel="noopener">ETL (extract, transform, load)</a> 程序，三个步骤都基于 <kbd>pandas</kbd> 实现。不过这个程序最常用的功能，却仅仅是定时读取一批 <a href="https://en.wikipedia.org/wiki/SQL" target="_blank" rel="noopener">SQL</a>，然后写入 <a href="https://www.microsoft.com/en-us/microsoft-365/excel" target="_blank" rel="noopener">Excel</a>，最后把这些 Excel 文件作为邮件附件进行发送，真是杀鸡用牛刀😂。</p>
+<p>其实，我个人并不太喜欢使用 Excel 文件，先不论 Excel 那缓慢的打开速度，它的一个工作表最多也只能有 <strong>1048576</strong>（2^20） 行和 <strong>16384</strong>（2^14） 列，工作表名字最多 31 个字符。所以在我看来，<a href="https://en.wikipedia.org/wiki/Comma-separated_values" target="_blank" rel="noopener">CSV</a> 才是更好的选项。</p>
+<p>在那个 <code>ETL</code> 中，只允许从每个源读取一个 <kbd>pandas</kbd> 的 <code>DataFrame</code>，但在输出时，可以把多个 <code>DataFrame</code> 输出到一个目标里面。对于一种这类情况，即把多个 <code>DataFrame</code> 输出到同一个 <code>Excel</code> 工作簿，如果这个目标之后再作为一个源时，就不好处理了。如果这是最终的输出，而不是管道的一个中间环节，却是可以接受的。</p>
+<p><code>Excel</code> 最大的问题是工作表的规模有限，如果你的表格的规格超出 <strong>1048576</strong>×<strong>16384</strong>，也就是这个矩形不能把你数据表格完全盖住，你就得对 <code>DataFrame</code> 进行拆分。一般来说，我个人是不推荐做拆分的，我个人的建议是，一个工作簿，只开一个工作表，如果一个工作表存储不下，那就用 <code>CSV</code> 或者 <a href="https://en.wikipedia.org/wiki/Hierarchical_Data_Format" target="_blank" rel="noopener">hdf5</a> 格式。</p>
+<a id="more"></a>
+<h2 id="代码实现"><a class="markdownIt-Anchor" href="#代码实现"></a> 代码实现</h2>
+<blockquote>
+<p><strong>TIPS</strong> 代码的最新版本在 <a href="https://gist.github.com/ChenyangGao" target="_blank" rel="noopener">GitHub Gist</a> 中维护<br>
+<a href="https://gist.github.com/ChenyangGao/6a3f6177ce8da748413ce304156588f9" target="_blank" rel="noopener">https://gist.github.com/ChenyangGao/6a3f6177ce8da748413ce304156588f9</a></p>
+</blockquote>
+<p>文件名称是 <code>pandas_to_excel_bytes.py</code>，<kbd>Python</kbd> 实现代码如下：</p>
+<div class="highlight-wrap" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true" data-rel="PYTHON"><figure class="iseeu highlight /python hljs"><figcaption><span>pandas_to_excel_bytes.py</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br><span class="line">251</span><br><span class="line">252</span><br><span class="line">253</span><br><span class="line">254</span><br><span class="line">255</span><br><span class="line">256</span><br><span class="line">257</span><br><span class="line">258</span><br><span class="line">259</span><br><span class="line">260</span><br><span class="line">261</span><br><span class="line">262</span><br><span class="line">263</span><br><span class="line">264</span><br><span class="line">265</span><br><span class="line">266</span><br><span class="line">267</span><br><span class="line">268</span><br><span class="line">269</span><br><span class="line">270</span><br><span class="line">271</span><br><span class="line">272</span><br><span class="line">273</span><br><span class="line">274</span><br><span class="line">275</span><br><span class="line">276</span><br><span class="line">277</span><br><span class="line">278</span><br><span class="line">279</span><br><span class="line">280</span><br><span class="line">281</span><br><span class="line">282</span><br><span class="line">283</span><br><span class="line">284</span><br><span class="line">285</span><br><span class="line">286</span><br><span class="line">287</span><br><span class="line">288</span><br><span class="line">289</span><br><span class="line">290</span><br><span class="line">291</span><br><span class="line">292</span><br><span class="line">293</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">#!/usr/bin/env python3</span></span><br><span class="line"><span class="hljs-comment"># coding: utf-8</span></span><br><span class="line"></span><br><span class="line"><span class="hljs-string">"""这个模块提供了工具函数，可以把 `pandas` 的 `DataFrame` 转换成</span></span><br><span class="line"><span class="hljs-string">xlsx 格式的 Excel 文件的二进制数据</span></span><br><span class="line"><span class="hljs-string">"""</span></span><br><span class="line"></span><br><span class="line">__author__ = <span class="hljs-string">"ChenyangGao &lt;https://chenyanggao.github.io/&gt;"</span></span><br><span class="line">__version__ = (<span class="hljs-number">0</span>, <span class="hljs-number">1</span>)</span><br><span class="line">__all__ = [<span class="hljs-string">"df_to_excel_bytes"</span>, <span class="hljs-string">"sql_to_excel_bytes"</span>]</span><br><span class="line"></span><br><span class="line"><span class="hljs-keyword">from</span> concurrent.futures <span class="hljs-keyword">import</span> ThreadPoolExecutor</span><br><span class="line"><span class="hljs-keyword">from</span> contextlib <span class="hljs-keyword">import</span> contextmanager</span><br><span class="line"><span class="hljs-keyword">from</span> io <span class="hljs-keyword">import</span> BytesIO </span><br><span class="line"><span class="hljs-keyword">from</span> os <span class="hljs-keyword">import</span> PathLike</span><br><span class="line"><span class="hljs-keyword">from</span> typing <span class="hljs-keyword">import</span> cast, Final, Iterable, IO, TypeVar, Union</span><br><span class="line"><span class="hljs-keyword">from</span> types <span class="hljs-keyword">import</span> MappingProxyType, MethodType</span><br><span class="line"><span class="hljs-keyword">from</span> warnings <span class="hljs-keyword">import</span> warn</span><br><span class="line"></span><br><span class="line"><span class="hljs-comment"># 安装 [pandas-stubs](https://pypi.org/project/pandas-stubs/) 以静态检查</span></span><br><span class="line"><span class="hljs-keyword">from</span> pandas <span class="hljs-keyword">import</span> read_sql, DataFrame, ExcelWriter, RangeIndex</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">IO_T = TypeVar(<span class="hljs-string">"IO_T"</span>, bytes, str)</span><br><span class="line"></span><br><span class="line"><span class="hljs-comment"># Excel 的工作表名有一些非法字符 []:*?/\\，需要把出现的非法字符变成合法字符 _</span></span><br><span class="line">EXCEL_SHEETNAME_INVALID_CHARS_TRANSTABLE: Final[MappingProxyType] = \</span><br><span class="line">    MappingProxyType(dict.fromkeys(map(ord, <span class="hljs-string">"[]:*?/\\"</span>), <span class="hljs-string">"_"</span>))</span><br><span class="line"></span><br><span class="line"><span class="hljs-comment"># xlsx 格式的 Excel 文件，最大的行数</span></span><br><span class="line">SHEET_MAX_NROWS: Final[int] = <span class="hljs-number">2</span> ** <span class="hljs-number">20</span></span><br><span class="line"><span class="hljs-comment"># xlsx 格式的 Excel 文件，最大的列数</span></span><br><span class="line">SHEET_MAX_NCOLS: Final[int] = <span class="hljs-number">2</span> ** <span class="hljs-number">14</span></span><br><span class="line"><span class="hljs-comment"># xlsx 格式的 Excel 文件，工作表名最大的字符数</span></span><br><span class="line">SHEETNAME_MAX_LENGTH: Final[int] = <span class="hljs-number">31</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">read_io</span><span class="hljs-params">(fio: IO[IO_T], /)</span> -&gt; IO_T:</span></span><br><span class="line">    <span class="hljs-string">"从头读取一个 IO 对象的数据"</span></span><br><span class="line">    pos: int = fio.tell()</span><br><span class="line">    <span class="hljs-keyword">try</span>:</span><br><span class="line">        fio.seek(<span class="hljs-number">0</span>)</span><br><span class="line">        <span class="hljs-keyword">return</span> fio.read()</span><br><span class="line">    <span class="hljs-keyword">finally</span>:</span><br><span class="line">        fio.seek(pos)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="hljs-meta">@contextmanager</span></span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">ctx_df_to_excel_bytes</span><span class="hljs-params">(**kwargs)</span>:</span></span><br><span class="line">    <span class="hljs-string">"""上下文管理器。</span></span><br><span class="line"><span class="hljs-string">    把 `pandas` 的 `DataFrame` 对象转换成 xlsx 格式的 Excel 文件的字节数据</span></span><br><span class="line"><span class="hljs-string"></span></span><br><span class="line"><span class="hljs-string">    :param kwargs: 关键字参数传给 `pandas` 的 `ExcelWriter` 构造器</span></span><br><span class="line"><span class="hljs-string">        &gt; 请参考: pandas.io.Excel._base.ExcelWriter</span></span><br><span class="line"><span class="hljs-string">        &gt; https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.ExcelWriter.html</span></span><br><span class="line"><span class="hljs-string">    :return: 上下文管理器，返回一个 `pandas` 的 `ExcelWriter` 对象，</span></span><br><span class="line"><span class="hljs-string">        但是增加了 3 个属性：</span></span><br><span class="line"><span class="hljs-string">        - bio: Excel 数据将被写入这个 `io.Bytes` 对象</span></span><br><span class="line"><span class="hljs-string">        - read: 从 `bio` 中读取 Excel 数据</span></span><br><span class="line"><span class="hljs-string">        - write: 把 `bio` 中的 Excel 数据写入一个路径</span></span><br><span class="line"><span class="hljs-string"></span></span><br><span class="line"><span class="hljs-string">    Example::</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; import pandas as pd</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; df = pd.DataFrame([[1,2],[3,4]])</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; with ctx_df_to_excel_bytes() as writer:</span></span><br><span class="line"><span class="hljs-string">        ...     for i in range(10):</span></span><br><span class="line"><span class="hljs-string">        ...         df.to_excel(writer, sheet_name=str(i), index=False)</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; data = writer.read()</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; df2 = pd.read_excel(data, sheet_name="5")</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; (df == df2).all(None)</span></span><br><span class="line"><span class="hljs-string">        True</span></span><br><span class="line"><span class="hljs-string">    """</span></span><br><span class="line">    bio = kwargs[<span class="hljs-string">"path"</span>] = BytesIO()</span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">read</span><span class="hljs-params">(self)</span> -&gt; bytes:</span></span><br><span class="line">        <span class="hljs-keyword">return</span> read_io(self.bio)</span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">write</span><span class="hljs-params">(self, path: Union[bytes, int, PathLike])</span> -&gt; int:</span></span><br><span class="line">        <span class="hljs-keyword">return</span> open(path, <span class="hljs-string">"wb"</span>).write(read(self))</span><br><span class="line">    <span class="hljs-keyword">with</span> ExcelWriter(**kwargs) <span class="hljs-keyword">as</span> writer:</span><br><span class="line">        setattr(writer, <span class="hljs-string">"bio"</span>, bio)</span><br><span class="line">        setattr(writer, <span class="hljs-string">"read"</span>, MethodType(read, writer))</span><br><span class="line">        setattr(writer, <span class="hljs-string">"write"</span>, MethodType(write, writer))</span><br><span class="line">        <span class="hljs-keyword">yield</span> writer</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">df_to_excel_bytes</span><span class="hljs-params">(</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">    dfs: Union[DataFrame, dict[str, DataFrame], Iterable[DataFrame]]</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">)</span> -&gt; bytes:</span></span><br><span class="line">    <span class="hljs-string">"""把 `pandas` 的 `DataFrame` 对象转换成 xlsx 格式的 Excel 文件的字节数据</span></span><br><span class="line"><span class="hljs-string"></span></span><br><span class="line"><span class="hljs-string">    :param dfs: 一个或一批 `pandas` 的 `DataFrame` 对象</span></span><br><span class="line"><span class="hljs-string">    :return: Excel 文件的字节数据</span></span><br><span class="line"><span class="hljs-string"></span></span><br><span class="line"><span class="hljs-string">    Example::</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; import pandas as pd</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; df = pd.DataFrame([[1,2],[3,4]])</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; data = df_to_excel_bytes([df]*10)</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; df2 = pd.read_excel(data, sheet_name="5")</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; (df == df2).all(None)</span></span><br><span class="line"><span class="hljs-string">        True</span></span><br><span class="line"><span class="hljs-string">    """</span></span><br><span class="line">    dfd: dict[str, DataFrame]</span><br><span class="line">    <span class="hljs-keyword">if</span> isinstance(dfs, DataFrame):</span><br><span class="line">        dfd = &#123;<span class="hljs-string">"Sheet1"</span>: dfs&#125;</span><br><span class="line">    <span class="hljs-keyword">elif</span> isinstance(dfs, dict):</span><br><span class="line">        dfd = dfs</span><br><span class="line">    <span class="hljs-keyword">else</span>:</span><br><span class="line">        dfd = &#123;str(i): df <span class="hljs-keyword">for</span> i, df <span class="hljs-keyword">in</span> enumerate(dfs)&#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">with</span> ctx_df_to_excel_bytes() <span class="hljs-keyword">as</span> writer:</span><br><span class="line">        <span class="hljs-keyword">for</span> old_k, df <span class="hljs-keyword">in</span> dfd.items():</span><br><span class="line">            <span class="hljs-comment"># 把名称 old_k 中的所有非法字符各自转换成下划线 _</span></span><br><span class="line">            k = old_k.translate(EXCEL_SHEETNAME_INVALID_CHARS_TRANSTABLE)</span><br><span class="line">            <span class="hljs-keyword">if</span> old_k != k:</span><br><span class="line">                warn(<span class="hljs-string">f"Illegal characters found in sheetname, convert <span class="hljs-subst">&#123;old_k!r&#125;</span> to <span class="hljs-subst">&#123;k!r&#125;</span>"</span>)</span><br><span class="line"></span><br><span class="line">            index, columns = df.index, df.columns</span><br><span class="line">            nrows, ncols = len(index), len(columns)</span><br><span class="line">            index_nlevel, columns_nlevel = index.nlevels, columns.nlevels</span><br><span class="line">            <span class="hljs-comment"># whether_output_index 判别了是否要在 Excel 中输出 index</span></span><br><span class="line">            <span class="hljs-comment"># 只有当 index 和 columns 的 level 层数都是 1，并且 index 的开始值 start 为 0 且</span></span><br><span class="line">            <span class="hljs-comment"># 步进 step 的值是 1，才不需要输出索引。</span></span><br><span class="line">            <span class="hljs-comment"># TIPS: 如果 columns 的 level 层数大于 1，`pandas` 规定必须输出 index</span></span><br><span class="line">            whether_output_index = <span class="hljs-keyword">not</span> (</span><br><span class="line">                columns_nlevel == <span class="hljs-number">1</span> <span class="hljs-keyword">and</span></span><br><span class="line">                index_nlevel == <span class="hljs-number">1</span> <span class="hljs-keyword">and</span></span><br><span class="line">                isinstance(index, RangeIndex) <span class="hljs-keyword">and</span></span><br><span class="line">                index.start == <span class="hljs-number">0</span> <span class="hljs-keyword">and</span></span><br><span class="line">                index.step == <span class="hljs-number">1</span></span><br><span class="line">            )</span><br><span class="line"></span><br><span class="line">            <span class="hljs-comment"># rng_row_step: 除去 columns 的输出后，还剩多少行可供数据输出</span></span><br><span class="line">            rng_row_step: int</span><br><span class="line">            <span class="hljs-comment"># rng_col_step: 除去 index 的输出后（也可能不输出），还剩多少列可供数据输出</span></span><br><span class="line">            rng_col_step: int</span><br><span class="line">            <span class="hljs-keyword">if</span> whether_output_index:</span><br><span class="line">                <span class="hljs-comment"># 如果 columns 的 level 层数大于 1，则会多输出一空白行</span></span><br><span class="line">                <span class="hljs-keyword">if</span> columns_nlevel &gt; <span class="hljs-number">1</span>:</span><br><span class="line">                    rng_row_step = SHEET_MAX_NROWS - columns_nlevel - <span class="hljs-number">1</span></span><br><span class="line">                <span class="hljs-keyword">else</span>:</span><br><span class="line">                    rng_row_step = SHEET_MAX_NROWS - <span class="hljs-number">1</span></span><br><span class="line">                rng_col_step = SHEET_MAX_NCOLS - index_nlevel</span><br><span class="line">            <span class="hljs-keyword">else</span>:</span><br><span class="line">                rng_row_step = SHEET_MAX_NROWS - <span class="hljs-number">1</span></span><br><span class="line">                rng_col_step = SHEET_MAX_NCOLS</span><br><span class="line">            rng_row = range(<span class="hljs-number">0</span>, nrows, rng_row_step)</span><br><span class="line">            rng_col = range(<span class="hljs-number">0</span>, ncols, rng_col_step)</span><br><span class="line"></span><br><span class="line">            <span class="hljs-comment"># suffix_template： 如果的行或列过大，导致一张工作表不能输出，则要</span></span><br><span class="line">            <span class="hljs-comment">#     拆分成几张工作表，为此需要为同一个 DataFrame 输出的多个工作表</span></span><br><span class="line">            <span class="hljs-comment">#     添加后缀，最后的格式形如（&#123;name&#125;表示引用）</span></span><br><span class="line">            <span class="hljs-comment">#         &#123;表名&#125;^&#123;行切分序号&#125;_&#123;列切分序号&#125;</span></span><br><span class="line">            <span class="hljs-comment">#     假设某个 DataFrame 被切分成了</span></span><br><span class="line">            <span class="hljs-comment">#         sheet^0_0, sheet^0_1, sheet^1_0, sheet^1_0</span></span><br><span class="line">            <span class="hljs-comment">#     那么数据在原来的 DataFrame 中的分布则是</span></span><br><span class="line">            <span class="hljs-comment">#         |sheet^0_0 | sheet^0_1 |</span></span><br><span class="line">            <span class="hljs-comment">#         |——————————|———————————|</span></span><br><span class="line">            <span class="hljs-comment">#         |sheet^1_0 | sheet^1_0 |</span></span><br><span class="line">            suffix_template = <span class="hljs-string">""</span></span><br><span class="line">            <span class="hljs-comment"># TIPS: 工作表最多只能有 31 个字符，因此如果添加后缀后，导致和表名的组合多于 </span></span><br><span class="line">            <span class="hljs-comment">#     31 字符，那么就要从表名的尾部去掉一些字符</span></span><br><span class="line">            suffix_len = <span class="hljs-number">0</span></span><br><span class="line">            <span class="hljs-keyword">if</span> len(rng_row) &gt; <span class="hljs-number">1</span>:</span><br><span class="line">                q, r = divmod(len(rng_row), <span class="hljs-number">16</span>)</span><br><span class="line">                l = q + (r &gt; <span class="hljs-number">0</span>)</span><br><span class="line">                suffix_template += <span class="hljs-string">"^&#123;0:0%dx&#125;"</span> % l</span><br><span class="line">                suffix_len += l + <span class="hljs-number">1</span></span><br><span class="line">            <span class="hljs-keyword">if</span> len(rng_col) &gt; <span class="hljs-number">1</span>:</span><br><span class="line">                q, r = divmod(len(rng_col), <span class="hljs-number">16</span>)</span><br><span class="line">                l = q + (r &gt; <span class="hljs-number">0</span>)</span><br><span class="line">                suffix_template += <span class="hljs-string">"_&#123;1:0%dx&#125;"</span> % l</span><br><span class="line">                suffix_len += l + <span class="hljs-number">1</span></span><br><span class="line">            <span class="hljs-keyword">if</span> suffix_len &gt; <span class="hljs-number">31</span>:</span><br><span class="line">                <span class="hljs-keyword">raise</span> RuntimeError(<span class="hljs-string">f"DataFrame is too large: <span class="hljs-subst">&#123;old_k!r&#125;</span>"</span>)</span><br><span class="line"></span><br><span class="line">            <span class="hljs-keyword">if</span> suffix_len:</span><br><span class="line">                <span class="hljs-keyword">for</span> i, row0 <span class="hljs-keyword">in</span> enumerate(rng_row):</span><br><span class="line">                    <span class="hljs-keyword">for</span> j, col0 <span class="hljs-keyword">in</span> enumerate(rng_col):</span><br><span class="line">                        suffix = suffix_template.format(i, j)</span><br><span class="line">                        key = k[:<span class="hljs-number">31</span>-suffix_len] + suffix</span><br><span class="line">                        warn(<span class="hljs-string">f"DataFrame is too large, generate sub-sheet: <span class="hljs-subst">&#123;key!r&#125;</span> (of <span class="hljs-subst">&#123;old_k!r&#125;</span>)"</span>)</span><br><span class="line">                        df.iloc[row0:row0+rng_row_step, col0:col0+rng_col_step].to_excel(</span><br><span class="line">                            writer, index=whether_output_index, sheet_name=key)</span><br><span class="line">            <span class="hljs-keyword">else</span>:</span><br><span class="line">                key = k[:<span class="hljs-number">31</span>]</span><br><span class="line">                <span class="hljs-keyword">if</span> key != k:</span><br><span class="line">                    warn(<span class="hljs-string">f"Sheetname is too long, convert <span class="hljs-subst">&#123;old_k!r&#125;</span> to <span class="hljs-subst">&#123;key!r&#125;</span>"</span>)</span><br><span class="line">                <span class="hljs-keyword">if</span> key == <span class="hljs-string">""</span>:</span><br><span class="line">                    key = <span class="hljs-string">"Sheet1"</span></span><br><span class="line">                df.to_excel(writer, index=whether_output_index, sheet_name=key)</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">return</span> writer.read()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">pandas_read_sqls</span><span class="hljs-params">(</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">    sqls: Union[str, dict[str, str], Iterable[str]],</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">    con,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">    read_workers: int = <span class="hljs-number">-1</span>,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">)</span> -&gt; dict[str, DataFrame]:</span></span><br><span class="line">    <span class="hljs-string">"""读取一批 SQL 查询语句，每个 SQL 的查询结果都是一个 `pandas` 的 `DataFrame` 对象。</span></span><br><span class="line"><span class="hljs-string"></span></span><br><span class="line"><span class="hljs-string">    :param sqls: 一个或一批 SQL 查询语句</span></span><br><span class="line"><span class="hljs-string">    :param con: SQL 查询的服务器连接</span></span><br><span class="line"><span class="hljs-string">        SQLAlchemy connectable, str, or sqlite3 connection</span></span><br><span class="line"><span class="hljs-string">        Using SQLAlchemy makes it possible to use any DB supported by that</span></span><br><span class="line"><span class="hljs-string">        library. If a DBAPI2 object, only sqlite3 is supported. The user is responsible</span></span><br><span class="line"><span class="hljs-string">        for engine disposal and connection closure for the SQLAlchemy connectable; str</span></span><br><span class="line"><span class="hljs-string">        connections are closed automatically. See</span></span><br><span class="line"><span class="hljs-string">        `here &lt;https://docs.sqlalchemy.org/en/13/core/connections.html&gt;`_.</span></span><br><span class="line"><span class="hljs-string">    :param read_workers: 并发的查询数</span></span><br><span class="line"><span class="hljs-string">        - 如果小于 0 或等于 1，则并发数为 1，即不并发</span></span><br><span class="line"><span class="hljs-string">        - 如果等于 0，则用 ThreadPoolExecutor 默认的并发数</span></span><br><span class="line"><span class="hljs-string">        - 如果大于 0，则数值就是并发数</span></span><br><span class="line"><span class="hljs-string"></span></span><br><span class="line"><span class="hljs-string">    :return: 返回值的内容取决于参数 `sqls`，具体为</span></span><br><span class="line"><span class="hljs-string">        if isinstance(sqls, str):</span></span><br><span class="line"><span class="hljs-string">            return &#123;"": pandas.read_sql(sqls, con)&#125;</span></span><br><span class="line"><span class="hljs-string">        elif isinstance(sqls, dict):</span></span><br><span class="line"><span class="hljs-string">            return &#123;k: pandas.read_sql(sql, con) for k, sql in sqls.items()&#125;</span></span><br><span class="line"><span class="hljs-string">        else:</span></span><br><span class="line"><span class="hljs-string">            return &#123;str(i): pandas.read_sql(sql, con) for i, sql in enumerate(sqls)&#125;</span></span><br><span class="line"><span class="hljs-string">    """</span></span><br><span class="line">    <span class="hljs-keyword">if</span> isinstance(sqls, str):</span><br><span class="line">        <span class="hljs-keyword">return</span> &#123;<span class="hljs-string">""</span>: read_sql(sqls, con)&#125;</span><br><span class="line">    <span class="hljs-keyword">else</span>:</span><br><span class="line">        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> isinstance(sqls, dict):</span><br><span class="line">            sqls = dict((str(i), sql) <span class="hljs-keyword">for</span> i, sql <span class="hljs-keyword">in</span> enumerate(sqls))</span><br><span class="line">        sqls = cast(dict[str, str], sqls)</span><br><span class="line">        <span class="hljs-keyword">if</span> read_workers &lt; <span class="hljs-number">0</span> <span class="hljs-keyword">or</span> read_workers == <span class="hljs-number">1</span>:</span><br><span class="line">            <span class="hljs-keyword">return</span> &#123;k: read_sql(sql, con) <span class="hljs-keyword">for</span> k, sql <span class="hljs-keyword">in</span> sqls.items()&#125;</span><br><span class="line">        <span class="hljs-keyword">else</span>:</span><br><span class="line">            <span class="hljs-keyword">with</span> ThreadPoolExecutor(</span><br><span class="line">                <span class="hljs-literal">None</span> <span class="hljs-keyword">if</span> read_workers == <span class="hljs-number">0</span> <span class="hljs-keyword">else</span> min(read_workers, len(sqls))</span><br><span class="line">            ) <span class="hljs-keyword">as</span> worker:</span><br><span class="line">                df_iter = worker.map(<span class="hljs-keyword">lambda</span> sql: read_sql(sql, con), sqls)</span><br><span class="line">            <span class="hljs-keyword">return</span> &#123;k: df <span class="hljs-keyword">for</span> k, df <span class="hljs-keyword">in</span> zip(sqls, df_iter)&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">sql_to_excel_bytes</span><span class="hljs-params">(</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">    sqls: Union[str, dict[str, str], Iterable[str]],</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">    con,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">    read_workers: int = <span class="hljs-number">-1</span>,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">)</span> -&gt; bytes:</span></span><br><span class="line">    <span class="hljs-string">"""执行一些 SQL 查询语句，并把查询结果保存到同一个 xlsx 格式的 Excel 文件中，</span></span><br><span class="line"><span class="hljs-string">    然后读取这个 Excel 文件并返回字节数据。</span></span><br><span class="line"><span class="hljs-string"></span></span><br><span class="line"><span class="hljs-string">    :param sqls: 一个或一批 SQL 查询语句，工作表名的确定方式如下：</span></span><br><span class="line"><span class="hljs-string">        - 如果 `sql` 是 str，则工作表名为 "Sheet1"，`sqls`是相应的 SQL</span></span><br><span class="line"><span class="hljs-string">        - 如果 `sql` 是 dict， 则字典的键是工作表名，值是相应的 SQL</span></span><br><span class="line"><span class="hljs-string">            &gt; 注意：每个工作表的名字，不允许包含这些字符之一 []:*?/\\ ，</span></span><br><span class="line"><span class="hljs-string">                如果包含，则会被自动替换成 _</span></span><br><span class="line"><span class="hljs-string">        - 否则 `sql` 就是可迭代对象， 则值是 SQL，序号（从0开始递增）是相应的工作表名</span></span><br><span class="line"><span class="hljs-string">        &gt; 注意：每个 SQL 查询返回的数据量，行数尽量 &lt;= 1048575(==2**20-1，第 1 行是表头)，</span></span><br><span class="line"><span class="hljs-string">            列数最好 &lt;= 16384 (==2**14)，否则会被自动拆分</span></span><br><span class="line"><span class="hljs-string">    :param con: SQL 查询的服务器连接</span></span><br><span class="line"><span class="hljs-string">        SQLAlchemy connectable, str, or sqlite3 connection</span></span><br><span class="line"><span class="hljs-string">        Using SQLAlchemy makes it possible to use any DB supported by that</span></span><br><span class="line"><span class="hljs-string">        library. If a DBAPI2 object, only sqlite3 is supported. The user is responsible</span></span><br><span class="line"><span class="hljs-string">        for engine disposal and connection closure for the SQLAlchemy connectable; str</span></span><br><span class="line"><span class="hljs-string">        connections are closed automatically. See</span></span><br><span class="line"><span class="hljs-string">        `here &lt;https://docs.sqlalchemy.org/en/13/core/connections.html&gt;`_.</span></span><br><span class="line"><span class="hljs-string">    :param read_workers: 并发的查询数</span></span><br><span class="line"><span class="hljs-string">        - 如果小于 0 或等于 1，则并发数为 1，即不并发</span></span><br><span class="line"><span class="hljs-string">        - 如果等于 0，则用 ThreadPoolExecutor 默认的并发数</span></span><br><span class="line"><span class="hljs-string">        - 如果大于 0，则数值就是并发数</span></span><br><span class="line"><span class="hljs-string"></span></span><br><span class="line"><span class="hljs-string">    :return: Excel 文件数据，bytes 形式</span></span><br><span class="line"><span class="hljs-string"></span></span><br><span class="line"><span class="hljs-string">    Example::</span></span><br><span class="line"><span class="hljs-string">        可以用 sqllite3 进行测试</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; sql = '''\\</span></span><br><span class="line"><span class="hljs-string">        ... with recursive range(x) as (</span></span><br><span class="line"><span class="hljs-string">        ...     values(0)</span></span><br><span class="line"><span class="hljs-string">        ...     union all</span></span><br><span class="line"><span class="hljs-string">        ...     select x + 1 from range where x &lt; POW(2, 21)</span></span><br><span class="line"><span class="hljs-string">        ... )</span></span><br><span class="line"><span class="hljs-string">        ... select * from range;'''</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; data = sql_to_excel_bytes([sql]*2, "sqlite:///:memory:")</span></span><br><span class="line"><span class="hljs-string">        ...</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; import pandas as pd</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; df0 = pd.read_excel(data, sheet_name="0^0")</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; df1 = pd.read_excel(data, sheet_name="0^1")</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; df2 = pd.read_excel(data, sheet_name="0^2")</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; df = pd.concat([df0, df1, df2], ignore_index=True)</span></span><br><span class="line"><span class="hljs-string">        &gt;&gt;&gt; (df.x == range(2 ** 21 + 1)).all()</span></span><br><span class="line"><span class="hljs-string">        True</span></span><br><span class="line"><span class="hljs-string">    """</span></span><br><span class="line">    dfs = pandas_read_sqls(sqls, con, read_workers)</span><br><span class="line">    <span class="hljs-keyword">return</span> df_to_excel_bytes(dfs)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">"__main__"</span>:</span><br><span class="line">    <span class="hljs-keyword">import</span> doctest</span><br><span class="line">    doctest.testmod()</span><br></pre></td></tr></table></figure></div>
+<h2 id="扩展阅读"><a class="markdownIt-Anchor" href="#扩展阅读"></a> 扩展阅读</h2>
+<p>我之前做 <code>ETL</code> 的 <code>extract</code> 这一步，封装了所有 <code>pandas.read_*</code> 方法，罗列如下</p>
+<div class="highlight-wrap" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true" data-rel="PYTHON"><figure class="iseeu highlight /python hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">import</span> pandas <span class="hljs-keyword">as</span> pd</span><br><span class="line"></span><br><span class="line">df = pd.DataFrame(</span><br><span class="line">    [(</span><br><span class="line">        <span class="hljs-string">"pandas."</span> + f, </span><br><span class="line">        pd.__dict__[f].__doc__.split(<span class="hljs-string">"\n"</span>, <span class="hljs-number">2</span>)[<span class="hljs-number">1</span>].strip()</span><br><span class="line">    ) <span class="hljs-keyword">for</span> f <span class="hljs-keyword">in</span> dir(pd) <span class="hljs-keyword">if</span> f.startswith(<span class="hljs-string">"read_"</span>)], </span><br><span class="line">    columns=[<span class="hljs-string">"读入方法"</span>, <span class="hljs-string">"说明"</span>], </span><br><span class="line">)</span><br><span class="line">print(df.to_markdown())</span><br></pre></td></tr></table></figure></div>
+<table>
+<thead>
+<tr>
+<th style="text-align:right"></th>
+<th style="text-align:left">读入方法</th>
+<th style="text-align:left">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right">0</td>
+<td style="text-align:left">pandas.read_clipboard</td>
+<td style="text-align:left">Read text from clipboard and pass to read_csv.</td>
+</tr>
+<tr>
+<td style="text-align:right">1</td>
+<td style="text-align:left">pandas.read_csv</td>
+<td style="text-align:left">Read a comma-separated values (csv) file into DataFrame.</td>
+</tr>
+<tr>
+<td style="text-align:right">2</td>
+<td style="text-align:left">pandas.read_excel</td>
+<td style="text-align:left">Read an Excel file into a pandas DataFrame.</td>
+</tr>
+<tr>
+<td style="text-align:right">3</td>
+<td style="text-align:left">pandas.read_feather</td>
+<td style="text-align:left">Load a feather-format object from the file path.</td>
+</tr>
+<tr>
+<td style="text-align:right">4</td>
+<td style="text-align:left">pandas.read_fwf</td>
+<td style="text-align:left">Read a table of fixed-width formatted lines into DataFrame.</td>
+</tr>
+<tr>
+<td style="text-align:right">5</td>
+<td style="text-align:left">pandas.read_gbq</td>
+<td style="text-align:left">Load data from Google BigQuery.</td>
+</tr>
+<tr>
+<td style="text-align:right">6</td>
+<td style="text-align:left">pandas.read_hdf</td>
+<td style="text-align:left">Read from the store, close it if we opened it.</td>
+</tr>
+<tr>
+<td style="text-align:right">7</td>
+<td style="text-align:left">pandas.read_html</td>
+<td style="text-align:left">Read HTML tables into a <code>list</code> of <code>DataFrame</code> objects.</td>
+</tr>
+<tr>
+<td style="text-align:right">8</td>
+<td style="text-align:left">pandas.read_json</td>
+<td style="text-align:left">Convert a JSON string to pandas object.</td>
+</tr>
+<tr>
+<td style="text-align:right">9</td>
+<td style="text-align:left">pandas.read_orc</td>
+<td style="text-align:left">Load an ORC object from the file path, returning a DataFrame.</td>
+</tr>
+<tr>
+<td style="text-align:right">10</td>
+<td style="text-align:left">pandas.read_parquet</td>
+<td style="text-align:left">Load a parquet object from the file path, returning a DataFrame.</td>
+</tr>
+<tr>
+<td style="text-align:right">11</td>
+<td style="text-align:left">pandas.read_pickle</td>
+<td style="text-align:left">Load pickled pandas object (or any object) from file.</td>
+</tr>
+<tr>
+<td style="text-align:right">12</td>
+<td style="text-align:left">pandas.read_sas</td>
+<td style="text-align:left">Read SAS files stored as either XPORT or SAS7BDAT format files.</td>
+</tr>
+<tr>
+<td style="text-align:right">13</td>
+<td style="text-align:left">pandas.read_spss</td>
+<td style="text-align:left">Load an SPSS file from the file path, returning a DataFrame.</td>
+</tr>
+<tr>
+<td style="text-align:right">14</td>
+<td style="text-align:left">pandas.read_sql</td>
+<td style="text-align:left">Read SQL query or database table into a DataFrame.</td>
+</tr>
+<tr>
+<td style="text-align:right">15</td>
+<td style="text-align:left">pandas.read_sql_query</td>
+<td style="text-align:left">Read SQL query into a DataFrame.</td>
+</tr>
+<tr>
+<td style="text-align:right">16</td>
+<td style="text-align:left">pandas.read_sql_table</td>
+<td style="text-align:left">Read SQL database table into a DataFrame.</td>
+</tr>
+<tr>
+<td style="text-align:right">17</td>
+<td style="text-align:left">pandas.read_stata</td>
+<td style="text-align:left">Read Stata file into DataFrame.</td>
+</tr>
+<tr>
+<td style="text-align:right">18</td>
+<td style="text-align:left">pandas.read_table</td>
+<td style="text-align:left">Read general delimited file into DataFrame.</td>
+</tr>
+<tr>
+<td style="text-align:right">19</td>
+<td style="text-align:left">pandas.read_xml</td>
+<td style="text-align:left">Read XML document into a <code>DataFrame</code> object.</td>
+</tr>
+</tbody>
+</table>
+<p>而做 <code>ETL</code> 的 <code>load</code> 这一步，封装了所有 <code>pandas.DataFrame.to_*</code> 方法，罗列如下</p>
+<div class="highlight-wrap" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true" data-rel="PYTHON"><figure class="iseeu highlight /python hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">import</span> pandas <span class="hljs-keyword">as</span> pd</span><br><span class="line"></span><br><span class="line">df = pd.DataFrame(</span><br><span class="line">    [(</span><br><span class="line">        <span class="hljs-string">"pandas.DataFrame."</span> + f, </span><br><span class="line">        getattr(pd.DataFrame, f).__doc__.split(<span class="hljs-string">"\n"</span>, <span class="hljs-number">2</span>)[<span class="hljs-number">1</span>].strip()</span><br><span class="line">    ) <span class="hljs-keyword">for</span> f <span class="hljs-keyword">in</span> dir(pd.DataFrame) <span class="hljs-keyword">if</span> f.startswith(<span class="hljs-string">"to_"</span>)], </span><br><span class="line">    columns=[<span class="hljs-string">"写出方法"</span>, <span class="hljs-string">"说明"</span>], </span><br><span class="line">)</span><br><span class="line">print(df.to_markdown())</span><br></pre></td></tr></table></figure></div>
+<table>
+<thead>
+<tr>
+<th style="text-align:right"></th>
+<th style="text-align:left">写出方法</th>
+<th style="text-align:left">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right">0</td>
+<td style="text-align:left">pandas.DataFrame.to_clipboard</td>
+<td style="text-align:left">Copy object to the system clipboard.</td>
+</tr>
+<tr>
+<td style="text-align:right">1</td>
+<td style="text-align:left">pandas.DataFrame.to_csv</td>
+<td style="text-align:left">Write object to a comma-separated values (csv) file.</td>
+</tr>
+<tr>
+<td style="text-align:right">2</td>
+<td style="text-align:left">pandas.DataFrame.to_dict</td>
+<td style="text-align:left">Convert the DataFrame to a dictionary.</td>
+</tr>
+<tr>
+<td style="text-align:right">3</td>
+<td style="text-align:left">pandas.DataFrame.to_excel</td>
+<td style="text-align:left">Write object to an Excel sheet.</td>
+</tr>
+<tr>
+<td style="text-align:right">4</td>
+<td style="text-align:left">pandas.DataFrame.to_feather</td>
+<td style="text-align:left">Write a DataFrame to the binary Feather format.</td>
+</tr>
+<tr>
+<td style="text-align:right">5</td>
+<td style="text-align:left">pandas.DataFrame.to_gbq</td>
+<td style="text-align:left">Write a DataFrame to a Google BigQuery table.</td>
+</tr>
+<tr>
+<td style="text-align:right">6</td>
+<td style="text-align:left">pandas.DataFrame.to_hdf</td>
+<td style="text-align:left">Write the contained data to an HDF5 file using HDFStore.</td>
+</tr>
+<tr>
+<td style="text-align:right">7</td>
+<td style="text-align:left">pandas.DataFrame.to_html</td>
+<td style="text-align:left">Render a DataFrame as an HTML table.</td>
+</tr>
+<tr>
+<td style="text-align:right">8</td>
+<td style="text-align:left">pandas.DataFrame.to_json</td>
+<td style="text-align:left">Convert the object to a JSON string.</td>
+</tr>
+<tr>
+<td style="text-align:right">9</td>
+<td style="text-align:left">pandas.DataFrame.to_latex</td>
+<td style="text-align:left">Render object to a LaTeX tabular, longtable, or nested table/tabular.</td>
+</tr>
+<tr>
+<td style="text-align:right">10</td>
+<td style="text-align:left">pandas.DataFrame.to_markdown</td>
+<td style="text-align:left">Print DataFrame in Markdown-friendly format.</td>
+</tr>
+<tr>
+<td style="text-align:right">11</td>
+<td style="text-align:left">pandas.DataFrame.to_numpy</td>
+<td style="text-align:left">Convert the DataFrame to a NumPy array.</td>
+</tr>
+<tr>
+<td style="text-align:right">12</td>
+<td style="text-align:left">pandas.DataFrame.to_parquet</td>
+<td style="text-align:left">Write a DataFrame to the binary parquet format.</td>
+</tr>
+<tr>
+<td style="text-align:right">13</td>
+<td style="text-align:left">pandas.DataFrame.to_period</td>
+<td style="text-align:left">Convert DataFrame from DatetimeIndex to PeriodIndex.</td>
+</tr>
+<tr>
+<td style="text-align:right">14</td>
+<td style="text-align:left">pandas.DataFrame.to_pickle</td>
+<td style="text-align:left">Pickle (serialize) object to file.</td>
+</tr>
+<tr>
+<td style="text-align:right">15</td>
+<td style="text-align:left">pandas.DataFrame.to_records</td>
+<td style="text-align:left">Convert DataFrame to a NumPy record array.</td>
+</tr>
+<tr>
+<td style="text-align:right">16</td>
+<td style="text-align:left">pandas.DataFrame.to_sql</td>
+<td style="text-align:left">Write records stored in a DataFrame to a SQL database.</td>
+</tr>
+<tr>
+<td style="text-align:right">17</td>
+<td style="text-align:left">pandas.DataFrame.to_stata</td>
+<td style="text-align:left">Export DataFrame object to Stata dta format.</td>
+</tr>
+<tr>
+<td style="text-align:right">18</td>
+<td style="text-align:left">pandas.DataFrame.to_string</td>
+<td style="text-align:left">Render a DataFrame to a console-friendly tabular output.</td>
+</tr>
+<tr>
+<td style="text-align:right">19</td>
+<td style="text-align:left">pandas.DataFrame.to_timestamp</td>
+<td style="text-align:left">Cast to DatetimeIndex of timestamps, at <em>beginning</em> of period.</td>
+</tr>
+<tr>
+<td style="text-align:right">20</td>
+<td style="text-align:left">pandas.DataFrame.to_xarray</td>
+<td style="text-align:left">Return an xarray object from the pandas object.</td>
+</tr>
+<tr>
+<td style="text-align:right">21</td>
+<td style="text-align:left">pandas.DataFrame.to_xml</td>
+<td style="text-align:left">Render a DataFrame to an XML document.</td>
+</tr>
+</tbody>
+</table>
+<p>做 <code>ETL</code> 的 <code>transform</code> 这一步，则专门开发了一个 <a href="https://en.wikipedia.org/wiki/Domain-specific_language" target="_blank" rel="noopener">DSL(Domain-specific language)</a>，会把一种相对简单的语言翻译成 <kbd>Python</kbd> 和 <kbd>pandas</kbd> 操作。等下次分享如何<strong>开发脚本语言</strong>时，我再展开这个例子。</p>
+<hr>
+<p>未完待续</p>
+
+        </div>
+        
+        <div class="level is-size-7 is-uppercase">
+            <div class="level-start">
+                <div class="level-item">
+                    <span class="is-size-6 has-text-grey has-mr-7">#</span>
+                    <a class="has-link-grey -link" href="/tags/Module/">Module</a>, <a class="has-link-grey -link" href="/tags/Python/">Python</a>
+                </div>
+            </div>
+        </div>
+        
+        
+        
+    </div>
+</div>
+
+
+
+
+
+<div class="card card-transparent">
+    <div class="level post-navigation is-flex-wrap is-mobile">
+        
+        
+        <div class="level-end">
+            <a class="level level-item has-link-grey  article-nav-next" href="/2022/09/01/12.Python模块-打包多个参数于一体/">
+                <span class="level-item">Python模块-打包多个参数于一体</span>
+                <i class="level-item fas fa-chevron-right"></i>
+            </a>
+        </div>
+        
+    </div>
+</div>
+
+
+
+    
+        
+<div class="card">
+    <div class="card-content">
+        <h3 class="title is-5 has-text-weight-normal">评论</h3>
+        
+<div id="comment-container"></div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1.4.1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1.4.1/dist/gitalk.min.js"></script>
+<script>
+    var gitalk = new Gitalk({
+        clientID: '0c4d63f8312662c8e0ef',
+        clientSecret: '02c284fe7dccd50cc1e02ed5431bf86d351fe255',
+        id: '681c62f587dcf4ffaa13ac13a65ec17d',
+        repo: 'ChenyangGao.github.io',
+        owner: 'ChenyangGao',
+        admin: ["ChenyangGao"]
+    })
+    gitalk.render('comment-container')
+</script>
+
+    </div>
+</div>
+        
+    
+        
+<div class="card">
+    <div class="card-content">
+        <h3 class="title is-5 has-text-weight-normal">评论</h3>
+        
+<script>
+    var disqus_config = function () {
+        this.page.url = 'https://chenyanggao.github.io/2022/09/08/13.Python模块-pandas.DataFrame转Excel格式的bytes数据/';
+        this.page.identifier = '2022/09/08/13.Python模块-pandas.DataFrame转Excel格式的bytes数据/';
+    };
+    (function() {
+        var d = document, s = d.createElement('script');  
+        s.src = '//' + 'chenyanggao-blog' + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+
+<div id="disqus_thread">
+    
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+    </div>
+</div>
+        
+    
+</div>
+                
+
+
+
+
+<div class="column is-4-tablet is-4-desktop is-3-widescreen  has-order-1 column-left ">
+    
+        
+<div class="card widget">
+    <div class="card-content">
+        <nav class="level">
+            <div class="level-item has-text-centered">
+                <div>
+                    
+                        <img class="image is-128x128 has-mb-6" src="https://octodex.github.com/images/hula_loop_octodex03.gif" alt="ChenyangGao">
+                    
+                    
+                    <p class="is-size-4 is-block">
+                        ChenyangGao
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-block">
+                        数据分析师
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-flex is-flex-center has-text-grey">
+                        <i class="fas fa-map-marker-alt has-mr-7"></i>
+                        <span>China</span>
+                    </p>
+                    
+                </div>
+            </div>
+        </nav>
+        <nav class="level is-mobile">
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        文章
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        13
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        分类
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        5
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        标签
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        5
+                    </p>
+                </div>
+            </div>
+        </nav>
+        <div class="level">
+            <a class="level-item button is-link is-rounded" href="https://github.com/ChenyangGao" target="_blank">
+                关注我</a>
+        </div>
+        
+        
+        <div class="level is-mobile">
+            
+            <a class="level-item button is-white is-marginless" target="_blank" title="Github" href="https://github.com/ChenyangGao">
+                
+                <i class="fab fa-github"></i>
+                
+            </a>
+            
+            <a class="level-item button is-white is-marginless" target="_blank" title="Facebook" href="https://facebook.com">
+                
+                <i class="fab fa-facebook"></i>
+                
+            </a>
+            
+            <a class="level-item button is-white is-marginless" target="_blank" title="Twitter" href="https://twitter.com">
+                
+                <i class="fab fa-twitter"></i>
+                
+            </a>
+            
+            <a class="level-item button is-white is-marginless" target="_blank" title="Dribbble" href="https://dribbble.com">
+                
+                <i class="fab fa-dribbble"></i>
+                
+            </a>
+            
+            <a class="level-item button is-white is-marginless" target="_blank" title="RSS" href="/">
+                
+                <i class="fas fa-rss"></i>
+                
+            </a>
+            
+        </div>
+        
+    </div>
+</div>
+    
+        
+
+<div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+        <h3 class="menu-label">
+            链接
+        </h3>
+        <ul class="menu-list">
+        
+            <li>
+                <a class="level is-mobile" href="https://hexo.io" target="_blank">
+                    <span class="level-left">
+                        <span class="level-item">Hexo</span>
+                    </span>
+                    <span class="level-right">
+                        <span class="level-item tag">hexo.io</span>
+                    </span>
+                </a>
+            </li>
+        
+            <li>
+                <a class="level is-mobile" href="https://github.com/ppoffice" target="_blank">
+                    <span class="level-left">
+                        <span class="level-item">PPOffice</span>
+                    </span>
+                    <span class="level-right">
+                        <span class="level-item tag">github.com</span>
+                    </span>
+                </a>
+            </li>
+        
+            <li>
+                <a class="level is-mobile" href="https://community.motifsing.com" target="_blank">
+                    <span class="level-left">
+                        <span class="level-item">资源分享</span>
+                    </span>
+                    <span class="level-right">
+                        <span class="level-item tag">community.motifsing.com</span>
+                    </span>
+                </a>
+            </li>
+        
+        </ul>
+        </div>
+    </div>
+</div>
+
+
+    
+        
+<div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                分类
+            </h3>
+            <ul class="menu-list">
+            <li>
+        <a class="level is-marginless" href="/categories/数学/">
+            <span class="level-start">
+                <span class="level-item">数学</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">1</span>
+            </span>
+        </a><ul><li>
+        <a class="level is-marginless" href="/categories/数学/经济学/">
+            <span class="level-start">
+                <span class="level-item">经济学</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">1</span>
+            </span>
+        </a></li></ul></li><li>
+        <a class="level is-marginless" href="/categories/编程思想/">
+            <span class="level-start">
+                <span class="level-item">编程思想</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">4</span>
+            </span>
+        </a></li><li>
+        <a class="level is-marginless" href="/categories/脚本工具/">
+            <span class="level-start">
+                <span class="level-item">脚本工具</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">6</span>
+            </span>
+        </a></li><li>
+        <a class="level is-marginless" href="/categories/通用模块/">
+            <span class="level-start">
+                <span class="level-item">通用模块</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">2</span>
+            </span>
+        </a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+    
+        
+<div class="card widget">
+    <div class="card-content">
+        <h3 class="menu-label">
+            标签云
+        </h3>
+        <a href="/tags/Module/" style="font-size: 13.33px;">Module</a> <a href="/tags/Python/" style="font-size: 20px;">Python</a> <a href="/tags/Script/" style="font-size: 16.67px;">Script</a> <a href="/tags/Shell/" style="font-size: 10px;">Shell</a> <a href="/tags/博弈论/" style="font-size: 10px;">博弈论</a>
+    </div>
+</div>
+
+    
+    
+        <div class="column-right-shadow is-hidden-widescreen ">
+        
+            
+        
+            
+<div class="card widget">
+    <div class="card-content">
+        <h3 class="menu-label">
+            最新文章
+        </h3>
+        
+        <article class="media">
+            
+            <a href="/2022/09/08/13.Python模块-pandas.DataFrame转Excel格式的bytes数据/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://cdn.pixabay.com/photo/2013/12/10/18/22/green-tree-python-226553_1280.jpg" alt="Python模块-pandas.DataFrame转Excel格式的bytes数据">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2022-09-08T10:00:00.000Z">2022-09-08</time></div>
+                    <a href="/2022/09/08/13.Python模块-pandas.DataFrame转Excel格式的bytes数据/" class="has-link-black-ter is-size-6">Python模块-pandas.DataFrame转Excel格式的bytes数据</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/通用模块/">通用模块</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2022/09/01/12.Python模块-打包多个参数于一体/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://cdn.pixabay.com/photo/2014/12/11/22/10/python-564817_1280.jpg" alt="Python模块-打包多个参数于一体">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2022-09-01T08:00:00.000Z">2022-09-01</time></div>
+                    <a href="/2022/09/01/12.Python模块-打包多个参数于一体/" class="has-link-black-ter is-size-6">Python模块-打包多个参数于一体</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/通用模块/">通用模块</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2022/08/30/11.Python脚本设置pip索引源/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://cdn.pixabay.com/photo/2016/02/27/10/26/snake-1225370_1280.jpg" alt="Python脚本设置pip索引源">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2022-08-30T07:00:00.000Z">2022-08-30</time></div>
+                    <a href="/2022/08/30/11.Python脚本设置pip索引源/" class="has-link-black-ter is-size-6">Python脚本设置pip索引源</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/脚本工具/">脚本工具</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2022/08/27/10.Python脚本作为配置文件加载/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://cdn.pixabay.com/photo/2015/05/17/20/39/snake-771541_640.jpg" alt="Python脚本作为配置文件加载">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2022-08-27T11:37:00.000Z">2022-08-27</time></div>
+                    <a href="/2022/08/27/10.Python脚本作为配置文件加载/" class="has-link-black-ter is-size-6">Python脚本作为配置文件加载</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/脚本工具/">脚本工具</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2022/08/26/9.Python在命令行修改Properties配置文件/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://cdn.pixabay.com/photo/2014/08/15/21/40/snake-419043_640.jpg" alt="Python在命令行修改Properties配置文件">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2022-08-26T12:30:00.000Z">2022-08-26</time></div>
+                    <a href="/2022/08/26/9.Python在命令行修改Properties配置文件/" class="has-link-black-ter is-size-6">Python在命令行修改Properties配置文件</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/脚本工具/">脚本工具</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+    </div>
+</div>
+
+        
+            <div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+        <h3 class="menu-label">
+            归档
+        </h3>
+        <ul class="menu-list">
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2022/09/">
+                <span class="level-start">
+                    <span class="level-item">九月 2022</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">2</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2022/08/">
+                <span class="level-start">
+                    <span class="level-item">八月 2022</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">6</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2019/07/">
+                <span class="level-start">
+                    <span class="level-item">七月 2019</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">2</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2019/05/">
+                <span class="level-start">
+                    <span class="level-item">五月 2019</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">1</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2019/04/">
+                <span class="level-start">
+                    <span class="level-item">四月 2019</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">2</span>
+                </span>
+            </a>
+        </li>
+        
+        </ul>
+        </div>
+    </div>
+</div>
+        
+            <div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                标签
+            </h3>
+            <div class="field is-grouped is-grouped-multiline">
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Module/">
+                        <span class="tag">Module</span>
+                        <span class="tag is-grey">2</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Python/">
+                        <span class="tag">Python</span>
+                        <span class="tag is-grey">11</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Script/">
+                        <span class="tag">Script</span>
+                        <span class="tag is-grey">6</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Shell/">
+                        <span class="tag">Shell</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/博弈论/">
+                        <span class="tag">博弈论</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+</div>
+        
+        </div>
+    
+</div>
+
+                
+
+
+
+
+<div class="column is-4-tablet is-4-desktop is-3-widescreen is-hidden-touch is-hidden-desktop-only has-order-3 column-right ">
+    
+        
+    
+        
+<div class="card widget">
+    <div class="card-content">
+        <h3 class="menu-label">
+            最新文章
+        </h3>
+        
+        <article class="media">
+            
+            <a href="/2022/09/08/13.Python模块-pandas.DataFrame转Excel格式的bytes数据/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://cdn.pixabay.com/photo/2013/12/10/18/22/green-tree-python-226553_1280.jpg" alt="Python模块-pandas.DataFrame转Excel格式的bytes数据">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2022-09-08T10:00:00.000Z">2022-09-08</time></div>
+                    <a href="/2022/09/08/13.Python模块-pandas.DataFrame转Excel格式的bytes数据/" class="has-link-black-ter is-size-6">Python模块-pandas.DataFrame转Excel格式的bytes数据</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/通用模块/">通用模块</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2022/09/01/12.Python模块-打包多个参数于一体/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://cdn.pixabay.com/photo/2014/12/11/22/10/python-564817_1280.jpg" alt="Python模块-打包多个参数于一体">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2022-09-01T08:00:00.000Z">2022-09-01</time></div>
+                    <a href="/2022/09/01/12.Python模块-打包多个参数于一体/" class="has-link-black-ter is-size-6">Python模块-打包多个参数于一体</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/通用模块/">通用模块</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2022/08/30/11.Python脚本设置pip索引源/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://cdn.pixabay.com/photo/2016/02/27/10/26/snake-1225370_1280.jpg" alt="Python脚本设置pip索引源">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2022-08-30T07:00:00.000Z">2022-08-30</time></div>
+                    <a href="/2022/08/30/11.Python脚本设置pip索引源/" class="has-link-black-ter is-size-6">Python脚本设置pip索引源</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/脚本工具/">脚本工具</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2022/08/27/10.Python脚本作为配置文件加载/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://cdn.pixabay.com/photo/2015/05/17/20/39/snake-771541_640.jpg" alt="Python脚本作为配置文件加载">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2022-08-27T11:37:00.000Z">2022-08-27</time></div>
+                    <a href="/2022/08/27/10.Python脚本作为配置文件加载/" class="has-link-black-ter is-size-6">Python脚本作为配置文件加载</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/脚本工具/">脚本工具</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2022/08/26/9.Python在命令行修改Properties配置文件/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://cdn.pixabay.com/photo/2014/08/15/21/40/snake-419043_640.jpg" alt="Python在命令行修改Properties配置文件">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2022-08-26T12:30:00.000Z">2022-08-26</time></div>
+                    <a href="/2022/08/26/9.Python在命令行修改Properties配置文件/" class="has-link-black-ter is-size-6">Python在命令行修改Properties配置文件</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/脚本工具/">脚本工具</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+    </div>
+</div>
+
+    
+        <div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+        <h3 class="menu-label">
+            归档
+        </h3>
+        <ul class="menu-list">
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2022/09/">
+                <span class="level-start">
+                    <span class="level-item">九月 2022</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">2</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2022/08/">
+                <span class="level-start">
+                    <span class="level-item">八月 2022</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">6</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2019/07/">
+                <span class="level-start">
+                    <span class="level-item">七月 2019</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">2</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2019/05/">
+                <span class="level-start">
+                    <span class="level-item">五月 2019</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">1</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2019/04/">
+                <span class="level-start">
+                    <span class="level-item">四月 2019</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">2</span>
+                </span>
+            </a>
+        </li>
+        
+        </ul>
+        </div>
+    </div>
+</div>
+    
+        <div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                标签
+            </h3>
+            <div class="field is-grouped is-grouped-multiline">
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Module/">
+                        <span class="tag">Module</span>
+                        <span class="tag is-grey">2</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Python/">
+                        <span class="tag">Python</span>
+                        <span class="tag is-grey">11</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Script/">
+                        <span class="tag">Script</span>
+                        <span class="tag is-grey">6</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Shell/">
+                        <span class="tag">Shell</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/博弈论/">
+                        <span class="tag">博弈论</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+</div>
+    
+    
+</div>
+
+            </div>
+        </div>
+    </section>
+    <footer class="footer">
+    <div class="container">
+        <div class="level">
+            <div class="level-start has-text-centered-mobile">
+                <a class="footer-logo is-block has-mb-6" href="/">
+                
+                    <img src="/images/logo.svg" alt="Python模块-pandas.DataFrame转Excel格式的bytes数据" height="28">
+                
+                </a>
+                <p class="is-size-7">
+                &copy; 2022 ChenyangGao&nbsp;
+                Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> & <a href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank">Icarus</a>
+                
+                <br>
+                <span id="busuanzi_container_site_uv">
+                共<span id="busuanzi_value_site_uv">0</span>个访客
+                </span>
+                
+                </p>
+            </div>
+            <div class="level-end">
+            
+                <div class="field has-addons is-flex-center-mobile has-mt-5-mobile is-flex-wrap is-flex-middle">
+                
+                
+                <p class="control">
+                    <a class="button is-white is-large" target="_blank" title="Creative Commons" href="https://creativecommons.org/">
+                        
+                        <i class="fab fa-creative-commons"></i>
+                        
+                    </a>
+                </p>
+                
+                <p class="control">
+                    <a class="button is-white is-large" target="_blank" title="Attribution 4.0 International" href="https://creativecommons.org/licenses/by/4.0/">
+                        
+                        <i class="fab fa-creative-commons-by"></i>
+                        
+                    </a>
+                </p>
+                
+                <p class="control">
+                    <a class="button is-white is-large" target="_blank" title="Download on GitHub" href="https://github.com/ppoffice/hexo-theme-icarus">
+                        
+                        <i class="fab fa-github"></i>
+                        
+                    </a>
+                </p>
+                
+                </div>
+            
+            </div>
+        </div>
+    </div>
+</footer>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script>
+<script>moment.locale("zh-CN");</script>
+
+
+    
+    
+    
+    <script src="/js/animation.js"></script>
+    
+
+    
+    
+    
+    <script src="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/js/lightgallery.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js" defer></script>
+    <script src="/js/gallery.js" defer></script>
+    
+
+    
+    
+
+<div id="outdated">
+    <h6>Your browser is out-of-date!</h6>
+    <p>Update your browser to view this website correctly. <a id="btnUpdateBrowser" href="http://outdatedbrowser.com/">Update
+            my browser now </a></p>
+    <p class="last"><a href="#" id="btnCloseUpdateBrowser" title="Close">&times;</a></p>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.js" defer></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        outdatedBrowser({
+            bgColor: '#f25648',
+            color: '#ffffff',
+            lowerThan: 'flex'
+        });
+    });
+</script>
+
+
+    
+    
+    
+    
+
+<a id="back-to-top" title="回到顶端" href="javascript:;">
+    <i class="fas fa-chevron-up"></i>
+</a>
+<script src="/js/back-to-top.js" defer></script>
+
+
+    
+    
+
+    
+    
+    
+    
+
+    
+    
+    
+    
+    
+    <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script>
+    <script src="/js/clipboard.js" defer></script>
+    
+
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+
+<script src="/js/main.js" defer></script>
+
+    
+    <div class="searchbox ins-search">
+    <div class="searchbox-container ins-search-container">
+        <div class="searchbox-input-wrapper">
+            <input type="text" class="searchbox-input ins-search-input" placeholder="想要查找什么...">
+            <span class="searchbox-close ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="searchbox-result-wrapper ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+    (function (window) {
+        var INSIGHT_CONFIG = {
+            TRANSLATION: {
+                POSTS: '文章',
+                PAGES: '页面',
+                CATEGORIES: '分类',
+                TAGS: '标签',
+                UNTITLED: '(无标题)',
+            },
+            CONTENT_URL: '/content.json',
+        };
+        window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+    })(window);
+</script>
+<script src="/js/insight.js" defer></script>
+<link rel="stylesheet" href="/css/search.css">
+<link rel="stylesheet" href="/css/insight.css">
+    
+</body>
+</html>
