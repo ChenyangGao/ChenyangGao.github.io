@@ -867,7 +867,7 @@
                 <span class="level-item has-text-grey">
                     
                     
-                    9 分钟 读完 (大约 1309 个字)
+                    9 分钟 读完 (大约 1370 个字)
                 </span>
                 
                 
@@ -881,7 +881,13 @@
         </h1>
         <div class="content">
             <h2 id="异常是一类消息"><a class="markdownIt-Anchor" href="#异常是一类消息"></a> 异常是一类消息</h2>
-<p>在面向对象的世界里，对象之间的交互表现为消息的传递。异常也是一种消息，就我的理解，异常并非错误，它经常用来表明存在错误，但本质上它是一类特殊的消息，关联着一种跳出局部范围的机制。而在<kbd>Python</kbd>的世界里，所有异常都必须是<a href="https://docs.python.org/3/library/exceptions.html#BaseException" target="_blank" rel="noopener">BaseException</a>的子类。<br>
+<p>在面向对象的世界里，对象之间的交互表现为消息的传递。</p>
+<p>异常也是一种消息，就我的理解，异常并非错误，它经常用来表明存在错误，但本质上它是一类特殊的消息，关联着一种跳出局部范围的机制。</p>
+<blockquote>
+<p><strong>It is my understanding that exceptions are not errors</strong>, and that they should only be used for exceptional conditions (e.g. I try to write a file into disk and there is no more space, or maybe I do not have permission), and not for flow control.</p>
+<p align="right">—— <a href="https://stackoverflow.com/questions/16138232/is-it-a-good-practice-to-use-try-except-else-in-python" target="_blank" rel="noopener">Is it a good practice to use try-except-else in Python?</a></p>
+</blockquote>
+<p>而在<kbd>Python</kbd>的世界里，所有异常都必须是<a href="https://docs.python.org/3/library/exceptions.html#BaseException" target="_blank" rel="noopener">BaseException</a>的子类。<br>
 所谓异常是消息，指的是一个异常对象可以携带信息，捕获异常（就得到了一个异常对象）或者传递一个异常对象，你就可以从这个异常对象中提取信息。这个消息有时会被认为是一个指令或者信号，即便仅仅只是捕获到了一个特定类型的异常对象，例如，某个无限循环中有一个捕获异常的语句，当捕获到某个类型的异常对象时，它就认为接收到了退出的信号，快速、优雅地退出。</p>
         </div>
         

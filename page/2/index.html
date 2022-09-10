@@ -203,7 +203,7 @@
                 <span class="level-item has-text-grey">
                     
                     
-                    9 分钟 读完 (大约 1309 个字)
+                    9 分钟 读完 (大约 1370 个字)
                 </span>
                 
                 
@@ -217,7 +217,13 @@
         </h1>
         <div class="content">
             <h2 id="异常是一类消息"><a class="markdownIt-Anchor" href="#异常是一类消息"></a> 异常是一类消息</h2>
-<p>在面向对象的世界里，对象之间的交互表现为消息的传递。异常也是一种消息，就我的理解，异常并非错误，它经常用来表明存在错误，但本质上它是一类特殊的消息，关联着一种跳出局部范围的机制。而在<kbd>Python</kbd>的世界里，所有异常都必须是<a href="https://docs.python.org/3/library/exceptions.html#BaseException" target="_blank" rel="noopener">BaseException</a>的子类。<br>
+<p>在面向对象的世界里，对象之间的交互表现为消息的传递。</p>
+<p>异常也是一种消息，就我的理解，异常并非错误，它经常用来表明存在错误，但本质上它是一类特殊的消息，关联着一种跳出局部范围的机制。</p>
+<blockquote>
+<p><strong>It is my understanding that exceptions are not errors</strong>, and that they should only be used for exceptional conditions (e.g. I try to write a file into disk and there is no more space, or maybe I do not have permission), and not for flow control.</p>
+<p align="right">—— <a href="https://stackoverflow.com/questions/16138232/is-it-a-good-practice-to-use-try-except-else-in-python" target="_blank" rel="noopener">Is it a good practice to use try-except-else in Python?</a></p>
+</blockquote>
+<p>而在<kbd>Python</kbd>的世界里，所有异常都必须是<a href="https://docs.python.org/3/library/exceptions.html#BaseException" target="_blank" rel="noopener">BaseException</a>的子类。<br>
 所谓异常是消息，指的是一个异常对象可以携带信息，捕获异常（就得到了一个异常对象）或者传递一个异常对象，你就可以从这个异常对象中提取信息。这个消息有时会被认为是一个指令或者信号，即便仅仅只是捕获到了一个特定类型的异常对象，例如，某个无限循环中有一个捕获异常的语句，当捕获到某个类型的异常对象时，它就认为接收到了退出的信号，快速、优雅地退出。</p>
         </div>
         
@@ -281,6 +287,230 @@
 <p><strong>NOTE</strong> 当前测试的<kbd>CPython</kbd>解释器版本为</p>
 </blockquote>
 <figure class="highlight python hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-meta">&gt;&gt;&gt; </span>print(__import__(<span class="hljs-string">'sys'</span>).version)</span><br><span class="line"><span class="hljs-number">3.7</span><span class="hljs-number">.3</span> (default, Mar <span class="hljs-number">27</span> <span class="hljs-number">2019</span>, <span class="hljs-number">16</span>:<span class="hljs-number">54</span>:<span class="hljs-number">48</span>)</span><br><span class="line">[Clang <span class="hljs-number">4.0</span><span class="hljs-number">.1</span> (tags/RELEASE_401/final)]</span><br></pre></td></tr></table></figure>
+<p>以当前版本的解释器下执行下面的代码，可得到一个<kbd>Markdown</kbd>表格</p>
+<figure class="highlight python hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">outer</span><span class="hljs-params">(freevar=None)</span>:</span></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">inner</span><span class="hljs-params">(a, b: int=<span class="hljs-number">1</span>, *args, c: str=<span class="hljs-string">'1'</span>, **kwds)</span> -&gt; tuple:</span></span><br><span class="line">        <span class="hljs-string">'a test function'</span></span><br><span class="line">        <span class="hljs-keyword">return</span> freevar, a, b, args, c, kwds</span><br><span class="line">    <span class="hljs-keyword">return</span> inner</span><br><span class="line"></span><br><span class="line">fn = outer()</span><br><span class="line"></span><br><span class="line">print(<span class="hljs-string">'attribute'</span>, <span class="hljs-string">'type'</span>, <span class="hljs-string">'setable'</span>, <span class="hljs-string">'reason'</span>, sep=<span class="hljs-string">' | '</span>)</span><br><span class="line">print(*<span class="hljs-string">'-'</span>*<span class="hljs-number">4</span>, sep=<span class="hljs-string">' | '</span>)</span><br><span class="line"><span class="hljs-keyword">for</span> attr <span class="hljs-keyword">in</span> dir(fn):</span><br><span class="line">    <span class="hljs-keyword">try</span>:</span><br><span class="line">        obj = getattr(fn, attr)</span><br><span class="line">        setattr(fn, attr, obj)</span><br><span class="line">        print(<span class="hljs-string">'`%s`'</span>%attr, type(obj), <span class="hljs-literal">True</span>, <span class="hljs-string">''</span>, sep=<span class="hljs-string">' | '</span>)</span><br><span class="line">    <span class="hljs-keyword">except</span> Exception <span class="hljs-keyword">as</span> exc: </span><br><span class="line">        print(<span class="hljs-string">'`%s`'</span>%attr, type(obj), <span class="hljs-literal">False</span>, <span class="hljs-string">'`%s`'</span>%exc, sep=<span class="hljs-string">' | '</span>)</span><br></pre></td></tr></table></figure>
+<table>
+<thead>
+<tr>
+<th>attribute</th>
+<th>type</th>
+<th>setable</th>
+<th>reason</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>__annotations__</code></td>
+<td>&lt;class ‘dict’&gt;</td>
+<td>True</td>
+<td></td>
+</tr>
+<tr>
+<td><code>__call__</code></td>
+<td>&lt;class ‘method-wrapper’&gt;</td>
+<td>True</td>
+<td></td>
+</tr>
+<tr>
+<td><code>__class__</code></td>
+<td>&lt;class ‘type’&gt;</td>
+<td>False</td>
+<td><code>__class__ assignment only supported for heap types or ModuleType subclasses</code></td>
+</tr>
+<tr>
+<td><code>__closure__</code></td>
+<td>&lt;class ‘tuple’&gt;</td>
+<td>False</td>
+<td><code>readonly attribute</code></td>
+</tr>
+<tr>
+<td><code>__code__</code></td>
+<td>&lt;class ‘code’&gt;</td>
+<td>True</td>
+<td></td>
+</tr>
+<tr>
+<td><code>__defaults__</code></td>
+<td>&lt;class ‘tuple’&gt;</td>
+<td>True</td>
+<td></td>
+</tr>
+<tr>
+<td><code>__delattr__</code></td>
+<td>&lt;class ‘method-wrapper’&gt;</td>
+<td>True</td>
+<td></td>
+</tr>
+<tr>
+<td><code>__dict__</code></td>
+<td>&lt;class ‘dict’&gt;</td>
+<td>True</td>
+<td></td>
+</tr>
+<tr>
+<td><code>__dir__</code></td>
+<td>&lt;class ‘builtin_function_or_method’&gt;</td>
+<td>True</td>
+<td></td>
+</tr>
+<tr>
+<td><code>__doc__</code></td>
+<td>&lt;class ‘str’&gt;</td>
+<td>True</td>
+<td></td>
+</tr>
+<tr>
+<td><code>__eq__</code></td>
+<td>&lt;class ‘method-wrapper’&gt;</td>
+<td>True</td>
+<td></td>
+</tr>
+<tr>
+<td><code>__format__</code></td>
+<td>&lt;class ‘builtin_function_or_method’&gt;</td>
+<td>True</td>
+<td></td>
+</tr>
+<tr>
+<td><code>__ge__</code></td>
+<td>&lt;class ‘method-wrapper’&gt;</td>
+<td>True</td>
+<td></td>
+</tr>
+<tr>
+<td><code>__get__</code></td>
+<td>&lt;class ‘method-wrapper’&gt;</td>
+<td>True</td>
+<td></td>
+</tr>
+<tr>
+<td><code>__getattribute__</code></td>
+<td>&lt;class ‘method-wrapper’&gt;</td>
+<td>True</td>
+<td></td>
+</tr>
+<tr>
+<td><code>__globals__</code></td>
+<td>&lt;class ‘dict’&gt;</td>
+<td>False</td>
+<td><code>readonly attribute</code></td>
+</tr>
+<tr>
+<td><code>__gt__</code></td>
+<td>&lt;class ‘method-wrapper’&gt;</td>
+<td>True</td>
+<td></td>
+</tr>
+<tr>
+<td><code>__hash__</code></td>
+<td>&lt;class ‘method-wrapper’&gt;</td>
+<td>True</td>
+<td></td>
+</tr>
+<tr>
+<td><code>__init__</code></td>
+<td>&lt;class ‘method-wrapper’&gt;</td>
+<td>True</td>
+<td></td>
+</tr>
+<tr>
+<td><code>__init_subclass__</code></td>
+<td>&lt;class ‘builtin_function_or_method’&gt;</td>
+<td>True</td>
+<td></td>
+</tr>
+<tr>
+<td><code>__kwdefaults__</code></td>
+<td>&lt;class ‘dict’&gt;</td>
+<td>True</td>
+<td></td>
+</tr>
+<tr>
+<td><code>__le__</code></td>
+<td>&lt;class ‘method-wrapper’&gt;</td>
+<td>True</td>
+<td></td>
+</tr>
+<tr>
+<td><code>__lt__</code></td>
+<td>&lt;class ‘method-wrapper’&gt;</td>
+<td>True</td>
+<td></td>
+</tr>
+<tr>
+<td><code>__module__</code></td>
+<td>&lt;class ‘str’&gt;</td>
+<td>True</td>
+<td></td>
+</tr>
+<tr>
+<td><code>__name__</code></td>
+<td>&lt;class ‘str’&gt;</td>
+<td>True</td>
+<td></td>
+</tr>
+<tr>
+<td><code>__ne__</code></td>
+<td>&lt;class ‘method-wrapper’&gt;</td>
+<td>True</td>
+<td></td>
+</tr>
+<tr>
+<td><code>__new__</code></td>
+<td>&lt;class ‘builtin_function_or_method’&gt;</td>
+<td>True</td>
+<td></td>
+</tr>
+<tr>
+<td><code>__qualname__</code></td>
+<td>&lt;class ‘str’&gt;</td>
+<td>True</td>
+<td></td>
+</tr>
+<tr>
+<td><code>__reduce__</code></td>
+<td>&lt;class ‘builtin_function_or_method’&gt;</td>
+<td>True</td>
+<td></td>
+</tr>
+<tr>
+<td><code>__reduce_ex__</code></td>
+<td>&lt;class ‘builtin_function_or_method’&gt;</td>
+<td>True</td>
+<td></td>
+</tr>
+<tr>
+<td><code>__repr__</code></td>
+<td>&lt;class ‘method-wrapper’&gt;</td>
+<td>True</td>
+<td></td>
+</tr>
+<tr>
+<td><code>__setattr__</code></td>
+<td>&lt;class ‘method-wrapper’&gt;</td>
+<td>True</td>
+<td></td>
+</tr>
+<tr>
+<td><code>__sizeof__</code></td>
+<td>&lt;class ‘builtin_function_or_method’&gt;</td>
+<td>True</td>
+<td></td>
+</tr>
+<tr>
+<td><code>__str__</code></td>
+<td>&lt;class ‘method-wrapper’&gt;</td>
+<td>True</td>
+<td></td>
+</tr>
+<tr>
+<td><code>__subclasshook__</code></td>
+<td>&lt;class ‘builtin_function_or_method’&gt;</td>
+<td>True</td>
+<td></td>
+</tr>
+</tbody>
+</table>
         </div>
         
         

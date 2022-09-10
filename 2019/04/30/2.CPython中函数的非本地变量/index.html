@@ -7,19 +7,19 @@
 
 
 
-    <meta name="description" content="函数对象的特殊属性  NOTE 当前测试的CPython解释器版本为  123&amp;gt;&amp;gt;&amp;gt; print(__import__(&apos;sys&apos;).version)3.7.3 (default, Mar 27 2019, 16:54:48)[Clang 4.0.1 (tags/RELEASE_401/final)]">
+    <meta name="description" content="函数对象的特殊属性  NOTE 当前测试的CPython解释器版本为  123&amp;gt;&amp;gt;&amp;gt; print(__import__(&apos;sys&apos;).version)3.7.3 (default, Mar 27 2019, 16:54:48)[Clang 4.0.1 (tags/RELEASE_401/final)] 以当前版本的解释器下执行下面的代码，可得到一个Markdown表格 1234">
 <meta name="keywords" content="Python">
 <meta property="og:type" content="article">
 <meta property="og:title" content="CPython中函数的非本地变量">
 <meta property="og:url" content="https://chenyanggao.github.io/2019/04/30/2.CPython中函数的非本地变量/index.html">
 <meta property="og:site_name" content="思考者">
-<meta property="og:description" content="函数对象的特殊属性  NOTE 当前测试的CPython解释器版本为  123&amp;gt;&amp;gt;&amp;gt; print(__import__(&apos;sys&apos;).version)3.7.3 (default, Mar 27 2019, 16:54:48)[Clang 4.0.1 (tags/RELEASE_401/final)]">
+<meta property="og:description" content="函数对象的特殊属性  NOTE 当前测试的CPython解释器版本为  123&amp;gt;&amp;gt;&amp;gt; print(__import__(&apos;sys&apos;).version)3.7.3 (default, Mar 27 2019, 16:54:48)[Clang 4.0.1 (tags/RELEASE_401/final)] 以当前版本的解释器下执行下面的代码，可得到一个Markdown表格 1234">
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="https://cdn.pixabay.com/photo/2014/11/23/21/22/snake-543243_640.jpg">
-<meta property="og:updated_time" content="2022-08-27T11:50:21.678Z">
+<meta property="og:updated_time" content="2022-09-10T14:49:00.221Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="CPython中函数的非本地变量">
-<meta name="twitter:description" content="函数对象的特殊属性  NOTE 当前测试的CPython解释器版本为  123&amp;gt;&amp;gt;&amp;gt; print(__import__(&apos;sys&apos;).version)3.7.3 (default, Mar 27 2019, 16:54:48)[Clang 4.0.1 (tags/RELEASE_401/final)]">
+<meta name="twitter:description" content="函数对象的特殊属性  NOTE 当前测试的CPython解释器版本为  123&amp;gt;&amp;gt;&amp;gt; print(__import__(&apos;sys&apos;).version)3.7.3 (default, Mar 27 2019, 16:54:48)[Clang 4.0.1 (tags/RELEASE_401/final)] 以当前版本的解释器下执行下面的代码，可得到一个Markdown表格 1234">
 <meta name="twitter:image" content="https://cdn.pixabay.com/photo/2014/11/23/21/22/snake-543243_640.jpg">
 
 
@@ -226,7 +226,6 @@
 <p><strong>NOTE</strong> 当前测试的<kbd>CPython</kbd>解释器版本为</p>
 </blockquote>
 <div class="highlight-wrap" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true" data-rel="PYTHON"><figure class="iseeu highlight /python hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-meta">&gt;&gt;&gt; </span>print(__import__(<span class="hljs-string">'sys'</span>).version)</span><br><span class="line"><span class="hljs-number">3.7</span><span class="hljs-number">.3</span> (default, Mar <span class="hljs-number">27</span> <span class="hljs-number">2019</span>, <span class="hljs-number">16</span>:<span class="hljs-number">54</span>:<span class="hljs-number">48</span>)</span><br><span class="line">[Clang <span class="hljs-number">4.0</span><span class="hljs-number">.1</span> (tags/RELEASE_401/final)]</span><br></pre></td></tr></table></figure></div>
-<a id="more"></a>
 <p>以当前版本的解释器下执行下面的代码，可得到一个<kbd>Markdown</kbd>表格</p>
 <div class="highlight-wrap" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true" data-rel="PYTHON"><figure class="iseeu highlight /python hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">outer</span><span class="hljs-params">(freevar=None)</span>:</span></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">inner</span><span class="hljs-params">(a, b: int=<span class="hljs-number">1</span>, *args, c: str=<span class="hljs-string">'1'</span>, **kwds)</span> -&gt; tuple:</span></span><br><span class="line">        <span class="hljs-string">'a test function'</span></span><br><span class="line">        <span class="hljs-keyword">return</span> freevar, a, b, args, c, kwds</span><br><span class="line">    <span class="hljs-keyword">return</span> inner</span><br><span class="line"></span><br><span class="line">fn = outer()</span><br><span class="line"></span><br><span class="line">print(<span class="hljs-string">'attribute'</span>, <span class="hljs-string">'type'</span>, <span class="hljs-string">'setable'</span>, <span class="hljs-string">'reason'</span>, sep=<span class="hljs-string">' | '</span>)</span><br><span class="line">print(*<span class="hljs-string">'-'</span>*<span class="hljs-number">4</span>, sep=<span class="hljs-string">' | '</span>)</span><br><span class="line"><span class="hljs-keyword">for</span> attr <span class="hljs-keyword">in</span> dir(fn):</span><br><span class="line">    <span class="hljs-keyword">try</span>:</span><br><span class="line">        obj = getattr(fn, attr)</span><br><span class="line">        setattr(fn, attr, obj)</span><br><span class="line">        print(<span class="hljs-string">'`%s`'</span>%attr, type(obj), <span class="hljs-literal">True</span>, <span class="hljs-string">''</span>, sep=<span class="hljs-string">' | '</span>)</span><br><span class="line">    <span class="hljs-keyword">except</span> Exception <span class="hljs-keyword">as</span> exc: </span><br><span class="line">        print(<span class="hljs-string">'`%s`'</span>%attr, type(obj), <span class="hljs-literal">False</span>, <span class="hljs-string">'`%s`'</span>%exc, sep=<span class="hljs-string">' | '</span>)</span><br></pre></td></tr></table></figure></div>
 <table>
@@ -451,6 +450,7 @@
 </tr>
 </tbody>
 </table>
+<a id="more"></a>
 <h2 id="命名空间和作用域"><a class="markdownIt-Anchor" href="#命名空间和作用域"></a> 命名空间和作用域</h2>
 <blockquote>
 <p><strong>NOTE</strong> 在传统的编程语言中，作用域（scope）就是一段程序代码中所用到的名字被限制的可用范围。本地（局部，local）作用域被限制在块或函数体内，而全局（global）作用域被限制在本地以上最长可达程序的生命周期结束。有些编程语言允许，在本地作用域内构建一个更低层次的本地作用域，低层作用域访问一个非本地的名字，它就会到较高层中寻找，逐层往上，直到找到或者最终不能找到。但是这会引出一个问题：定义在一个函数<code>outer</code>内的函数<code>inner</code>被作为返回值，<code>inner</code>中引用了<code>inner</code>中没有而在<code>outer</code>中有的名字，为了保证理论上的某些一致性，是否要求编译器提供一种被称为闭包（closure）的机制：<code>outer</code>中的这些名字及其引用应该继续保留在一个可被<code>inner</code>访问但对更高层作用域隐藏（并非指绝对不能被更高层发现）。<br>
