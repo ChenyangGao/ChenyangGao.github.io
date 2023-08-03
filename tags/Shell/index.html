@@ -194,6 +194,83 @@
     <div class="card">
     
     <div class="card-image">
+        <a href="/2023/08/02/14.在OpenWrt上部署AList和clouddrive/" class="image is-7by1">
+            <img class="thumbnail" src="https://cdn.pixabay.com/photo/2015/08/21/00/21/library-898333_1280.jpg" alt="在OpenWrt上部署AList和clouddrive">
+        </a>
+    </div>
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey" datetime="2023-08-02T08:00:00.000Z">2023-08-02</time>
+                
+                <div class="level-item">
+                <a class="has-link-grey -link" href="/categories/简单脚本/">简单脚本</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    9 分钟 读完 (大约 1284 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+                <a class="has-link-black-ter" href="/2023/08/02/14.在OpenWrt上部署AList和clouddrive/">在OpenWrt上部署AList和clouddrive</a>
+            
+        </h1>
+        <div class="content">
+            <h2 id="背景"><a class="markdownIt-Anchor" href="#背景"></a> 背景</h2>
+<p><a href="https://openwrt.org" target="_blank" rel="noopener">OpenWrt</a> 是一个<a href="https://git.openwrt.org/openwrt/openwrt.git" target="_blank" rel="noopener">开源</a>的嵌入式操作系统，专门为路由器和其他嵌入式设备设计。它基于<a href="https://www.kernel.org" target="_blank" rel="noopener">Linux内核</a>，并提供了一套完整的<a href="https://downloads.openwrt.org/releases/" target="_blank" rel="noopener">系统软件包</a>，用于构建和定制网络设备的固件。通过<a href="https://github.com/openwrt" target="_blank" rel="noopener">OpenWrt</a>，用户可以自定义配置和扩展功能，并享受强大的网络管理和路由功能。通过一些适当的扩展，OpenWrt 可以作为 <a href="https://en.wikipedia.org/wiki/Network-attached_storage" target="_blank" rel="noopener">NAS</a> 使用，下面是一些其它的嵌入式 NAS 系统：</p>
+<ol>
+<li><a href="https://www.openmediavault.org" target="_blank" rel="noopener">openmediavault</a>：一个基于 Debian Linux 的开源 NAS 系统，设计用于家庭和小型办公室环境。它提供了易于使用的管理界面和丰富的功能，如文件共享、远程访问、备份、媒体服务器等。</li>
+<li><a href="https://www.truenas.com/freenas/" target="_blank" rel="noopener">FreeNAS</a>：一个免费的网络存储操作系统，基于 FreeBSD。用于构建和管理网络存储服务器。它提供了 ZFS 文件系统、数据共享、备份和恢复、多媒体服务等功能，适用于家庭用户和小型企业。</li>
+<li><a href="https://xigmanas.com" target="_blank" rel="noopener">XigmaNAS</a>：它是 FreeNAS 项目的前身，也是基于 FreeBSD 的，提供了类似 FreeNAS 的功能。历史上，它经过了<a href="https://www.xigmanas.com/wiki/doku.php" target="_blank" rel="noopener">数次改名</a>。</li>
+<li><a href="https://www.wansec.com/Products/OpenNAS/" target="_blank" rel="noopener">OpenNAS</a>：这是一个基于 OpenMediaVault 的衍生项目，也是一个网络存储解决方案，提供了类似的功能和界面，可以用于搭建家庭或小型办公室的网络存储服务器。</li>
+</ol>
+<p><a href="https://alist.nn.ci" target="_blank" rel="noopener">AList</a> 是一个<a href="https://github.com/alist-org/alist" target="_blank" rel="noopener">开源</a>的网盘文件罗列程序，它支持<a href="https://alist.nn.ci/guide/drivers/" target="_blank" rel="noopener">数十个网盘</a>的挂载，并提供 WebDav 的访问方式。</p>
+<p><a href="https://t.me/cloudnaschat" target="_blank" rel="noopener">clouddrive</a> 是另一个闭源的网盘文件罗列程序，虽然它只支持几个网盘，但是也有独特的功能，例如把 <a href="https://www.aliyundrive.com" target="_blank" rel="noopener">阿里云盘</a> 的文件搬运到 <a href="http://www.115.com" target="_blank" rel="noopener">115网盘</a>。它支持 WebDav 和 挂载到磁盘本地（需要 fusermount 支持） 的访问方式。软件包需要在它的 telegram <a href="https://t.me/cloudnaschat" target="_blank" rel="noopener">Group</a> 或 <a href="https://t.me/cloud_nas" target="_blank" rel="noopener">Channel</a> 中下载，也有一个 <a href="https://hub.docker.com/r/cloudnas/clouddrive" target="_blank" rel="noopener">Docker</a> 页面。</p>
+<p>我在我的<a href="https://www.raspberrypi.org" target="_blank" rel="noopener">树莓派</a>上<a href="https://raspberrytips.com/openwrt-on-raspberry-pi/" target="_blank" rel="noopener">安装</a>了 <a href="https://openwrt.org/toh/raspberry_pi_foundation/raspberry_pi" target="_blank" rel="noopener">OpenWrt</a>，并修改了一些网络配置：</p>
+<ul>
+<li><a href="https://forum.openwrt.org/t/howto-openwrt-on-the-raspberry-pi-4" target="_blank" rel="noopener">HOWTO: OpenWrt on the Raspberry Pi 4</a></li>
+<li><a href="https://funprojects.blog/2023/04/19/openwrt-on-pi-light-os-with-network-features/" target="_blank" rel="noopener">OpenWRT on Pi – Light OS with Network Features</a></li>
+<li><a href="https://circuitdigest.com/microcontroller-projects/diy-router-using-raspberry-pi" target="_blank" rel="noopener">Turn your Raspberry Pi into a WiFi Router using OpenWrt</a></li>
+<li><a href="https://tristam.ie/2023/582/" target="_blank" rel="noopener">Raspberry Pi x OpenWRT Travel Router</a></li>
+<li><a href="https://sspai.com/post/38542" target="_blank" rel="noopener">树莓派入门指南｜明明白白玩 Pi 系列</a></li>
+<li><a href="https://shumeipai.nxez.com" target="_blank" rel="noopener">树莓派实验室</a></li>
+</ul>
+<p>这样我的<a href="https://www.raspberrypi.com" target="_blank" rel="noopener">树莓派</a>就是一个 NAS，再用 AList 和 clouddrive 挂载几个网盘，使用体验非常令人满意。</p>
+        </div>
+        
+        
+        <div class="level is-mobile">
+            <div class="level-start">
+                <div class="level-item">
+                <a class="button is-size-7 is-light" href="/2023/08/02/14.在OpenWrt上部署AList和clouddrive/#more">阅读更多</a>
+                </div>
+            </div>
+        </div>
+        
+        
+    </div>
+</div>
+
+
+
+
+
+
+
+
+    <div class="card">
+    
+    <div class="card-image">
         <a href="/2022/08/02/7.Shell脚本实现在Linux命令行开启代理/" class="image is-7by1">
             <img class="thumbnail" src="https://cdn.pixabay.com/photo/2019/06/06/08/27/vpn-4255473_640.jpg" alt="Shell脚本实现在Linux命令行开启代理">
         </a>
@@ -296,7 +373,7 @@
                         文章
                     </p>
                     <p class="title has-text-weight-normal">
-                        13
+                        14
                     </p>
                 </div>
             </div>
@@ -306,7 +383,7 @@
                         分类
                     </p>
                     <p class="title has-text-weight-normal">
-                        5
+                        6
                     </p>
                 </div>
             </div>
@@ -439,6 +516,14 @@
                 <span class="level-item tag">1</span>
             </span>
         </a></li></ul></li><li>
+        <a class="level is-marginless" href="/categories/简单脚本/">
+            <span class="level-start">
+                <span class="level-item">简单脚本</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">1</span>
+            </span>
+        </a></li><li>
         <a class="level is-marginless" href="/categories/编程思想/">
             <span class="level-start">
                 <span class="level-item">编程思想</span>
@@ -474,7 +559,7 @@
         <h3 class="menu-label">
             标签云
         </h3>
-        <a href="/tags/Module/" style="font-size: 13.33px;">Module</a> <a href="/tags/Python/" style="font-size: 20px;">Python</a> <a href="/tags/Script/" style="font-size: 16.67px;">Script</a> <a href="/tags/Shell/" style="font-size: 10px;">Shell</a> <a href="/tags/博弈论/" style="font-size: 10px;">博弈论</a>
+        <a href="/tags/Module/" style="font-size: 13.33px;">Module</a> <a href="/tags/Python/" style="font-size: 20px;">Python</a> <a href="/tags/Script/" style="font-size: 16.67px;">Script</a> <a href="/tags/Shell/" style="font-size: 13.33px;">Shell</a> <a href="/tags/博弈论/" style="font-size: 10px;">博弈论</a>
     </div>
 </div>
 
@@ -490,6 +575,25 @@
         <h3 class="menu-label">
             最新文章
         </h3>
+        
+        <article class="media">
+            
+            <a href="/2023/08/02/14.在OpenWrt上部署AList和clouddrive/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://cdn.pixabay.com/photo/2015/08/21/00/21/library-898333_1280.jpg" alt="在OpenWrt上部署AList和clouddrive">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2023-08-02T08:00:00.000Z">2023-08-02</time></div>
+                    <a href="/2023/08/02/14.在OpenWrt上部署AList和clouddrive/" class="has-link-black-ter is-size-6">在OpenWrt上部署AList和clouddrive</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/简单脚本/">简单脚本</a>
+                    </p>
+                </div>
+            </div>
+        </article>
         
         <article class="media">
             
@@ -567,25 +671,6 @@
             </div>
         </article>
         
-        <article class="media">
-            
-            <a href="/2022/08/26/9.Python在命令行修改Properties配置文件/" class="media-left">
-                <p class="image is-64x64">
-                    <img class="thumbnail" src="https://cdn.pixabay.com/photo/2014/08/15/21/40/snake-419043_640.jpg" alt="Python在命令行修改Properties配置文件">
-                </p>
-            </a>
-            
-            <div class="media-content">
-                <div class="content">
-                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2022-08-26T12:30:00.000Z">2022-08-26</time></div>
-                    <a href="/2022/08/26/9.Python在命令行修改Properties配置文件/" class="has-link-black-ter is-size-6">Python在命令行修改Properties配置文件</a>
-                    <p class="is-size-7 is-uppercase">
-                        <a class="has-link-grey -link" href="/categories/脚本工具/">脚本工具</a>
-                    </p>
-                </div>
-            </div>
-        </article>
-        
     </div>
 </div>
 
@@ -597,6 +682,17 @@
             归档
         </h3>
         <ul class="menu-list">
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2023/08/">
+                <span class="level-start">
+                    <span class="level-item">八月 2023</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">1</span>
+                </span>
+            </a>
+        </li>
         
         <li>
             <a class="level is-marginless" href="/archives/2022/09/">
@@ -683,14 +779,14 @@
                 <div class="control">
                     <a class="tags has-addons" href="/tags/Script/">
                         <span class="tag">Script</span>
-                        <span class="tag is-grey">6</span>
+                        <span class="tag is-grey">7</span>
                     </a>
                 </div>
                 
                 <div class="control">
                     <a class="tags has-addons" href="/tags/Shell/">
                         <span class="tag">Shell</span>
-                        <span class="tag is-grey">1</span>
+                        <span class="tag is-grey">2</span>
                     </a>
                 </div>
                 
@@ -728,6 +824,25 @@
         
         <article class="media">
             
+            <a href="/2023/08/02/14.在OpenWrt上部署AList和clouddrive/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://cdn.pixabay.com/photo/2015/08/21/00/21/library-898333_1280.jpg" alt="在OpenWrt上部署AList和clouddrive">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2023-08-02T08:00:00.000Z">2023-08-02</time></div>
+                    <a href="/2023/08/02/14.在OpenWrt上部署AList和clouddrive/" class="has-link-black-ter is-size-6">在OpenWrt上部署AList和clouddrive</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/简单脚本/">简单脚本</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
             <a href="/2022/09/08/13.Python模块-pandas.DataFrame转Excel格式的bytes数据/" class="media-left">
                 <p class="image is-64x64">
                     <img class="thumbnail" src="https://cdn.pixabay.com/photo/2013/12/10/18/22/green-tree-python-226553_1280.jpg" alt="Python模块-pandas.DataFrame转Excel格式的bytes数据">
@@ -802,25 +917,6 @@
             </div>
         </article>
         
-        <article class="media">
-            
-            <a href="/2022/08/26/9.Python在命令行修改Properties配置文件/" class="media-left">
-                <p class="image is-64x64">
-                    <img class="thumbnail" src="https://cdn.pixabay.com/photo/2014/08/15/21/40/snake-419043_640.jpg" alt="Python在命令行修改Properties配置文件">
-                </p>
-            </a>
-            
-            <div class="media-content">
-                <div class="content">
-                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2022-08-26T12:30:00.000Z">2022-08-26</time></div>
-                    <a href="/2022/08/26/9.Python在命令行修改Properties配置文件/" class="has-link-black-ter is-size-6">Python在命令行修改Properties配置文件</a>
-                    <p class="is-size-7 is-uppercase">
-                        <a class="has-link-grey -link" href="/categories/脚本工具/">脚本工具</a>
-                    </p>
-                </div>
-            </div>
-        </article>
-        
     </div>
 </div>
 
@@ -832,6 +928,17 @@
             归档
         </h3>
         <ul class="menu-list">
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2023/08/">
+                <span class="level-start">
+                    <span class="level-item">八月 2023</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">1</span>
+                </span>
+            </a>
+        </li>
         
         <li>
             <a class="level is-marginless" href="/archives/2022/09/">
@@ -918,14 +1025,14 @@
                 <div class="control">
                     <a class="tags has-addons" href="/tags/Script/">
                         <span class="tag">Script</span>
-                        <span class="tag is-grey">6</span>
+                        <span class="tag is-grey">7</span>
                     </a>
                 </div>
                 
                 <div class="control">
                     <a class="tags has-addons" href="/tags/Shell/">
                         <span class="tag">Shell</span>
-                        <span class="tag is-grey">1</span>
+                        <span class="tag is-grey">2</span>
                     </a>
                 </div>
                 
