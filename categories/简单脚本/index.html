@@ -214,7 +214,7 @@
                 <span class="level-item has-text-grey">
                     
                     
-                    14 分钟 读完 (大约 2136 个字)
+                    16 分钟 读完 (大约 2350 个字)
                 </span>
                 
                 
@@ -233,6 +233,17 @@
 <img src="https://www.clouddrive2.com/img/clouddrive-h.png" alt="clouddrive" width="50%">
 <p><a href="http://www.clouddrive2.com/index.html" target="_blank" rel="noopener">clouddrive</a> 是一个闭源的网盘文件罗列程序，虽然它只支持几个网盘，但是也有独特的功能。它也支持 <kbd>WebDav</kbd>。</p>
 <p>我编写了 2 个脚本：<code>deploy-alist.sh</code> 可用于一键部署 <kbd>AList</kbd>，<code>deploy-clouddrive.sh</code> 可用于一键部署 <kbd>clouddrive</kbd>。您的设备上可能有一个应用商店，本身就提供了安装 <code>alist</code> 或 <code>clouddrive</code>，或者你使用了官方提供的一键部署脚本（但支持的平台有限），或者你用 docker 来部署，等等，这样你可能用不到我的脚本。不过如果你的平台上找不到可用的一键部署方案，不如尝试一下我的办法吧😂。</p>
+<h2 id="代码实现"><a class="markdownIt-Anchor" href="#代码实现"></a> 代码实现</h2>
+<blockquote>
+<p><strong>TIPS</strong> 代码的最新版本在 <a href="https://gist.github.com/ChenyangGao" target="_blank" rel="noopener">GitHub Gist</a> 中维护<br>
+<a href="https://gist.github.com/ChenyangGao/e8e520de651e6375dad552b5a761902f" target="_blank" rel="noopener">https://gist.github.com/ChenyangGao/e8e520de651e6375dad552b5a761902f</a></p>
+</blockquote>
+<h3 id="1-部署-alist"><a class="markdownIt-Anchor" href="#1-部署-alist"></a> 1. 部署 AList</h3>
+<p>文件名称是 <code>deploy-alist.sh</code>，您可以用 <kbd>bash</kbd> 或 <kbd>zsh</kbd> 运行代码，由于用到了一些较新的语法，请确保你的解释器版本不能太低：</p>
+<figure class="highlight console hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bash -c "$(wget -q -O - https://gist.githubusercontent.com/ChenyangGao/e8e520de651e6375dad552b5a761902f/raw/deploy-alist.sh)"</span><br></pre></td></tr></table></figure>
+<h3 id="2-部署-clouddrive2"><a class="markdownIt-Anchor" href="#2-部署-clouddrive2"></a> 2. 部署 clouddrive2</h3>
+<p>文件名称是 <code>deploy-clouddrive.sh</code>，您可以用 <kbd>bash</kbd> 或 <kbd>zsh</kbd> 运行代码：</p>
+<figure class="highlight console hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bash -c "$(wget -q -O - https://gist.githubusercontent.com/ChenyangGao/e8e520de651e6375dad552b5a761902f/raw/deploy-clouddrive.sh)"</span><br></pre></td></tr></table></figure>
         </div>
         
         
