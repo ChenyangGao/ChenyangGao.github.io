@@ -1,0 +1,491 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><meta><title>CPython中函数的非本地变量 - 思考者</title><link rel="manifest" href="/manifest.json"><meta name="application-name" content="ChenyangGao&#039;s Blog"><meta name="msapplication-TileImage" content="/img/favicon.svg"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="ChenyangGao&#039;s Blog"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="description" content="函数对象的特殊属性 NOTE 当前测试的CPython解释器版本为  123&amp;gt;&amp;gt;&amp;gt; print(__import__(&amp;#x27;sys&amp;#x27;).version)3.7.3 (default, Mar 27 2019, 16:54:48)[Clang 4.0.1 (tags&amp;#x2F;RELEASE_401&amp;#x2F;final)]  以当前版本的解释器下执行下面的代码，可得到一个Markdo"><meta property="og:type" content="blog"><meta property="og:title" content="CPython中函数的非本地变量"><meta property="og:url" content="https://chenyanggao.github.io/2019/04/30/2.CPython%E4%B8%AD%E5%87%BD%E6%95%B0%E7%9A%84%E9%9D%9E%E6%9C%AC%E5%9C%B0%E5%8F%98%E9%87%8F/"><meta property="og:site_name" content="思考者"><meta property="og:description" content="函数对象的特殊属性 NOTE 当前测试的CPython解释器版本为  123&amp;gt;&amp;gt;&amp;gt; print(__import__(&amp;#x27;sys&amp;#x27;).version)3.7.3 (default, Mar 27 2019, 16:54:48)[Clang 4.0.1 (tags&amp;#x2F;RELEASE_401&amp;#x2F;final)]  以当前版本的解释器下执行下面的代码，可得到一个Markdo"><meta property="og:locale" content="zh_CN"><meta property="og:image" content="https://cdn.pixabay.com/photo/2014/11/23/21/22/snake-543243_640.jpg"><meta property="article:published_time" content="2019-04-30T14:36:10.000Z"><meta property="article:modified_time" content="2025-08-20T09:56:18.602Z"><meta property="article:author" content="ChenyangGao"><meta property="article:tag" content="Python"><meta property="twitter:card" content="summary"><meta property="twitter:image:src" content="https://cdn.pixabay.com/photo/2014/11/23/21/22/snake-543243_640.jpg"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"https://chenyanggao.github.io/2019/04/30/2.CPython%E4%B8%AD%E5%87%BD%E6%95%B0%E7%9A%84%E9%9D%9E%E6%9C%AC%E5%9C%B0%E5%8F%98%E9%87%8F/"},"headline":"CPython中函数的非本地变量","image":["https://cdn.pixabay.com/photo/2014/11/23/21/22/snake-543243_640.jpg"],"datePublished":"2019-04-30T14:36:10.000Z","dateModified":"2025-08-20T09:56:18.602Z","author":{"@type":"Person","name":"ChenyangGao"},"publisher":{"@type":"Organization","name":"思考者","logo":{"@type":"ImageObject"}},"description":"函数对象的特殊属性 NOTE 当前测试的CPython解释器版本为  123&gt;&gt;&gt; print(__import__(&#x27;sys&#x27;).version)3.7.3 (default, Mar 27 2019, 16:54:48)[Clang 4.0.1 (tags&#x2F;RELEASE_401&#x2F;final)]  以当前版本的解释器下执行下面的代码，可得到一个Markdo"}</script><link rel="canonical" href="https://chenyanggao.github.io/2019/04/30/2.CPython%E4%B8%AD%E5%87%BD%E6%95%B0%E7%9A%84%E9%9D%9E%E6%9C%AC%E5%9C%B0%E5%8F%98%E9%87%8F/"><link rel="icon" href="/img/favicon.svg"><link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.0.0/css/all.css"><link data-pjax rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.7.0/styles/atom-one-light.css"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;600&amp;family=Source+Code+Pro"><link data-pjax rel="stylesheet" href="/css/default.css"><style>body>.footer,body>.navbar,body>.section{opacity:0}</style><!--!--><script src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" defer></script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cookieconsent@3.1.1/build/cookieconsent.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@1.10.0/dist/css/lightgallery.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/justifiedGallery@3.8.1/dist/css/justifiedGallery.min.css"><!--!--><!--!--><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.css"><!--!--><style>.pace{-webkit-pointer-events:none;pointer-events:none;-webkit-user-select:none;-moz-user-select:none;user-select:none}.pace-inactive{display:none}.pace .pace-progress{background:#3273dc;position:fixed;z-index:2000;top:0;right:100%;width:100%;height:2px}</style><script src="https://cdn.jsdelivr.net/npm/pace-js@1.2.4/pace.min.js"></script><!-- hexo injector head_end start --><script>
+  (function () {
+      function switchTab() {
+          if (!location.hash) {
+            return;
+          }
+
+          const id = '#' + CSS.escape(location.hash.substring(1));
+          const $tabMenu = document.querySelector(`.tabs a[href="${id}"]`);
+          if (!$tabMenu) {
+            return;
+          }
+
+          const $tabMenuContainer = $tabMenu.parentElement.parentElement;
+          Array.from($tabMenuContainer.children).forEach($menu => $menu.classList.remove('is-active'));
+          Array.from($tabMenuContainer.querySelectorAll('a'))
+              .map($menu => document.getElementById($menu.getAttribute("href").substring(1)))
+              .forEach($content => $content.classList.add('is-hidden'));
+
+          if ($tabMenu) {
+              $tabMenu.parentElement.classList.add('is-active');
+          }
+          const $activeTab = document.querySelector(id);
+          if ($activeTab) {
+              $activeTab.classList.remove('is-hidden');
+          }
+      }
+      switchTab();
+      window.addEventListener('hashchange', switchTab, false);
+  })();
+  </script><!-- hexo injector head_end end --><meta name="generator" content="Hexo 7.3.0"></head><body class="is-3-column"><nav class="navbar navbar-main"><div class="container navbar-container"><div class="navbar-brand justify-content-center"><a class="navbar-item navbar-logo" href="/">思考者</a></div><div class="navbar-menu"><div class="navbar-start"><a class="navbar-item" href="/">Home</a><a class="navbar-item" href="/archives">Archives</a><a class="navbar-item" href="/categories">Categories</a><a class="navbar-item" href="/tags">Tags</a><a class="navbar-item" href="/about">About</a></div><div class="navbar-end"><a class="navbar-item search" title="搜索" href="javascript:;"><i class="fas fa-search"></i></a></div></div></div></nav><section class="section"><div class="container"><div class="columns"><div class="column order-2 column-main is-8-tablet is-8-desktop is-6-widescreen"><div class="card"><div class="card-image"><span class="image is-7by3"><img class="fill" src="https://cdn.pixabay.com/photo/2014/11/23/21/22/snake-543243_640.jpg" alt="CPython中函数的非本地变量"></span></div><article class="card-content article" role="article"><div class="article-meta is-size-7 is-uppercase level is-mobile"><div class="level-left"><span class="level-item"><time dateTime="2019-04-30T14:36:10.000Z" title="2019/4/30 22:36:10">2019-04-30</time>发表</span><span class="level-item"><time dateTime="2025-08-20T09:56:18.602Z" title="2025/8/20 17:56:18">2025-08-20</time>更新</span><span class="level-item"> ChenyangGao </span><span class="level-item"><a class="link-muted" href="/categories/%E7%BC%96%E7%A8%8B%E6%80%9D%E6%83%B3/">编程思想</a></span><span class="level-item">34 分钟读完 (大约5134个字)</span><span class="level-item" id="busuanzi_container_page_pv"><span id="busuanzi_value_page_pv">0</span>次访问</span></div></div><h1 class="title is-3 is-size-4-mobile">CPython中函数的非本地变量</h1><div class="content"><h2 id="函数对象的特殊属性"><a href="#函数对象的特殊属性" class="headerlink" title="函数对象的特殊属性"></a>函数对象的特殊属性</h2><blockquote>
+<p><strong>NOTE</strong> 当前测试的<kbd>CPython</kbd>解释器版本为</p>
+</blockquote>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="built_in">print</span>(<span class="built_in">__import__</span>(<span class="string">&#x27;sys&#x27;</span>).version)</span><br><span class="line"><span class="number">3.7</span><span class="number">.3</span> (default, Mar <span class="number">27</span> <span class="number">2019</span>, <span class="number">16</span>:<span class="number">54</span>:<span class="number">48</span>)</span><br><span class="line">[Clang <span class="number">4.0</span><span class="number">.1</span> (tags/RELEASE_401/final)]</span><br></pre></td></tr></table></figure>
+
+<p>以当前版本的解释器下执行下面的代码，可得到一个<kbd>Markdown</kbd>表格</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">outer</span>(<span class="params">freevar=<span class="literal">None</span></span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">inner</span>(<span class="params">a, b: <span class="built_in">int</span>=<span class="number">1</span>, *args, c: <span class="built_in">str</span>=<span class="string">&#x27;1&#x27;</span>, **kwds</span>) -&gt; <span class="built_in">tuple</span>:</span><br><span class="line">        <span class="string">&#x27;a test function&#x27;</span></span><br><span class="line">        <span class="keyword">return</span> freevar, a, b, args, c, kwds</span><br><span class="line">    <span class="keyword">return</span> inner</span><br><span class="line"></span><br><span class="line">fn = outer()</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;attribute&#x27;</span>, <span class="string">&#x27;type&#x27;</span>, <span class="string">&#x27;setable&#x27;</span>, <span class="string">&#x27;reason&#x27;</span>, sep=<span class="string">&#x27; | &#x27;</span>)</span><br><span class="line"><span class="built_in">print</span>(*<span class="string">&#x27;-&#x27;</span>*<span class="number">4</span>, sep=<span class="string">&#x27; | &#x27;</span>)</span><br><span class="line"><span class="keyword">for</span> attr <span class="keyword">in</span> <span class="built_in">dir</span>(fn):</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        obj = <span class="built_in">getattr</span>(fn, attr)</span><br><span class="line">        <span class="built_in">setattr</span>(fn, attr, obj)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&#x27;`%s`&#x27;</span>%attr, <span class="built_in">type</span>(obj), <span class="literal">True</span>, <span class="string">&#x27;&#x27;</span>, sep=<span class="string">&#x27; | &#x27;</span>)</span><br><span class="line">    <span class="keyword">except</span> Exception <span class="keyword">as</span> exc: </span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&#x27;`%s`&#x27;</span>%attr, <span class="built_in">type</span>(obj), <span class="literal">False</span>, <span class="string">&#x27;`%s`&#x27;</span>%exc, sep=<span class="string">&#x27; | &#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>attribute</th>
+<th>type</th>
+<th>setable</th>
+<th>reason</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>__annotations__</code></td>
+<td>&lt;class ‘dict’&gt;</td>
+<td>True</td>
+<td></td>
+</tr>
+<tr>
+<td><code>__call__</code></td>
+<td>&lt;class ‘method-wrapper’&gt;</td>
+<td>True</td>
+<td></td>
+</tr>
+<tr>
+<td><code>__class__</code></td>
+<td>&lt;class ‘type’&gt;</td>
+<td>False</td>
+<td><code>__class__ assignment only supported for heap types or ModuleType subclasses</code></td>
+</tr>
+<tr>
+<td><code>__closure__</code></td>
+<td>&lt;class ‘tuple’&gt;</td>
+<td>False</td>
+<td><code>readonly attribute</code></td>
+</tr>
+<tr>
+<td><code>__code__</code></td>
+<td>&lt;class ‘code’&gt;</td>
+<td>True</td>
+<td></td>
+</tr>
+<tr>
+<td><code>__defaults__</code></td>
+<td>&lt;class ‘tuple’&gt;</td>
+<td>True</td>
+<td></td>
+</tr>
+<tr>
+<td><code>__delattr__</code></td>
+<td>&lt;class ‘method-wrapper’&gt;</td>
+<td>True</td>
+<td></td>
+</tr>
+<tr>
+<td><code>__dict__</code></td>
+<td>&lt;class ‘dict’&gt;</td>
+<td>True</td>
+<td></td>
+</tr>
+<tr>
+<td><code>__dir__</code></td>
+<td>&lt;class ‘builtin_function_or_method’&gt;</td>
+<td>True</td>
+<td></td>
+</tr>
+<tr>
+<td><code>__doc__</code></td>
+<td>&lt;class ‘str’&gt;</td>
+<td>True</td>
+<td></td>
+</tr>
+<tr>
+<td><code>__eq__</code></td>
+<td>&lt;class ‘method-wrapper’&gt;</td>
+<td>True</td>
+<td></td>
+</tr>
+<tr>
+<td><code>__format__</code></td>
+<td>&lt;class ‘builtin_function_or_method’&gt;</td>
+<td>True</td>
+<td></td>
+</tr>
+<tr>
+<td><code>__ge__</code></td>
+<td>&lt;class ‘method-wrapper’&gt;</td>
+<td>True</td>
+<td></td>
+</tr>
+<tr>
+<td><code>__get__</code></td>
+<td>&lt;class ‘method-wrapper’&gt;</td>
+<td>True</td>
+<td></td>
+</tr>
+<tr>
+<td><code>__getattribute__</code></td>
+<td>&lt;class ‘method-wrapper’&gt;</td>
+<td>True</td>
+<td></td>
+</tr>
+<tr>
+<td><code>__globals__</code></td>
+<td>&lt;class ‘dict’&gt;</td>
+<td>False</td>
+<td><code>readonly attribute</code></td>
+</tr>
+<tr>
+<td><code>__gt__</code></td>
+<td>&lt;class ‘method-wrapper’&gt;</td>
+<td>True</td>
+<td></td>
+</tr>
+<tr>
+<td><code>__hash__</code></td>
+<td>&lt;class ‘method-wrapper’&gt;</td>
+<td>True</td>
+<td></td>
+</tr>
+<tr>
+<td><code>__init__</code></td>
+<td>&lt;class ‘method-wrapper’&gt;</td>
+<td>True</td>
+<td></td>
+</tr>
+<tr>
+<td><code>__init_subclass__</code></td>
+<td>&lt;class ‘builtin_function_or_method’&gt;</td>
+<td>True</td>
+<td></td>
+</tr>
+<tr>
+<td><code>__kwdefaults__</code></td>
+<td>&lt;class ‘dict’&gt;</td>
+<td>True</td>
+<td></td>
+</tr>
+<tr>
+<td><code>__le__</code></td>
+<td>&lt;class ‘method-wrapper’&gt;</td>
+<td>True</td>
+<td></td>
+</tr>
+<tr>
+<td><code>__lt__</code></td>
+<td>&lt;class ‘method-wrapper’&gt;</td>
+<td>True</td>
+<td></td>
+</tr>
+<tr>
+<td><code>__module__</code></td>
+<td>&lt;class ‘str’&gt;</td>
+<td>True</td>
+<td></td>
+</tr>
+<tr>
+<td><code>__name__</code></td>
+<td>&lt;class ‘str’&gt;</td>
+<td>True</td>
+<td></td>
+</tr>
+<tr>
+<td><code>__ne__</code></td>
+<td>&lt;class ‘method-wrapper’&gt;</td>
+<td>True</td>
+<td></td>
+</tr>
+<tr>
+<td><code>__new__</code></td>
+<td>&lt;class ‘builtin_function_or_method’&gt;</td>
+<td>True</td>
+<td></td>
+</tr>
+<tr>
+<td><code>__qualname__</code></td>
+<td>&lt;class ‘str’&gt;</td>
+<td>True</td>
+<td></td>
+</tr>
+<tr>
+<td><code>__reduce__</code></td>
+<td>&lt;class ‘builtin_function_or_method’&gt;</td>
+<td>True</td>
+<td></td>
+</tr>
+<tr>
+<td><code>__reduce_ex__</code></td>
+<td>&lt;class ‘builtin_function_or_method’&gt;</td>
+<td>True</td>
+<td></td>
+</tr>
+<tr>
+<td><code>__repr__</code></td>
+<td>&lt;class ‘method-wrapper’&gt;</td>
+<td>True</td>
+<td></td>
+</tr>
+<tr>
+<td><code>__setattr__</code></td>
+<td>&lt;class ‘method-wrapper’&gt;</td>
+<td>True</td>
+<td></td>
+</tr>
+<tr>
+<td><code>__sizeof__</code></td>
+<td>&lt;class ‘builtin_function_or_method’&gt;</td>
+<td>True</td>
+<td></td>
+</tr>
+<tr>
+<td><code>__str__</code></td>
+<td>&lt;class ‘method-wrapper’&gt;</td>
+<td>True</td>
+<td></td>
+</tr>
+<tr>
+<td><code>__subclasshook__</code></td>
+<td>&lt;class ‘builtin_function_or_method’&gt;</td>
+<td>True</td>
+<td></td>
+</tr>
+</tbody></table>
+<span id="more"></span>
+
+<h2 id="命名空间和作用域"><a href="#命名空间和作用域" class="headerlink" title="命名空间和作用域"></a>命名空间和作用域</h2><blockquote>
+<p><strong>NOTE</strong> 在传统的编程语言中，作用域（scope）就是一段程序代码中所用到的名字被限制的可用范围。本地（局部，local）作用域被限制在块或函数体内，而全局（global）作用域被限制在本地以上最长可达程序的生命周期结束。有些编程语言允许，在本地作用域内构建一个更低层次的本地作用域，低层作用域访问一个非本地的名字，它就会到较高层中寻找，逐层往上，直到找到或者最终不能找到。但是这会引出一个问题：定义在一个函数<code>outer</code>内的函数<code>inner</code>被作为返回值，<code>inner</code>中引用了<code>inner</code>中没有而在<code>outer</code>中有的名字，为了保证理论上的某些一致性，是否要求编译器提供一种被称为闭包（closure）的机制：<code>outer</code>中的这些名字及其引用应该继续保留在一个可被<code>inner</code>访问但对更高层作用域隐藏（并非指绝对不能被更高层发现）。<br>程序执行过程中，必定会处于某个作用域中，作用域其实是在维护一些名字对一些资源的占用关系。一旦程序离开某个作用域，那么注销其中的名字和释放对相关资源的占用往往被认为是唯一正确的。<br>在<kbd>CPython</kbd>中，命名空间（namespace）和作用域虽然联系紧密，但却是两个不同的概念。在传统的编程语言<kbd>C</kbd>中，全局作用域建立在堆上，而本地作用域建立在栈上，但是在<kbd>Python</kbd>中，命名空间实际上就是个字典，而回收资源又是另一回事了，不再是“销毁”，只是“解除”对资源的引用关系。对资源的管理基于另一套机制（引用计数和垃圾回收），它代理了资源的创建和销毁的操作，它依靠建立统计信息来实现有效的管理。<br>相关的情况非常复杂，但简单来说：更新全局命名空间<code>globals()</code>，会改变模块级别作用域中相应变量的值，但是更新本地命名空间<code>locals()</code>，其实际效果视所处情况会有所不同。在函数内还可以有本地作用域一说，但模块级别还是低于传统的全局概念的，在其上尚有<code>builtins</code>一级，而且解除一个模块对资源的占用关系更是轻而易举。命名空间也存在低级对高级的遮盖，这在面向对象中甚至可用来实现多态（polymorphism）。</p>
+</blockquote>
+<blockquote>
+<p><strong>NOTE</strong> <kbd>CPython</kbd>中对名字的寻找顺序：<code>locals</code> &gt; <code>closure</code> &gt; <code>globals</code> &gt; <code>builtins</code></p>
+</blockquote>
+<h3 id="1-全局命名空间和模块作用域"><a href="#1-全局命名空间和模块作用域" class="headerlink" title="1. 全局命名空间和模块作用域"></a>1. 全局命名空间和模块作用域</h3><blockquote>
+<p>更新全局命名空间<code>globals()</code>，会同时更新模块作用域中的变量</p>
+</blockquote>
+<hr>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>val = <span class="number">0</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="built_in">globals</span>()[<span class="string">&#x27;val&#x27;</span>] = <span class="number">1</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>val</span><br><span class="line"><span class="number">1</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="2-模块作用域中的本地命名空间"><a href="#2-模块作用域中的本地命名空间" class="headerlink" title="2. 模块作用域中的本地命名空间"></a>2. 模块作用域中的本地命名空间</h3><blockquote>
+<p>在模块作用域中，本地命名空间<code>locals()</code>等同于全局命名空间<code>globals()</code></p>
+</blockquote>
+<hr>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="built_in">locals</span>() <span class="keyword">is</span> <span class="built_in">globals</span>()</span><br><span class="line"><span class="literal">True</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>val = <span class="number">0</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="built_in">locals</span>()[<span class="string">&#x27;val&#x27;</span>] = <span class="number">1</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>val</span><br><span class="line"><span class="number">1</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="3-函数本地作用域中的本地命名空间"><a href="#3-函数本地作用域中的本地命名空间" class="headerlink" title="3.  函数本地作用域中的本地命名空间"></a>3.  函数本地作用域中的本地命名空间</h3><blockquote>
+<p>在本地作用域中，本地命名空间<code>locals()</code>的更新并不影响本地作用域中变量的值，反之不然</p>
+</blockquote>
+<hr>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">fn</span>():</span><br><span class="line">    val = <span class="number">0</span></span><br><span class="line">    <span class="built_in">locals</span>()[<span class="string">&#x27;val&#x27;</span>] = <span class="number">1</span></span><br><span class="line">    <span class="keyword">return</span> val</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>fn()</span><br><span class="line"><span class="number">0</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">fn</span>():</span><br><span class="line">    val = <span class="number">0</span></span><br><span class="line">    <span class="built_in">print</span>(<span class="built_in">locals</span>()[<span class="string">&#x27;val&#x27;</span>])</span><br><span class="line">    val = <span class="number">1</span></span><br><span class="line">    <span class="built_in">print</span>(<span class="built_in">locals</span>()[<span class="string">&#x27;val&#x27;</span>])</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>fn()</span><br><span class="line"><span class="number">0</span></span><br><span class="line"><span class="number">1</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<blockquote>
+<p>本地命名空间<code>locals()</code>包含本地作用域的名称和自由变量</p>
+</blockquote>
+<hr>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">outer</span>():</span><br><span class="line">    nval = <span class="number">0</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">inner</span>():</span><br><span class="line">        <span class="keyword">global</span> gval</span><br><span class="line">        <span class="keyword">nonlocal</span> nval</span><br><span class="line">        lval = <span class="number">1</span></span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">locals</span>()</span><br><span class="line">    <span class="keyword">return</span> inner</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>gval = <span class="number">0</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>outer()() <span class="comment"># ⚠️ 注意结果的顺序</span></span><br><span class="line">&#123;<span class="string">&#x27;lval&#x27;</span>: <span class="number">1</span>, <span class="string">&#x27;nval&#x27;</span>: <span class="number">0</span>&#125;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="4-本地命名空间和本地作用域的更新对闭包的影响"><a href="#4-本地命名空间和本地作用域的更新对闭包的影响" class="headerlink" title="4. 本地命名空间和本地作用域的更新对闭包的影响"></a>4. 本地命名空间和本地作用域的更新对闭包的影响</h3><blockquote>
+<p>和在本地作用域的赋值不同，对本地命名空间<code>locals()</code>的更新，不能为闭包所侦测和使用</p>
+</blockquote>
+<hr>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">val = <span class="number">0</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">outer</span>(<span class="params">mapping</span>):</span><br><span class="line">    <span class="built_in">locals</span>().update(mapping)</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">inner</span>():</span><br><span class="line">        <span class="keyword">return</span> val</span><br><span class="line">    <span class="keyword">return</span> inner</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>outer(<span class="built_in">dict</span>(val=<span class="number">1</span>))()</span><br><span class="line"><span class="number">0</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">outer</span>(<span class="params">mapping</span>):</span><br><span class="line">    val = <span class="number">0</span></span><br><span class="line">    <span class="built_in">locals</span>().update(mapping)</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">inner</span>():</span><br><span class="line">        <span class="keyword">return</span> val</span><br><span class="line">    <span class="keyword">return</span> inner</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>outer(<span class="built_in">dict</span>(val=<span class="number">1</span>))()</span><br><span class="line"><span class="number">0</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<blockquote>
+<p>并且在本地作用域的赋值，必须是显式的，使用<code>exec</code>和<code>eval</code>，同样只会更新相应的<code>gloabls</code>和<code>locals</code></p>
+</blockquote>
+<hr>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">outer</span>(<span class="params">mapping</span>):</span><br><span class="line">    <span class="keyword">for</span> key <span class="keyword">in</span> <span class="built_in">tuple</span>(mapping):</span><br><span class="line">        <span class="built_in">exec</span>(<span class="string">f&#x27;<span class="subst">&#123;key&#125;</span>=<span class="subst">&#123;key&#125;</span>&#x27;</span>, mapping, <span class="built_in">locals</span>())</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">inner</span>():</span><br><span class="line">        <span class="keyword">return</span> val</span><br><span class="line">    <span class="keyword">return</span> inner</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>outer(<span class="built_in">dict</span>(val=<span class="number">1</span>))()</span><br><span class="line">NameError: name <span class="string">&#x27;val&#x27;</span> <span class="keyword">is</span> <span class="keyword">not</span> defined</span><br></pre></td></tr></table></figure>
+
+<hr>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">outer</span>(<span class="params">mapping</span>):</span><br><span class="line">    <span class="keyword">for</span> key <span class="keyword">in</span> <span class="built_in">tuple</span>(mapping):</span><br><span class="line">        <span class="built_in">eval</span>(<span class="built_in">compile</span>(<span class="string">f&#x27;<span class="subst">&#123;key&#125;</span>=<span class="subst">&#123;key&#125;</span>&#x27;</span>, <span class="string">&#x27;&#x27;</span>, <span class="string">&#x27;single&#x27;</span>), mapping, <span class="built_in">locals</span>())</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">inner</span>():</span><br><span class="line">        <span class="keyword">return</span> val</span><br><span class="line">    <span class="keyword">return</span> inner</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>outer(<span class="built_in">dict</span>(val=<span class="number">1</span>))()</span><br><span class="line">NameError: name <span class="string">&#x27;val&#x27;</span> <span class="keyword">is</span> <span class="keyword">not</span> defined</span><br></pre></td></tr></table></figure>
+
+<hr>
+<blockquote>
+<p>总而言之，编程语言作为编译器或解释器的配置文件，编程语言的行为会受到解释器或编译器实现方式的限制。在<kbd>CPython</kbd>的实现中，在一定程度上可认为，本地作用域是静态的，本地命名空间是动态的，对本地作用域更新的过程，在编译时就已经确定了，而在运行时更新本地命名空间和动态编译代码执行，只会影响一些动态的局面。</p>
+</blockquote>
+<h2 id="函数利用缓存的研究"><a href="#函数利用缓存的研究" class="headerlink" title="函数利用缓存的研究"></a>函数利用缓存的研究</h2><blockquote>
+<p><strong>NOTE</strong> 一般地讲，系统<code>A</code>和系统<code>B</code>之间有通信，<code>B</code>可存储<code>A</code>发送过来的数据，并且当<code>A</code>索要时可原样返回，就能用<code>B</code>提供<code>A</code>的缓存需求。无论<code>A</code>用什么方式去访问<code>B</code>，它们之间的运作着怎样的通信协议，是本地还是通过网络。甚至<code>B</code>可以是<code>A</code>的一部分，或者<code>A</code>和<code>B</code>都是某个系统<code>C</code>的一部分，<code>A</code>借助了某些基础设施对<code>B</code>进行了操作，例如<code>B</code>是某个可读写存储器、它的驱动程序或者在存储器上构造的容器（container）数据结构和相关处理方法集合，就算这个存储器或数据结构在数据写入后就不可更改。<br>一般的，当我们在说缓存时，其实是说：以任意方式，把数据存储在容器中，需要的时候就从容器中获取。虽然并不规定使用次数，但合理的策略是至少使用到1次，🚫 使用0次的不应缓存。<br>实质上，缓存唯一问题是存储和访问，其它问题都是附加的。执行一次操作的结果被后续多次使用需求，就是业务问题对缓存的附加问题：把某个操作的结果存储起来，在以后需要用到时直接返回相应结果，而不是再次执行操作然后把结果返回。但一个操作，它可能：可进一步细分，操作的过程会改变一些对象的数据，多次执行的结果不同。缓存只是把结果存储起来，何时更新、何时失效取决于现实考虑和程序实现，如果需要使用缓存来自动处理其它问题，只要附加相关的处理逻辑即可。</p>
+</blockquote>
+<blockquote>
+<p><strong>NOTE</strong> 讨论一个特殊情形：假设函数<code>fn</code>需要引用某个数据，并且希望能在多次调用间持续。通常的做法是，在一个所属的高层命名空间或作用域中有名称绑定了这个引用或者这个名称所引用的容器直接或间接持有这个引用，然后在本地无冲突的策略下，使用名称和另外的间接操作去获取这个引用。使用名称去获取，并不保证每次获取的都是同一个引用，但在规则约束下，却是可以加以保证。</p>
+</blockquote>
+<h3 id="1-定义在函数体中"><a href="#1-定义在函数体中" class="headerlink" title="1. 定义在函数体中"></a>1. 定义在函数体中</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">fn</span>():</span><br><span class="line">    val = <span class="string">&#x27;&lt;time-consuming&gt;&#x27;</span></span><br><span class="line">    <span class="keyword">return</span> val</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>NOTE</strong> 如果<code>fn.__code__.co_consts</code>包含这项计算结果（解释器隐含地缓存了这项常量），那么意味着这项计算只在函数编译时执行一次，这个方案就是可取的</p>
+<ol>
+<li>某些字面量的简单计算</li>
+<li>函数(<code>def</code>和<code>lambda</code>)和类的定义（缓存的是code对象，⚠️在函数内定义的类，类似函数）</li>
+</ol>
+</blockquote>
+<blockquote>
+<p>⚠️ 缓存往往指的是一次操作的结果被多次使用，把数据保存在某个名称上，然后在需要使用的时间和地点，使用名称进行访问，那么广义上讲，保存在名称上的值，在其作用范围内，都是缓存的(cached)。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">val = <span class="string">&#x27;&lt;expr&gt;&#x27;</span></span><br><span class="line">...</span><br><span class="line"></span><br><span class="line"><span class="comment"># 此处是`val`或者某个`val`的引用者的作用范围</span></span><br><span class="line"><span class="comment"># 并包括`val`作为参数传入这个作用范围的情况</span></span><br><span class="line">use(val)</span><br></pre></td></tr></table></figure>
+<p>⚠️ 函数的基本信息在编译时就确定，在执行时又受到传入参数的影响。本地有哪些变量名，在编译时就确定，根据显式的赋值语句，以及函数和类的定义语句来判定。函数编译是一个多阶段的过程，如果函数<code>b</code>的定义嵌套在函数<code>a</code>的定义内，那么在<code>a</code>的本地变量名信息收集完成后，<code>b</code>才能被编译，但<code>b</code>的编译完成时间会早于<code>a</code>，<code>b</code>的某些上下文信息也会取自<code>a</code>，例如自由变量。<br>⚠️ 本地作用域中变量的赋值（包括函数和类的定义）是一个复杂机制，远远不是修改本地命名空间的名称和值的映射关系那么简单。这类赋值，会去修改多个地方，栈、本地命名空间、闭包的自由变量对应<code>cell</code>对象的<code>cell_contents</code>等。这种复杂性也是有成本的，主要影响运行时的效率。</p>
+</blockquote>
+<h3 id="2-定义在函数所在的全局命名空间中"><a href="#2-定义在函数所在的全局命名空间中" class="headerlink" title="2. 定义在函数所在的全局命名空间中"></a>2. 定义在函数所在的全局命名空间中</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">val = <span class="string">&#x27;&lt;time-consuming&gt;&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">fn</span>():</span><br><span class="line">    <span class="keyword">return</span> val</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>NOTE</strong> 这意味着会在全局命名空间中建立一个名称，有时候我们会认为，这是对全局命名空间的污染，尤其是当这个名称只被某一个函数用到时。函数的<code>__globals__</code>属性引用的就是所在的全局命名空间，不过这并不意味着这个命名空间保留着对它的引用。函数的<code>__globals__</code>属性是只读的，不过<code>__code__</code>属性是可替换的，可以创建一个功能相同的新函数，引用某个<code>dict</code>对象，充当它的全局命名空间。</p>
+</blockquote>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> functools</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> typing <span class="keyword">import</span> <span class="type">Optional</span>, <span class="type">Type</span></span><br><span class="line"></span><br><span class="line">Function = <span class="type">Type</span>[<span class="built_in">type</span>(<span class="keyword">lambda</span>:<span class="literal">None</span>)]</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">redirect_globals</span>(<span class="params"></span></span><br><span class="line"><span class="params">    namespace: <span class="built_in">dict</span>,</span></span><br><span class="line"><span class="params">    fn: <span class="type">Optional</span>[Function] = <span class="literal">None</span></span></span><br><span class="line"><span class="params"></span>) -&gt; Function:</span><br><span class="line">    <span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">    利用传入的命名空间`namespace`和函数`fn`，创建一个和`fn`功能和签名完全相同的函数，</span></span><br><span class="line"><span class="string">    但是__globals__属性为`namespace`的函数，要求`fn.__closure__`没有被设置</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    :param namespace: 作为新函数的全局命名空间</span></span><br><span class="line"><span class="string">    :param fn: 函数</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    :return: 和`fn`功能和签名完全相同，但全局命名空间为`namespace`的函数</span></span><br><span class="line"><span class="string">    &#x27;&#x27;&#x27;</span></span><br><span class="line">    <span class="keyword">if</span> fn <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">        <span class="keyword">return</span> functools.partial(redirect_globals, namespace)</span><br><span class="line">    f = <span class="built_in">eval</span>(<span class="string">&#x27;lambda: None&#x27;</span>, namespace)</span><br><span class="line">    <span class="comment"># `fn`的自由变量个数不为0时，会抛出`ValueError`，意味着它其实是一个闭包</span></span><br><span class="line">    <span class="comment"># 可根据`fn.__closure__`或`fn.__code__.co_freevars`判断</span></span><br><span class="line">    f.__code__ = fn.__code__</span><br><span class="line">    <span class="keyword">return</span> functools.update_wrapper(f, fn)</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-在函数的定义头中定义默认参数"><a href="#3-在函数的定义头中定义默认参数" class="headerlink" title="3. 在函数的定义头中定义默认参数"></a>3. 在函数的定义头中定义默认参数</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">fn</span>(<span class="params">val=<span class="string">&#x27;&lt;time-consuming&gt;&#x27;</span></span>):</span><br><span class="line">    <span class="keyword">return</span> val</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>NOTE</strong> 在定义头中定义，只在函数编译时执行一次，允许是任何表达式，无论它有多复杂。不过这种做法也会被认为污染了函数的签名，对使用者造成困惑，即便参数名以下划线开头。</p>
+</blockquote>
+<blockquote>
+<p><strong>NOTE</strong> 在函数头中定义默认参数，自动设置了它的<code>__defaults__</code>和<code>__kwdefaults__</code>的属性，它们都是可替换的，而且<code>__kwdefaults__</code>是一个普通的字典，本身就是可改的。在函数调用时，新传入的参数会遮盖这些默认参数，具体行为如下：</p>
+</blockquote>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">def</span> <span class="title function_">fn</span>(<span class="params">foo=<span class="number">1</span>, bar=<span class="number">2</span>, *, baz=<span class="string">&#x27;0&#x27;</span></span>): <span class="keyword">return</span> foo, bar, baz</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>fn.__defaults__</span><br><span class="line">(<span class="number">1</span>, <span class="number">2</span>)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>fn.__kwdefaults__</span><br><span class="line">&#123;<span class="string">&#x27;baz&#x27;</span>: <span class="string">&#x27;0&#x27;</span>&#125;</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>fn.__defaults__ = (<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>fn.__defaults__[<span class="string">&#x27;baz&#x27;</span>] = <span class="string">&#x27;inf&#x27;</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>fn()</span><br><span class="line">(<span class="number">2</span>, <span class="number">3</span>, <span class="string">&#x27;inf&#x27;</span>)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>fn(<span class="number">1</span>, <span class="number">2</span>, baz=<span class="number">3</span>)</span><br><span class="line">(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>fn.__defaults__ = (<span class="number">0</span>,)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>fn()</span><br><span class="line">Traceback (most recent call last):</span><br><span class="line">  File <span class="string">&quot;&lt;stdin&gt;&quot;</span>, line <span class="number">1</span>, <span class="keyword">in</span> &lt;module&gt;</span><br><span class="line">TypeError: fn() missing <span class="number">1</span> required positional argument: <span class="string">&#x27;foo&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>✍ 在定义头上的参数名称，是函数本地的，会计入<code>fn.__code__.co_nlocals</code>和<code>fn.__code__.co_varnames</code>中，但不会计入<code>fn.__code__.co_consts</code>中。位置参数计入<code>fn.__code__.co_argcount</code>，但可变长度参数不计入，例如<code>*args</code>。<code>__defaults__</code>和<code>__kwdefaults__</code>都是容器，这是解释器的自动缓存策略，编译函数除了生成机器（例如<kbd>PVM</kbd>）的字节码，还有收集上下文相关信息绑定到函数对象的过程。</p>
+</blockquote>
+<h3 id="4-闭包"><a href="#4-闭包" class="headerlink" title="4. 闭包"></a>4. 闭包</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">outer</span>():</span><br><span class="line">    val = <span class="string">&#x27;&lt;time-consuming&gt;&#x27;</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">fn</span>():</span><br><span class="line">        <span class="keyword">return</span> val</span><br><span class="line">    <span class="keyword">return</span> fn</span><br><span class="line"></span><br><span class="line">fn = outer()</span><br><span class="line"><span class="comment"># del outer</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>NOTE</strong> 如果使用闭包存粹是为了不污染全局命名空间，那么外层函数使用一次，把它的返回值绑定到一个变量后，就可以删除了。在<kbd>Python</kbd>中，使用<code>def</code>(也包括<code>async def</code>等<code>def</code>衍生)定义函数的构造被认为是语句而非表达式，用<code>lambda</code>定义函数的构造虽然是表达式，但是定义体中只允许用且只用1个表达式，运用这种技术就必须写一些<strong>冗余</strong>的代码。<kbd>JavaScript</kbd>的用户笑了😄，因为<kbd>JavaScript</kbd>中几乎所有结构都是表达式，意味着有返回值，这种性质可谓awesome。</p>
+</blockquote>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">fn = (<span class="keyword">function</span>(<span class="params"></span>)&#123;</span><br><span class="line">    val = <span class="string">&#x27;&lt;time-consuming&gt;&#x27;</span>;</span><br><span class="line">    <span class="keyword">return</span> <span class="function">() =&gt;</span> val;</span><br><span class="line">&#125;)()</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>Python的函数，也有一个设计问题，就是它们的<code>__closure__</code>属性是只读的。这可以理解，因为<code>__closure__</code>实际上和<code>__code__.co_freevars</code>存在关系，即便函数的<code>__code__</code>属性可被替换，但也要和<code>__closure__</code>属性协调，即并非所有的替换都能被接受。如果想构造一个只是<code>__closure__</code>属性不同，功能相同的函数，其实是比较麻烦的。</p>
+</blockquote>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> functools</span><br><span class="line"><span class="keyword">import</span> inspect</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> typing <span class="keyword">import</span> <span class="type">Optional</span>, <span class="type">Type</span>, Mapping</span><br><span class="line"></span><br><span class="line">Function = <span class="type">Type</span>[<span class="built_in">type</span>(<span class="keyword">lambda</span>:<span class="literal">None</span>)]</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">use_closure</span>(<span class="params"></span></span><br><span class="line"><span class="params">    namespace: Mapping,</span></span><br><span class="line"><span class="params">    fn: <span class="type">Optional</span>[Function] = <span class="literal">None</span></span></span><br><span class="line"><span class="params"></span>) -&gt; Function:</span><br><span class="line">    <span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">    利用传入的命名空间`namespace`和函数`fn`，创建一个和`fn`功能和签名完全相同的函数，</span></span><br><span class="line"><span class="string">    但是__closure__属性可能有所不同的函数</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    :param namespace: `fn`中的非本地变量会尝试从这个映射中提取</span></span><br><span class="line"><span class="string">    :param fn: 函数</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    :return: 和`fn`功能和签名完全相同，但尝试从`namespace`获取一些值来构建__closure__</span></span><br><span class="line"><span class="string">    &#x27;&#x27;&#x27;</span></span><br><span class="line">    <span class="keyword">if</span> fn <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">        <span class="keyword">return</span> functools.partial(use_closure, mapping)</span><br><span class="line">    assign = <span class="string">&#x27;\n    &#x27;</span>.join(<span class="built_in">map</span>(<span class="string">&#x27;&#123;0&#125; = __[&quot;&#123;0&#125;&quot;]&#x27;</span>.<span class="built_in">format</span>, mapping))</span><br><span class="line">    <span class="comment"># 获取的源代码，可能是不可用的，或者可能获取不到，对于lambda函数，这样的处理也是不适合的</span></span><br><span class="line">    source = <span class="string">&#x27;    &#x27;</span>.join(inspect.getsourcelines(fn)[<span class="number">0</span>])</span><br><span class="line">    <span class="built_in">exec</span>(<span class="string">f&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">def outer(__):</span></span><br><span class="line"><span class="string">    <span class="subst">&#123;assign&#125;</span></span></span><br><span class="line"><span class="string">    <span class="subst">&#123;source&#125;</span></span></span><br><span class="line"><span class="string">    return <span class="subst">&#123;fn.__name__&#125;</span></span></span><br><span class="line"><span class="string">&#x27;&#x27;&#x27;</span>, fn.__globals__, <span class="built_in">locals</span>())</span><br><span class="line">    <span class="keyword">return</span> functools.update_wrapper(<span class="built_in">locals</span>()[<span class="string">&#x27;outer&#x27;</span>](mapping), fn)</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>NOTE</strong> 虽然函数的<code>__closure__</code>属性不可更改，但是<code>__closure__</code>中所有<code>cell</code>对象的<code>cell_contents</code>是可更改的。完全可以精心设计函数定义，先占用几个<code>__closure__</code>位置，在以后需要的时候进行更改。</p>
+</blockquote>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">outer</span>():</span><br><span class="line">    val: <span class="built_in">int</span> = <span class="number">1</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">inner</span>():</span><br><span class="line">        <span class="keyword">return</span> val</span><br><span class="line">    <span class="keyword">return</span> inner</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>fn = outer()</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>fn.__closure__</span><br><span class="line">(&lt;cell at <span class="number">0x10e375d68</span>: <span class="built_in">int</span> <span class="built_in">object</span> at <span class="number">0x10e0105a0</span>&gt;,)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>fn.__closure__[<span class="number">0</span>].cell_contents = <span class="string">&#x27;foo&#x27;</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>fn.__closure__</span><br><span class="line">(&lt;cell at <span class="number">0x10e375d68</span>: <span class="built_in">str</span> <span class="built_in">object</span> at <span class="number">0x10e3dd180</span>&gt;,)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>fn()</span><br><span class="line"><span class="string">&#x27;foo&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>✍ 但我建议一种更为集中的管理办法，把数据保存到映射容器里面，推荐<code>dict</code></p>
+</blockquote>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">outer</span>():</span><br><span class="line">    _closure_ns: <span class="built_in">dict</span> = &#123;&#125;</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">inner</span>():</span><br><span class="line">        <span class="keyword">if</span> <span class="string">&#x27;val&#x27;</span> <span class="keyword">not</span> <span class="keyword">in</span> _closure_ns:</span><br><span class="line">            _closure_ns[<span class="string">&#x27;val&#x27;</span>] = <span class="string">&#x27;&lt;time-consuming&gt;&#x27;</span></span><br><span class="line">        val = _closure_ns[<span class="string">&#x27;val&#x27;</span>]</span><br><span class="line">        <span class="keyword">return</span> i</span><br><span class="line">    <span class="keyword">return</span> inner</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-nonlocal和global"><a href="#5-nonlocal和global" class="headerlink" title="5. nonlocal和global"></a>5. nonlocal和global</h3><blockquote>
+<p><strong>NOTE</strong> <code>nonlocal</code>用于声明某个名称是自由变量（非本地和模块层次，属于闭包层次作用域），而<code>global</code>用于声明某个名称是全局变量（<code>globals()</code>，模块层次作用域）。当一个函数调用结束后，在本地作用域建立的所有名称都会被销毁（体现为它们所引用对象的引用计数自动减小相应数目），包括：</p>
+<blockquote>
+<ol>
+<li>本地赋值的名称</li>
+<li>定义头中的名称</li>
+<li><code>nonlocal</code>和<code>global</code>声明的名称</li>
+</ol>
+</blockquote>
+<p><kbd>2.</kbd>中的默认参数和<kbd>3.</kbd>都有自动缓存，但每次执行时都需要拿缓存执行赋值，并不等同于传统语言的静态变量。当在本地用赋值语句修改自由变量的值时，会自动更新函数的<code>__closure__</code>中相应<code>cell</code>对象的<code>cell_content</code>的值，修改全局变量则时更新对应的模块层次命名空间<code>globals()</code>中的名称和值的映射关系。</p>
+</blockquote>
+<h3 id="6-容器"><a href="#6-容器" class="headerlink" title="6. 容器"></a>6. 容器</h3><blockquote>
+<p><strong>NOTE</strong> 容器包括作用域、命名空间、物理存储区域在逻辑上的管理机制等。缓存只是容器的运用之一，容器主要的功能在于实现程序的动态和数据的集中（更一般的说，数据结构实现了数据的秩序，容器是一类数据结构）。</p>
+</blockquote>
+<blockquote>
+<p><strong>NOTE</strong> 在函数的多次调用间持续引用需利用<strong>非本地的容器</strong>缓存：</p>
+<ol>
+<li>存储于比函数本地的更高层的作用域或命名空间者函数的默认参数中，一个<kbd>Python</kbd>函数会自动寻找未在本地声明而需要用到的名称；</li>
+<li>或者存储于上述非本地名称所引用的容器中。</li>
+</ol>
+</blockquote>
+<blockquote>
+<p>✍ 如果把缓存的使用封装到一条指令中，例如函数，它以上述方式引用了一个外部容器，由此可实现惰性计算和缓存。对于纯函数，相同的参数传入返回相同的结果，那么把具体参数和相应返回值建立关联，存入一个映射型容器中，那么每个不同的参数传入只需要计算一次。<br>如果让函数自动维护缓存，需要增加对容器的查询和写入的操作，查询是每次执行，写入执行一次（若有缓存删除则次数取决于算法和实际情况），这也是有成本的，需要和计算的成本进行权衡取舍。<br><code>functools.lru_cache</code>实现了 Least Recently Used 算法的缓存管理，缓存并非一直有效，当长时间不用的缓存将会被清理。这不是唯一的缓存管理算法，例如你还可以使用 LFU(Least Frequently Used) 等算法。</p>
+</blockquote>
+<blockquote>
+<p>✍ 命名空间（namespace）实际上是一个映射型的数据结构，尤其是散列表，被广泛用于充当命名空间。所谓名称定义在某个命名空间，实际上就是在命名空间有这个名称的名称-值对，访问某个命名空间中的某个名称，就是在这个命名空间中这个名称的名称-值对中的值。<br>通过名称，访问作用域或命名空间这类容器中的值，只能确保名称是确定的，而值要取得后才能确定，或者说，如果值发生变更那么取得值也是不同的，这让情况变得相当灵活和复杂多变。</p>
+</blockquote>
+</div><div class="article-licensing box"><div class="licensing-title"><p>CPython中函数的非本地变量</p><p><a href="https://chenyanggao.github.io/2019/04/30/2.CPython中函数的非本地变量/">https://chenyanggao.github.io/2019/04/30/2.CPython中函数的非本地变量/</a></p></div><div class="licensing-meta level is-mobile"><div class="level-left"><div class="level-item is-narrow"><div><h6>作者</h6><p>ChenyangGao</p></div></div><div class="level-item is-narrow"><div><h6>发布于</h6><p>2019-04-30</p></div></div><div class="level-item is-narrow"><div><h6>更新于</h6><p>2025-08-20</p></div></div><div class="level-item is-narrow"><div><h6>许可协议</h6><p><a class="icons" rel="noopener" target="_blank" title="Creative Commons" href="https://creativecommons.org/"><i class="icon fab fa-creative-commons"></i></a><a class="icons" rel="noopener" target="_blank" title="Attribution" href="https://creativecommons.org/licenses/by/4.0/"><i class="icon fab fa-creative-commons-by"></i></a><a class="icons" rel="noopener" target="_blank" title="Noncommercial" href="https://creativecommons.org/licenses/by-nc/4.0/"><i class="icon fab fa-creative-commons-nc"></i></a></p></div></div></div></div></div><div class="article-tags is-size-7 mb-4"><span class="mr-2">#</span><a class="link-muted mr-2" rel="tag" href="/tags/Python/">Python</a></div><!--!--></article></div><div class="card"><div class="card-content"><h3 class="menu-label has-text-centered">喜欢这篇文章？打赏一下作者吧</h3><div class="buttons is-centered"><a class="button donate" href="/" target="_blank" rel="noopener" data-type="buymeacoffee"><span class="icon is-small"><i class="fas fa-coffee"></i></span><span>送我杯咖啡</span></a></div></div></div><nav class="post-navigation mt-4 level is-mobile"><div class="level-start"><a class="article-nav-prev level level-item link-muted" href="/2019/05/28/3.%E5%88%A9%E7%94%A8%E5%BC%82%E5%B8%B8%E5%AE%9E%E7%8E%B0%E8%B6%8A%E7%BA%A7return%EF%BC%88Python%E5%AE%9E%E7%8E%B0%EF%BC%89/"><i class="level-item fas fa-chevron-left"></i><span class="level-item">利用异常实现越级return（Python实现）</span></a></div><div class="level-end"><a class="article-nav-next level level-item link-muted" href="/2019/04/28/1.%E6%A0%87%E5%87%86%E5%BC%8F%E5%8D%9A%E5%BC%88/"><span class="level-item">标准式博弈</span><i class="level-item fas fa-chevron-right"></i></a></div></nav><!--!--></div><div class="column column-left is-4-tablet is-4-desktop is-3-widescreen  order-1"><div class="card widget" data-type="profile"><div class="card-content"><nav class="level"><div class="level-item has-text-centered flex-shrink-1"><div><figure class="image is-128x128 mx-auto mb-2"><img class="avatar" src="https://octodex.github.com/images/hula_loop_octodex03.gif" alt="ChenyangGao"></figure><p class="title is-size-4 is-block" style="line-height:inherit;">ChenyangGao</p><p class="is-size-6 is-block">Thinker</p><p class="is-size-6 is-flex justify-content-center"><i class="fas fa-map-marker-alt mr-1"></i><span>China</span></p></div></div></nav><nav class="level is-mobile"><div class="level-item has-text-centered is-marginless"><div><p class="heading">文章</p><a href="/archives/"><p class="title">15</p></a></div></div><div class="level-item has-text-centered is-marginless"><div><p class="heading">分类</p><a href="/categories/"><p class="title">6</p></a></div></div><div class="level-item has-text-centered is-marginless"><div><p class="heading">标签</p><a href="/tags/"><p class="title">5</p></a></div></div></nav><div class="level"><a class="level-item button is-primary is-rounded" href="https://github.com/ChenyangGao" target="_blank" rel="me noopener">关注我</a></div></div></div><!--!--><div class="card widget" data-type="links"><div class="card-content"><div class="menu"><h3 class="menu-label">链接</h3><ul class="menu-list"><li><a class="level is-mobile" href="https://hexo.io" target="_blank" rel="noopener"><span class="level-left"><span class="level-item">Hexo</span></span><span class="level-right"><span class="level-item tag">hexo.io</span></span></a></li><li><a class="level is-mobile" href="https://bulma.io" target="_blank" rel="noopener"><span class="level-left"><span class="level-item">Bulma</span></span><span class="level-right"><span class="level-item tag">bulma.io</span></span></a></li></ul></div></div></div><div class="card widget" data-type="categories"><div class="card-content"><div class="menu"><h3 class="menu-label">分类</h3><ul class="menu-list"><li><a class="level is-mobile" href="/categories/%E6%95%B0%E5%AD%A6/"><span class="level-start"><span class="level-item">数学</span></span><span class="level-end"><span class="level-item tag">1</span></span></a><ul><li><a class="level is-mobile" href="/categories/%E6%95%B0%E5%AD%A6/%E7%BB%8F%E6%B5%8E%E5%AD%A6/"><span class="level-start"><span class="level-item">经济学</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li></ul></li><li><a class="level is-mobile" href="/categories/%E7%AE%80%E5%8D%95%E8%84%9A%E6%9C%AC/"><span class="level-start"><span class="level-item">简单脚本</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/categories/%E7%BC%96%E7%A8%8B%E6%80%9D%E6%83%B3/"><span class="level-start"><span class="level-item">编程思想</span></span><span class="level-end"><span class="level-item tag">5</span></span></a></li><li><a class="level is-mobile" href="/categories/%E8%84%9A%E6%9C%AC%E5%B7%A5%E5%85%B7/"><span class="level-start"><span class="level-item">脚本工具</span></span><span class="level-end"><span class="level-item tag">6</span></span></a></li><li><a class="level is-mobile" href="/categories/%E9%80%9A%E7%94%A8%E6%A8%A1%E5%9D%97/"><span class="level-start"><span class="level-item">通用模块</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li></ul></div></div></div><div class="card widget" data-type="tags"><div class="card-content"><div class="menu"><h3 class="menu-label">标签</h3><div class="field is-grouped is-grouped-multiline"><div class="control"><a class="tags has-addons" href="/tags/Module/"><span class="tag">Module</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Python/"><span class="tag">Python</span><span class="tag">12</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Script/"><span class="tag">Script</span><span class="tag">7</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Shell/"><span class="tag">Shell</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E5%8D%9A%E5%BC%88%E8%AE%BA/"><span class="tag">博弈论</span><span class="tag">1</span></a></div></div></div></div></div><div class="column-right-shadow is-hidden-widescreen"></div></div><div class="column column-right is-4-tablet is-4-desktop is-3-widescreen is-hidden-touch is-hidden-desktop-only order-3"><div class="card widget" data-type="recent-posts"><div class="card-content"><h3 class="menu-label">最新文章</h3><article class="media"><figure class="media-left"><a class="image" href="/2025/08/20/15.python%E7%9A%84%E5%AD%97%E5%85%B8%E5%92%8C%E9%9B%86%E5%90%88%E7%9A%84%E9%80%80%E5%8C%96/"><img src="https://cdn.pixabay.com/photo/2018/09/28/03/33/python-3708448_1280.jpg" alt="python的字典和集合的退化"></a></figure><div class="media-content"><p class="date"><time dateTime="2025-08-20T08:00:00.000Z">2025-08-20</time></p><p class="title"><a href="/2025/08/20/15.python%E7%9A%84%E5%AD%97%E5%85%B8%E5%92%8C%E9%9B%86%E5%90%88%E7%9A%84%E9%80%80%E5%8C%96/">python的字典和集合的退化</a></p><p class="categories"><a href="/categories/%E7%BC%96%E7%A8%8B%E6%80%9D%E6%83%B3/">编程思想</a></p></div></article><article class="media"><figure class="media-left"><a class="image" href="/2023/08/02/14.%E5%9C%A8Linux:MacOSX%E4%B8%8A%E9%83%A8%E7%BD%B2AList%E5%92%8Cclouddrive/"><img src="https://cdn.pixabay.com/photo/2015/08/21/00/21/library-898333_1280.jpg" alt="在Linux/MacOSX上部署AList和clouddrive"></a></figure><div class="media-content"><p class="date"><time dateTime="2023-08-02T08:00:00.000Z">2023-08-02</time></p><p class="title"><a href="/2023/08/02/14.%E5%9C%A8Linux:MacOSX%E4%B8%8A%E9%83%A8%E7%BD%B2AList%E5%92%8Cclouddrive/">在Linux/MacOSX上部署AList和clouddrive</a></p><p class="categories"><a href="/categories/%E7%AE%80%E5%8D%95%E8%84%9A%E6%9C%AC/">简单脚本</a></p></div></article><article class="media"><figure class="media-left"><a class="image" href="/2022/09/08/13.Python%E6%A8%A1%E5%9D%97-pandas.DataFrame%E8%BD%ACExcel%E6%A0%BC%E5%BC%8F%E7%9A%84bytes%E6%95%B0%E6%8D%AE/"><img src="https://cdn.pixabay.com/photo/2013/12/10/18/22/green-tree-python-226553_1280.jpg" alt="Python模块-pandas.DataFrame转Excel格式的bytes数据"></a></figure><div class="media-content"><p class="date"><time dateTime="2022-09-08T10:00:00.000Z">2022-09-08</time></p><p class="title"><a href="/2022/09/08/13.Python%E6%A8%A1%E5%9D%97-pandas.DataFrame%E8%BD%ACExcel%E6%A0%BC%E5%BC%8F%E7%9A%84bytes%E6%95%B0%E6%8D%AE/">Python模块-pandas.DataFrame转Excel格式的bytes数据</a></p><p class="categories"><a href="/categories/%E9%80%9A%E7%94%A8%E6%A8%A1%E5%9D%97/">通用模块</a></p></div></article><article class="media"><figure class="media-left"><a class="image" href="/2022/09/01/12.Python%E6%A8%A1%E5%9D%97-%E6%89%93%E5%8C%85%E5%A4%9A%E4%B8%AA%E5%8F%82%E6%95%B0%E4%BA%8E%E4%B8%80%E4%BD%93/"><img src="https://cdn.pixabay.com/photo/2014/12/11/22/10/python-564817_1280.jpg" alt="Python模块-打包多个参数于一体"></a></figure><div class="media-content"><p class="date"><time dateTime="2022-09-01T08:00:00.000Z">2022-09-01</time></p><p class="title"><a href="/2022/09/01/12.Python%E6%A8%A1%E5%9D%97-%E6%89%93%E5%8C%85%E5%A4%9A%E4%B8%AA%E5%8F%82%E6%95%B0%E4%BA%8E%E4%B8%80%E4%BD%93/">Python模块-打包多个参数于一体</a></p><p class="categories"><a href="/categories/%E9%80%9A%E7%94%A8%E6%A8%A1%E5%9D%97/">通用模块</a></p></div></article><article class="media"><figure class="media-left"><a class="image" href="/2022/08/30/11.Python%E8%84%9A%E6%9C%AC%E8%AE%BE%E7%BD%AEpip%E7%B4%A2%E5%BC%95%E6%BA%90/"><img src="https://cdn.pixabay.com/photo/2016/02/27/10/26/snake-1225370_1280.jpg" alt="Python脚本设置pip索引源"></a></figure><div class="media-content"><p class="date"><time dateTime="2022-08-30T07:00:00.000Z">2022-08-30</time></p><p class="title"><a href="/2022/08/30/11.Python%E8%84%9A%E6%9C%AC%E8%AE%BE%E7%BD%AEpip%E7%B4%A2%E5%BC%95%E6%BA%90/">Python脚本设置pip索引源</a></p><p class="categories"><a href="/categories/%E8%84%9A%E6%9C%AC%E5%B7%A5%E5%85%B7/">脚本工具</a></p></div></article></div></div><div class="card widget" data-type="archives"><div class="card-content"><div class="menu"><h3 class="menu-label">归档</h3><ul class="menu-list"><li><a class="level is-mobile" href="/archives/2025/08/"><span class="level-start"><span class="level-item">八月 2025</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2023/08/"><span class="level-start"><span class="level-item">八月 2023</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2022/09/"><span class="level-start"><span class="level-item">九月 2022</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/archives/2022/08/"><span class="level-start"><span class="level-item">八月 2022</span></span><span class="level-end"><span class="level-item tag">6</span></span></a></li><li><a class="level is-mobile" href="/archives/2019/07/"><span class="level-start"><span class="level-item">七月 2019</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/archives/2019/05/"><span class="level-start"><span class="level-item">五月 2019</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2019/04/"><span class="level-start"><span class="level-item">四月 2019</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li></ul></div></div></div></div></div></div></section><footer class="footer"><div class="container"><div class="level"><div class="level-start"><a class="footer-logo is-block mb-2" href="/">思考者</a><p class="is-size-7"><span>&copy; 2025 ChenyangGao</span>  Powered by <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a> &amp; <a href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank" rel="noopener">Icarus</a><br><span id="busuanzi_container_site_uv">共<span id="busuanzi_value_site_uv">0</span>个访客</span></p></div><div class="level-end"></div></div></div></footer><script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script><script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script><script>moment.locale("zh-cn");</script><script>var IcarusThemeSettings = {
+            article: {
+                highlight: {
+                    clipboard: true,
+                    fold: 'unfolded'
+                }
+            }
+        };</script><script data-pjax src="/js/column.js"></script><script src="/js/animation.js"></script><a id="back-to-top" title="回到顶端" href="javascript:;"><i class="fas fa-chevron-up"></i></a><script data-pjax src="/js/back_to_top.js" defer></script><!--!--><script src="https://cdn.jsdelivr.net/npm/cookieconsent@3.1.1/build/cookieconsent.min.js" defer></script><script>window.addEventListener("load", () => {
+      window.cookieconsent.initialise({
+        type: "info",
+        theme: "edgeless",
+        static: false,
+        position: "bottom-left",
+        content: {
+          message: "此网站使用Cookie来改善您的体验。",
+          dismiss: "知道了！",
+          allow: "允许使用Cookie",
+          deny: "拒绝",
+          link: "了解更多",
+          policy: "Cookie政策",
+          href: "https://www.cookiesandyou.com/",
+        },
+        palette: {
+          popup: {
+            background: "#edeff5",
+            text: "#838391"
+          },
+          button: {
+            background: "#4b81e8"
+          },
+        },
+      });
+    });</script><script src="https://cdn.jsdelivr.net/npm/lightgallery@1.10.0/dist/js/lightgallery.min.js" defer></script><script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.8.1/dist/js/jquery.justifiedGallery.min.js" defer></script><script>window.addEventListener("load", () => {
+            if (typeof $.fn.lightGallery === 'function') {
+                $('.article').lightGallery({ selector: '.gallery-item' });
+            }
+            if (typeof $.fn.justifiedGallery === 'function') {
+                if ($('.justified-gallery > p > .gallery-item').length) {
+                    $('.justified-gallery > p > .gallery-item').unwrap();
+                }
+                $('.justified-gallery').justifiedGallery();
+            }
+        });</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.css"><script src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.js" defer></script><script src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/contrib/auto-render.min.js" defer></script><script src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/contrib/mhchem.min.js" defer></script><script>window.addEventListener("load", function() {
+            document.querySelectorAll('[role="article"] > .content').forEach(function(element) {
+                renderMathInElement(element);
+            });
+        });</script><script type="text/javascript" id="MathJax-script" async>MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']]
+      },
+      svg: {
+        fontCache: 'global'
+      },
+      chtml: {
+        matchFontHeight: false
+      }
+    };</script><script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js"></script><div id="outdated"><h6>Your browser is out-of-date!</h6><p>Update your browser to view this website correctly.&amp;npsb;<a id="btnUpdateBrowser" href="http://outdatedbrowser.com/">Update my browser now </a></p><p class="last"><a href="#" id="btnCloseUpdateBrowser" title="Close">×</a></p></div><script src="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.js" defer></script><script>window.addEventListener("load", function () {
+            outdatedBrowser({
+                bgColor: '#f25648',
+                color: '#ffffff',
+                lowerThan: 'object-fit' // display on IE11 or below
+            });
+        });</script><script src="https://cdn.jsdelivr.net/npm/pjax@0.2.8/pjax.min.js"></script><script src="/js/pjax.js"></script><!--!--><script data-pjax src="/js/main.js" defer></script><div class="searchbox"><div class="searchbox-container"><div class="searchbox-header"><div class="searchbox-input-container"><input class="searchbox-input" type="text" placeholder="想要查找什么..."></div><a class="searchbox-close" href="javascript:;">×</a></div><div class="searchbox-body"></div></div></div><script data-pjax src="/js/insight.js" defer></script><script data-pjax>document.addEventListener('DOMContentLoaded', function () {
+            loadInsight({"contentUrl":"/content.json"}, {"hint":"想要查找什么...","untitled":"(无标题)","posts":"文章","pages":"页面","categories":"分类","tags":"标签"});
+        });</script></body></html>

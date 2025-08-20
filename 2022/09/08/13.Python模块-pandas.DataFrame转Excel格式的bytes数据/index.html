@@ -1,0 +1,573 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><meta><title>Python模块-pandas.DataFrame转Excel格式的bytes数据 - 思考者</title><link rel="manifest" href="/manifest.json"><meta name="application-name" content="ChenyangGao&#039;s Blog"><meta name="msapplication-TileImage" content="/img/favicon.svg"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="ChenyangGao&#039;s Blog"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="description" content="背景 pandas is an open source, BSD-licensed library providing high-performance, easy-to-use data structures and data analysis tools for the Python programming language.  数据分析工具包 pandas，是利用 Python 进行数据分析"><meta property="og:type" content="blog"><meta property="og:title" content="Python模块-pandas.DataFrame转Excel格式的bytes数据"><meta property="og:url" content="https://chenyanggao.github.io/2022/09/08/13.Python%E6%A8%A1%E5%9D%97-pandas.DataFrame%E8%BD%ACExcel%E6%A0%BC%E5%BC%8F%E7%9A%84bytes%E6%95%B0%E6%8D%AE/"><meta property="og:site_name" content="思考者"><meta property="og:description" content="背景 pandas is an open source, BSD-licensed library providing high-performance, easy-to-use data structures and data analysis tools for the Python programming language.  数据分析工具包 pandas，是利用 Python 进行数据分析"><meta property="og:locale" content="zh_CN"><meta property="og:image" content="https://cdn.pixabay.com/photo/2013/12/10/18/22/green-tree-python-226553_1280.jpg"><meta property="article:published_time" content="2022-09-08T10:00:00.000Z"><meta property="article:modified_time" content="2025-08-20T09:55:19.367Z"><meta property="article:author" content="ChenyangGao"><meta property="article:tag" content="Python"><meta property="article:tag" content="Module"><meta property="twitter:card" content="summary"><meta property="twitter:image:src" content="https://cdn.pixabay.com/photo/2013/12/10/18/22/green-tree-python-226553_1280.jpg"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"https://chenyanggao.github.io/2022/09/08/13.Python%E6%A8%A1%E5%9D%97-pandas.DataFrame%E8%BD%ACExcel%E6%A0%BC%E5%BC%8F%E7%9A%84bytes%E6%95%B0%E6%8D%AE/"},"headline":"Python模块-pandas.DataFrame转Excel格式的bytes数据","image":["https://cdn.pixabay.com/photo/2013/12/10/18/22/green-tree-python-226553_1280.jpg"],"datePublished":"2022-09-08T10:00:00.000Z","dateModified":"2025-08-20T09:55:19.367Z","author":{"@type":"Person","name":"ChenyangGao"},"publisher":{"@type":"Organization","name":"思考者","logo":{"@type":"ImageObject"}},"description":"背景 pandas is an open source, BSD-licensed library providing high-performance, easy-to-use data structures and data analysis tools for the Python programming language.  数据分析工具包 pandas，是利用 Python 进行数据分析"}</script><link rel="canonical" href="https://chenyanggao.github.io/2022/09/08/13.Python%E6%A8%A1%E5%9D%97-pandas.DataFrame%E8%BD%ACExcel%E6%A0%BC%E5%BC%8F%E7%9A%84bytes%E6%95%B0%E6%8D%AE/"><link rel="icon" href="/img/favicon.svg"><link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.0.0/css/all.css"><link data-pjax rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.7.0/styles/atom-one-light.css"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;600&amp;family=Source+Code+Pro"><link data-pjax rel="stylesheet" href="/css/default.css"><style>body>.footer,body>.navbar,body>.section{opacity:0}</style><!--!--><script src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" defer></script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cookieconsent@3.1.1/build/cookieconsent.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@1.10.0/dist/css/lightgallery.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/justifiedGallery@3.8.1/dist/css/justifiedGallery.min.css"><!--!--><!--!--><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.css"><!--!--><style>.pace{-webkit-pointer-events:none;pointer-events:none;-webkit-user-select:none;-moz-user-select:none;user-select:none}.pace-inactive{display:none}.pace .pace-progress{background:#3273dc;position:fixed;z-index:2000;top:0;right:100%;width:100%;height:2px}</style><script src="https://cdn.jsdelivr.net/npm/pace-js@1.2.4/pace.min.js"></script><!-- hexo injector head_end start --><script>
+  (function () {
+      function switchTab() {
+          if (!location.hash) {
+            return;
+          }
+
+          const id = '#' + CSS.escape(location.hash.substring(1));
+          const $tabMenu = document.querySelector(`.tabs a[href="${id}"]`);
+          if (!$tabMenu) {
+            return;
+          }
+
+          const $tabMenuContainer = $tabMenu.parentElement.parentElement;
+          Array.from($tabMenuContainer.children).forEach($menu => $menu.classList.remove('is-active'));
+          Array.from($tabMenuContainer.querySelectorAll('a'))
+              .map($menu => document.getElementById($menu.getAttribute("href").substring(1)))
+              .forEach($content => $content.classList.add('is-hidden'));
+
+          if ($tabMenu) {
+              $tabMenu.parentElement.classList.add('is-active');
+          }
+          const $activeTab = document.querySelector(id);
+          if ($activeTab) {
+              $activeTab.classList.remove('is-hidden');
+          }
+      }
+      switchTab();
+      window.addEventListener('hashchange', switchTab, false);
+  })();
+  </script><!-- hexo injector head_end end --><meta name="generator" content="Hexo 7.3.0"></head><body class="is-3-column"><nav class="navbar navbar-main"><div class="container navbar-container"><div class="navbar-brand justify-content-center"><a class="navbar-item navbar-logo" href="/">思考者</a></div><div class="navbar-menu"><div class="navbar-start"><a class="navbar-item" href="/">Home</a><a class="navbar-item" href="/archives">Archives</a><a class="navbar-item" href="/categories">Categories</a><a class="navbar-item" href="/tags">Tags</a><a class="navbar-item" href="/about">About</a></div><div class="navbar-end"><a class="navbar-item search" title="搜索" href="javascript:;"><i class="fas fa-search"></i></a></div></div></div></nav><section class="section"><div class="container"><div class="columns"><div class="column order-2 column-main is-8-tablet is-8-desktop is-6-widescreen"><div class="card"><div class="card-image"><span class="image is-7by3"><img class="fill" src="https://cdn.pixabay.com/photo/2013/12/10/18/22/green-tree-python-226553_1280.jpg" alt="Python模块-pandas.DataFrame转Excel格式的bytes数据"></span></div><article class="card-content article" role="article"><div class="article-meta is-size-7 is-uppercase level is-mobile"><div class="level-left"><span class="level-item"><time dateTime="2022-09-08T10:00:00.000Z" title="2022/9/8 18:00:00">2022-09-08</time>发表</span><span class="level-item"><time dateTime="2025-08-20T09:55:19.367Z" title="2025/8/20 17:55:19">2025-08-20</time>更新</span><span class="level-item"> ChenyangGao </span><span class="level-item"><a class="link-muted" href="/categories/%E9%80%9A%E7%94%A8%E6%A8%A1%E5%9D%97/">通用模块</a></span><span class="level-item">29 分钟读完 (大约4308个字)</span><span class="level-item" id="busuanzi_container_page_pv"><span id="busuanzi_value_page_pv">0</span>次访问</span></div></div><h1 class="title is-3 is-size-4-mobile">Python模块-pandas.DataFrame转Excel格式的bytes数据</h1><div class="content"><h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><blockquote>
+<p><a href="https://pandas.pydata.org/">pandas</a> is an open source, <a href="https://en.wikipedia.org/wiki/BSD_licenses">BSD-licensed</a> library providing high-performance, easy-to-use data structures and data analysis tools for the <a href="https://www.python.org/">Python</a> programming language.</p>
+</blockquote>
+<p>数据分析工具包 <kbd>pandas</kbd>，是利用 <kbd>Python</kbd> 进行数据分析时，一个难以割舍的选项。它的官方文档 <a href="https://pandas.pydata.org/docs/">pandas&#x2F;docs</a> 示例非常丰富，而且它的作者 <a href="https://wesmckinney.com/">Wes McKinney</a> 另外还写了一本书 <a href="https://wesmckinney.com/book/">Python for Data Analysis</a>，截至目前已经更新到第 3 版，<a href="https://salttiger.com/python-for-data-analysis-3rd-edition/">👆点击下载</a>。<br>中国国内也有热心网友做了免费的翻译分享，这是第 2 版，<a href="https://www.jianshu.com/p/fad9e41c1a42">简书-《Python数据分析》2nd</a>。<br><img src="https://learning.oreilly.com/library/cover/9781098104023/1200w/" alt="Python for Data Analysis, 3rd Edition"></p>
+<p>我曾经实现过一个单机部署的 <a href="https://en.wikipedia.org/wiki/Extract,_transform,_load">ETL (extract, transform, load)</a> 程序，三个步骤都基于 <kbd>pandas</kbd> 实现。不过这个程序最常用的功能，却仅仅是定时读取一批 <a href="https://en.wikipedia.org/wiki/SQL">SQL</a>，然后写入 <a href="https://www.microsoft.com/en-us/microsoft-365/excel">Excel</a>，最后把这些 Excel 文件作为邮件附件进行发送，真是杀鸡用牛刀😂。</p>
+<p>其实，我个人并不太喜欢使用 Excel 文件，先不论 Excel 那缓慢的打开速度，它的一个工作表最多也只能有 <strong>1048576</strong>（2^20） 行和 <strong>16384</strong>（2^14） 列，工作表名字最多 <strong>31</strong> 个字符。所以在我看来，<a href="https://en.wikipedia.org/wiki/Comma-separated_values">CSV</a> 才是更好的选项。</p>
+<p>在那个 <code>ETL</code> 中，只允许从每个源读取一个 <kbd>pandas</kbd> 的 <code>DataFrame</code>，但在输出时，可以把多个 <code>DataFrame</code> 输出到一个目标里面。对于一种这类情况，即把多个 <code>DataFrame</code> 输出到同一个 <code>Excel</code> 工作簿，如果这个目标之后再作为一个源时，就不好处理了。如果这是最终的输出，而不是管道的一个中间环节，却是可以接受的。</p>
+<p><code>Excel</code> 最大的问题是工作表的规模有限，如果你的表格的规格超出 <strong>1048576</strong>×<strong>16384</strong>，也就是这个矩形不能把你数据表格完全盖住，你就得对 <code>DataFrame</code> 进行拆分。一般来说，我个人是不推荐做拆分的。我的建议是，一个工作簿，只开一个工作表，如果一个工作表存储不下，那就用 <code>CSV</code> 或者 <a href="https://en.wikipedia.org/wiki/Hierarchical_Data_Format">hdf5</a> 格式。</p>
+<span id="more"></span>
+
+<h2 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h2><blockquote>
+<p><strong>TIPS</strong> 代码的最新版本在 <a href="https://gist.github.com/ChenyangGao">GitHub Gist</a> 中维护<br><a href="https://gist.github.com/ChenyangGao/6a3f6177ce8da748413ce304156588f9">https://gist.github.com/ChenyangGao/6a3f6177ce8da748413ce304156588f9</a></p>
+</blockquote>
+<p>文件名称是 <code>pandas_to_excel_bytes.py</code>，<kbd>Python</kbd> 实现代码如下：</p>
+<figure class="highlight python"><figcaption><span>pandas_to_excel_bytes.py</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br><span class="line">251</span><br><span class="line">252</span><br><span class="line">253</span><br><span class="line">254</span><br><span class="line">255</span><br><span class="line">256</span><br><span class="line">257</span><br><span class="line">258</span><br><span class="line">259</span><br><span class="line">260</span><br><span class="line">261</span><br><span class="line">262</span><br><span class="line">263</span><br><span class="line">264</span><br><span class="line">265</span><br><span class="line">266</span><br><span class="line">267</span><br><span class="line">268</span><br><span class="line">269</span><br><span class="line">270</span><br><span class="line">271</span><br><span class="line">272</span><br><span class="line">273</span><br><span class="line">274</span><br><span class="line">275</span><br><span class="line">276</span><br><span class="line">277</span><br><span class="line">278</span><br><span class="line">279</span><br><span class="line">280</span><br><span class="line">281</span><br><span class="line">282</span><br><span class="line">283</span><br><span class="line">284</span><br><span class="line">285</span><br><span class="line">286</span><br><span class="line">287</span><br><span class="line">288</span><br><span class="line">289</span><br><span class="line">290</span><br><span class="line">291</span><br><span class="line">292</span><br><span class="line">293</span><br><span class="line">294</span><br><span class="line">295</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python3</span></span><br><span class="line"><span class="comment"># coding: utf-8</span></span><br><span class="line"></span><br><span class="line"><span class="string">&quot;&quot;&quot;这个模块提供了工具函数，可以把 `pandas` 的 `DataFrame` 转换成</span></span><br><span class="line"><span class="string">xlsx 格式的 Excel 文件的二进制数据</span></span><br><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">__author__ = <span class="string">&quot;ChenyangGao &lt;https://chenyanggao.github.io/&gt;&quot;</span></span><br><span class="line">__version__ = (<span class="number">0</span>, <span class="number">1</span>)</span><br><span class="line">__all__ = [<span class="string">&quot;df_to_excel_bytes&quot;</span>, <span class="string">&quot;sql_to_excel_bytes&quot;</span>]</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> concurrent.futures <span class="keyword">import</span> ThreadPoolExecutor</span><br><span class="line"><span class="keyword">from</span> contextlib <span class="keyword">import</span> contextmanager</span><br><span class="line"><span class="keyword">from</span> io <span class="keyword">import</span> BytesIO </span><br><span class="line"><span class="keyword">from</span> os <span class="keyword">import</span> PathLike</span><br><span class="line"><span class="keyword">from</span> typing <span class="keyword">import</span> cast, Final, Iterable, IO, TypeVar, <span class="type">Union</span></span><br><span class="line"><span class="keyword">from</span> types <span class="keyword">import</span> MappingProxyType, MethodType</span><br><span class="line"><span class="keyword">from</span> warnings <span class="keyword">import</span> warn</span><br><span class="line"></span><br><span class="line"><span class="comment"># 安装 [pandas-stubs](https://pypi.org/project/pandas-stubs/) 以静态检查</span></span><br><span class="line"><span class="keyword">from</span> pandas <span class="keyword">import</span> read_sql, DataFrame, ExcelWriter, RangeIndex</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">IO_T = TypeVar(<span class="string">&quot;IO_T&quot;</span>, <span class="built_in">bytes</span>, <span class="built_in">str</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Excel 的工作表名有一些非法字符 []:*?/\\，需要把出现的非法字符变成合法字符 _</span></span><br><span class="line">EXCEL_SHEETNAME_INVALID_CHARS_TRANSTABLE: Final[MappingProxyType] = \</span><br><span class="line">    MappingProxyType(<span class="built_in">dict</span>.fromkeys(<span class="built_in">map</span>(<span class="built_in">ord</span>, <span class="string">&quot;[]:*?/\\&quot;</span>), <span class="string">&quot;_&quot;</span>))</span><br><span class="line"></span><br><span class="line"><span class="comment"># xlsx 格式的 Excel 文件，最大的行数</span></span><br><span class="line">SHEET_MAX_NROWS: Final[<span class="built_in">int</span>] = <span class="number">2</span> ** <span class="number">20</span></span><br><span class="line"><span class="comment"># xlsx 格式的 Excel 文件，最大的列数</span></span><br><span class="line">SHEET_MAX_NCOLS: Final[<span class="built_in">int</span>] = <span class="number">2</span> ** <span class="number">14</span></span><br><span class="line"><span class="comment"># xlsx 格式的 Excel 文件，工作表名最大的字符数</span></span><br><span class="line">SHEETNAME_MAX_LENGTH: Final[<span class="built_in">int</span>] = <span class="number">31</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">read_io</span>(<span class="params">fio: IO[IO_T], /</span>) -&gt; IO_T:</span><br><span class="line">    <span class="string">&quot;从头读取一个 IO 对象的数据&quot;</span></span><br><span class="line">    pos: <span class="built_in">int</span> = fio.tell()</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        fio.seek(<span class="number">0</span>)</span><br><span class="line">        <span class="keyword">return</span> fio.read()</span><br><span class="line">    <span class="keyword">finally</span>:</span><br><span class="line">        fio.seek(pos)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@contextmanager</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">ctx_df_to_excel_bytes</span>(<span class="params">**kwargs</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;上下文管理器。</span></span><br><span class="line"><span class="string">    把 `pandas` 的 `DataFrame` 对象转换成 xlsx 格式的 Excel 文件的字节数据</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    :param kwargs: 关键字参数传给 `pandas` 的 `ExcelWriter` 构造器</span></span><br><span class="line"><span class="string">        &gt; 请参考: pandas.io.Excel._base.ExcelWriter</span></span><br><span class="line"><span class="string">        &gt; https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.ExcelWriter.html</span></span><br><span class="line"><span class="string">    :return: 上下文管理器，返回一个 `pandas` 的 `ExcelWriter` 对象，</span></span><br><span class="line"><span class="string">        但是增加了 3 个属性：</span></span><br><span class="line"><span class="string">        - bio: Excel 数据将被写入这个 `io.Bytes` 对象</span></span><br><span class="line"><span class="string">        - read: 从 `bio` 中读取 Excel 数据</span></span><br><span class="line"><span class="string">        - write: 把 `bio` 中的 Excel 数据写入一个路径</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    Example::</span></span><br><span class="line"><span class="string">        &gt;&gt;&gt; import pandas as pd</span></span><br><span class="line"><span class="string">        &gt;&gt;&gt; df = pd.DataFrame([[1,2],[3,4]])</span></span><br><span class="line"><span class="string">        &gt;&gt;&gt; with ctx_df_to_excel_bytes() as writer:</span></span><br><span class="line"><span class="string">        ...     for i in range(10):</span></span><br><span class="line"><span class="string">        ...         df.to_excel(writer, sheet_name=str(i), index=False)</span></span><br><span class="line"><span class="string">        &gt;&gt;&gt; data = writer.read()</span></span><br><span class="line"><span class="string">        &gt;&gt;&gt; df2 = pd.read_excel(data, sheet_name=&quot;5&quot;)</span></span><br><span class="line"><span class="string">        &gt;&gt;&gt; (df == df2).all(None)</span></span><br><span class="line"><span class="string">        True</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    bio = kwargs[<span class="string">&quot;path&quot;</span>] = BytesIO()</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">read</span>(<span class="params">self</span>) -&gt; <span class="built_in">bytes</span>:</span><br><span class="line">        <span class="keyword">return</span> read_io(<span class="variable language_">self</span>.bio)</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">write</span>(<span class="params">self, path: <span class="type">Union</span>[<span class="built_in">bytes</span>, <span class="built_in">int</span>, PathLike]</span>) -&gt; <span class="built_in">int</span>:</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">open</span>(path, <span class="string">&quot;wb&quot;</span>).write(read(<span class="variable language_">self</span>))</span><br><span class="line">    <span class="keyword">with</span> ExcelWriter(**kwargs) <span class="keyword">as</span> writer:</span><br><span class="line">        <span class="built_in">setattr</span>(writer, <span class="string">&quot;bio&quot;</span>, bio)</span><br><span class="line">        <span class="built_in">setattr</span>(writer, <span class="string">&quot;read&quot;</span>, MethodType(read, writer))</span><br><span class="line">        <span class="built_in">setattr</span>(writer, <span class="string">&quot;write&quot;</span>, MethodType(write, writer))</span><br><span class="line">        <span class="keyword">yield</span> writer</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">df_to_excel_bytes</span>(<span class="params"></span></span><br><span class="line"><span class="params">    dfs: <span class="type">Union</span>[DataFrame, <span class="built_in">dict</span>[<span class="built_in">str</span>, DataFrame], Iterable[DataFrame]]</span></span><br><span class="line"><span class="params"></span>) -&gt; <span class="built_in">bytes</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;把 `pandas` 的 `DataFrame` 对象转换成 xlsx 格式的 Excel 文件的字节数据</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    :param dfs: 一个或一批 `pandas` 的 `DataFrame` 对象</span></span><br><span class="line"><span class="string">    :return: Excel 文件的字节数据</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    Example::</span></span><br><span class="line"><span class="string">        &gt;&gt;&gt; import pandas as pd</span></span><br><span class="line"><span class="string">        &gt;&gt;&gt; df = pd.DataFrame([[1,2],[3,4]])</span></span><br><span class="line"><span class="string">        &gt;&gt;&gt; data = df_to_excel_bytes([df]*10)</span></span><br><span class="line"><span class="string">        &gt;&gt;&gt; df2 = pd.read_excel(data, sheet_name=&quot;5&quot;)</span></span><br><span class="line"><span class="string">        &gt;&gt;&gt; (df == df2).all(None)</span></span><br><span class="line"><span class="string">        True</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    dfd: <span class="built_in">dict</span>[<span class="built_in">str</span>, DataFrame]</span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">isinstance</span>(dfs, DataFrame):</span><br><span class="line">        dfd = &#123;<span class="string">&quot;Sheet1&quot;</span>: dfs&#125;</span><br><span class="line">    <span class="keyword">elif</span> <span class="built_in">isinstance</span>(dfs, <span class="built_in">dict</span>):</span><br><span class="line">        dfd = dfs</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        dfd = &#123;<span class="built_in">str</span>(i): df <span class="keyword">for</span> i, df <span class="keyword">in</span> <span class="built_in">enumerate</span>(dfs)&#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">with</span> ctx_df_to_excel_bytes() <span class="keyword">as</span> writer:</span><br><span class="line">        <span class="keyword">for</span> old_k, df <span class="keyword">in</span> dfd.items():</span><br><span class="line">            <span class="comment"># 把名称 old_k 中的所有非法字符各自转换成下划线 _</span></span><br><span class="line">            k = old_k.translate(EXCEL_SHEETNAME_INVALID_CHARS_TRANSTABLE)</span><br><span class="line">            <span class="keyword">if</span> old_k != k:</span><br><span class="line">                warn(<span class="string">f&quot;Illegal characters found in sheetname, convert <span class="subst">&#123;old_k!r&#125;</span> to <span class="subst">&#123;k!r&#125;</span>&quot;</span>)</span><br><span class="line"></span><br><span class="line">            index, columns = df.index, df.columns</span><br><span class="line">            nrows, ncols = <span class="built_in">len</span>(index), <span class="built_in">len</span>(columns)</span><br><span class="line">            index_nlevel, columns_nlevel = index.nlevels, columns.nlevels</span><br><span class="line">            <span class="comment"># whether_output_index 判别了是否要在 Excel 中输出 index</span></span><br><span class="line">            <span class="comment"># 只有当 index 和 columns 的 level 层数都是 1，并且 index 的开始值 start 为 0 且</span></span><br><span class="line">            <span class="comment"># 步进 step 的值是 1，才不需要输出索引。</span></span><br><span class="line">            <span class="comment"># TIPS: 如果 columns 的 level 层数大于 1，`pandas` 规定必须输出 index</span></span><br><span class="line">            whether_output_index = <span class="keyword">not</span> (</span><br><span class="line">                columns_nlevel == <span class="number">1</span> <span class="keyword">and</span></span><br><span class="line">                index_nlevel == <span class="number">1</span> <span class="keyword">and</span></span><br><span class="line">                <span class="built_in">isinstance</span>(index, RangeIndex) <span class="keyword">and</span></span><br><span class="line">                index.start == <span class="number">0</span> <span class="keyword">and</span></span><br><span class="line">                index.step == <span class="number">1</span></span><br><span class="line">            )</span><br><span class="line"></span><br><span class="line">            <span class="comment"># rng_row_step: 除去 columns 的输出后，还剩多少行可供数据输出</span></span><br><span class="line">            rng_row_step: <span class="built_in">int</span></span><br><span class="line">            <span class="comment"># rng_col_step: 除去 index 的输出后（也可能不输出），还剩多少列可供数据输出</span></span><br><span class="line">            rng_col_step: <span class="built_in">int</span></span><br><span class="line">            <span class="keyword">if</span> whether_output_index:</span><br><span class="line">                <span class="comment"># 如果 columns 的 level 层数大于 1，则会多输出一空白行</span></span><br><span class="line">                <span class="keyword">if</span> columns_nlevel &gt; <span class="number">1</span>:</span><br><span class="line">                    rng_row_step = SHEET_MAX_NROWS - columns_nlevel - <span class="number">1</span></span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    rng_row_step = SHEET_MAX_NROWS - <span class="number">1</span></span><br><span class="line">                rng_col_step = SHEET_MAX_NCOLS - index_nlevel</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                rng_row_step = SHEET_MAX_NROWS - <span class="number">1</span></span><br><span class="line">                rng_col_step = SHEET_MAX_NCOLS</span><br><span class="line">            rng_row = <span class="built_in">range</span>(<span class="number">0</span>, nrows, rng_row_step)</span><br><span class="line">            rng_col = <span class="built_in">range</span>(<span class="number">0</span>, ncols, rng_col_step)</span><br><span class="line"></span><br><span class="line">            <span class="comment"># suffix_template： 如果的行或列过大，导致一张工作表不能输出，则要</span></span><br><span class="line">            <span class="comment">#     拆分成几张工作表，为此需要为同一个 DataFrame 输出的多个工作表</span></span><br><span class="line">            <span class="comment">#     添加后缀，最后的格式形如（&#123;name&#125;表示引用）</span></span><br><span class="line">            <span class="comment">#         &#123;表名&#125;^&#123;行切分序号&#125;_&#123;列切分序号&#125;</span></span><br><span class="line">            <span class="comment">#     假设某个 DataFrame 被切分成了</span></span><br><span class="line">            <span class="comment">#         sheet^0_0, sheet^0_1, sheet^1_0, sheet^1_0</span></span><br><span class="line">            <span class="comment">#     那么数据在原来的 DataFrame 中的分布则是</span></span><br><span class="line">            <span class="comment">#         |sheet^0_0 | sheet^0_1 |</span></span><br><span class="line">            <span class="comment">#         |——————————|———————————|</span></span><br><span class="line">            <span class="comment">#         |sheet^1_0 | sheet^1_0 |</span></span><br><span class="line">            suffix_template = <span class="string">&quot;&quot;</span></span><br><span class="line">            <span class="comment"># TIPS: 工作表最多只能有 31 个字符，因此如果添加后缀后，导致和表名的组合多于 </span></span><br><span class="line">            <span class="comment">#     31 字符，那么就要从表名的尾部去掉一些字符</span></span><br><span class="line">            suffix_len = <span class="number">0</span></span><br><span class="line">            <span class="keyword">if</span> <span class="built_in">len</span>(rng_row) &gt; <span class="number">1</span>:</span><br><span class="line">                q, r = <span class="built_in">divmod</span>(<span class="built_in">len</span>(rng_row), <span class="number">16</span>)</span><br><span class="line">                l = q + (r &gt; <span class="number">0</span>)</span><br><span class="line">                suffix_template += <span class="string">&quot;^&#123;0:0%dx&#125;&quot;</span> % l</span><br><span class="line">                suffix_len += l + <span class="number">1</span></span><br><span class="line">            <span class="keyword">if</span> <span class="built_in">len</span>(rng_col) &gt; <span class="number">1</span>:</span><br><span class="line">                q, r = <span class="built_in">divmod</span>(<span class="built_in">len</span>(rng_col), <span class="number">16</span>)</span><br><span class="line">                l = q + (r &gt; <span class="number">0</span>)</span><br><span class="line">                suffix_template += <span class="string">&quot;_&#123;1:0%dx&#125;&quot;</span> % l</span><br><span class="line">                suffix_len += l + <span class="number">1</span></span><br><span class="line">            <span class="keyword">if</span> suffix_len &gt; <span class="number">31</span>:</span><br><span class="line">                <span class="keyword">raise</span> RuntimeError(<span class="string">f&quot;DataFrame is too large: <span class="subst">&#123;old_k!r&#125;</span>&quot;</span>)</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> suffix_len:</span><br><span class="line">                <span class="keyword">for</span> i, row0 <span class="keyword">in</span> <span class="built_in">enumerate</span>(rng_row):</span><br><span class="line">                    <span class="keyword">for</span> j, col0 <span class="keyword">in</span> <span class="built_in">enumerate</span>(rng_col):</span><br><span class="line">                        suffix = suffix_template.<span class="built_in">format</span>(i, j)</span><br><span class="line">                        key = k[:<span class="number">31</span>-suffix_len] + suffix</span><br><span class="line">                        warn(<span class="string">f&quot;DataFrame is too large, generate sub-sheet: <span class="subst">&#123;key!r&#125;</span> (of <span class="subst">&#123;old_k!r&#125;</span>)&quot;</span>)</span><br><span class="line">                        df.iloc[row0:row0+rng_row_step, col0:col0+rng_col_step].to_excel(</span><br><span class="line">                            writer, index=whether_output_index, sheet_name=key)</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                key = k[:<span class="number">31</span>]</span><br><span class="line">                <span class="keyword">if</span> key != k:</span><br><span class="line">                    warn(<span class="string">f&quot;Sheetname is too long, convert <span class="subst">&#123;old_k!r&#125;</span> to <span class="subst">&#123;key!r&#125;</span>&quot;</span>)</span><br><span class="line">                <span class="keyword">if</span> key == <span class="string">&quot;&quot;</span>:</span><br><span class="line">                    key = <span class="string">&quot;Sheet1&quot;</span></span><br><span class="line">                df.to_excel(writer, index=whether_output_index, sheet_name=key)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> writer.read()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">pandas_read_sqls</span>(<span class="params"></span></span><br><span class="line"><span class="params">    sqls: <span class="type">Union</span>[<span class="built_in">str</span>, <span class="built_in">dict</span>[<span class="built_in">str</span>, <span class="built_in">str</span>], Iterable[<span class="built_in">str</span>]],</span></span><br><span class="line"><span class="params">    con,</span></span><br><span class="line"><span class="params">    read_workers: <span class="built_in">int</span> = -<span class="number">1</span>,</span></span><br><span class="line"><span class="params"></span>) -&gt; <span class="built_in">dict</span>[<span class="built_in">str</span>, DataFrame]:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;读取一批 SQL 查询语句，每个 SQL 的查询结果都是一个 `pandas` 的 `DataFrame` 对象。</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    :param sqls: 一个或一批 SQL 查询语句</span></span><br><span class="line"><span class="string">    :param con: SQL 查询的服务器连接</span></span><br><span class="line"><span class="string">        SQLAlchemy connectable, str, or sqlite3 connection</span></span><br><span class="line"><span class="string">        Using SQLAlchemy makes it possible to use any DB supported by that</span></span><br><span class="line"><span class="string">        library. If a DBAPI2 object, only sqlite3 is supported. The user is responsible</span></span><br><span class="line"><span class="string">        for engine disposal and connection closure for the SQLAlchemy connectable; str</span></span><br><span class="line"><span class="string">        connections are closed automatically. See</span></span><br><span class="line"><span class="string">        `here &lt;https://docs.sqlalchemy.org/en/13/core/connections.html&gt;`_.</span></span><br><span class="line"><span class="string">    :param read_workers: 并发的查询数</span></span><br><span class="line"><span class="string">        - 如果小于 0 或等于 1，则并发数为 1，即不并发</span></span><br><span class="line"><span class="string">        - 如果等于 0，则用 ThreadPoolExecutor 默认的并发数</span></span><br><span class="line"><span class="string">        - 如果大于 0，则数值就是并发数</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    :return: 返回值的内容取决于参数 `sqls`，具体为</span></span><br><span class="line"><span class="string">        if isinstance(sqls, str):</span></span><br><span class="line"><span class="string">            return &#123;&quot;&quot;: pandas.read_sql(sqls, con)&#125;</span></span><br><span class="line"><span class="string">        elif isinstance(sqls, dict):</span></span><br><span class="line"><span class="string">            return &#123;k: pandas.read_sql(sql, con) for k, sql in sqls.items()&#125;</span></span><br><span class="line"><span class="string">        else:</span></span><br><span class="line"><span class="string">            return &#123;str(i): pandas.read_sql(sql, con) for i, sql in enumerate(sqls)&#125;</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">isinstance</span>(sqls, <span class="built_in">str</span>):</span><br><span class="line">        <span class="keyword">return</span> &#123;<span class="string">&quot;&quot;</span>: read_sql(sqls, con)&#125;</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> <span class="built_in">isinstance</span>(sqls, <span class="built_in">dict</span>):</span><br><span class="line">            sqls = <span class="built_in">dict</span>((<span class="built_in">str</span>(i), sql) <span class="keyword">for</span> i, sql <span class="keyword">in</span> <span class="built_in">enumerate</span>(sqls))</span><br><span class="line">        sqls = cast(<span class="built_in">dict</span>[<span class="built_in">str</span>, <span class="built_in">str</span>], sqls)</span><br><span class="line">        <span class="keyword">if</span> read_workers &lt; <span class="number">0</span> <span class="keyword">or</span> read_workers == <span class="number">1</span>:</span><br><span class="line">            <span class="keyword">return</span> &#123;k: read_sql(sql, con) <span class="keyword">for</span> k, sql <span class="keyword">in</span> sqls.items()&#125;</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="keyword">with</span> ThreadPoolExecutor(</span><br><span class="line">                <span class="literal">None</span> <span class="keyword">if</span> read_workers == <span class="number">0</span> <span class="keyword">else</span> <span class="built_in">min</span>(read_workers, <span class="built_in">len</span>(sqls))</span><br><span class="line">            ) <span class="keyword">as</span> worker:</span><br><span class="line">                df_iter = worker.<span class="built_in">map</span>(<span class="keyword">lambda</span> sql: read_sql(sql, con), sqls)</span><br><span class="line">            <span class="keyword">return</span> &#123;k: df <span class="keyword">for</span> k, df <span class="keyword">in</span> <span class="built_in">zip</span>(sqls, df_iter)&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">sql_to_excel_bytes</span>(<span class="params"></span></span><br><span class="line"><span class="params">    sqls: <span class="type">Union</span>[<span class="built_in">str</span>, <span class="built_in">dict</span>[<span class="built_in">str</span>, <span class="built_in">str</span>], Iterable[<span class="built_in">str</span>]],</span></span><br><span class="line"><span class="params">    con,</span></span><br><span class="line"><span class="params">    read_workers: <span class="built_in">int</span> = -<span class="number">1</span>,</span></span><br><span class="line"><span class="params"></span>) -&gt; <span class="built_in">bytes</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;执行一些 SQL 查询语句，并把查询结果保存到同一个 xlsx 格式的 Excel 文件中，</span></span><br><span class="line"><span class="string">    然后读取这个 Excel 文件并返回字节数据。</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    :param sqls: 一个或一批 SQL 查询语句，工作表名的确定方式如下：</span></span><br><span class="line"><span class="string">        - 如果 `sql` 是 str，则工作表名为 &quot;Sheet1&quot;，`sqls`是相应的 SQL</span></span><br><span class="line"><span class="string">        - 如果 `sql` 是 dict， 则字典的键是工作表名，值是相应的 SQL</span></span><br><span class="line"><span class="string">            &gt; 注意：每个工作表的名字，不允许包含这些字符之一 []:*?/\\ ，</span></span><br><span class="line"><span class="string">                如果包含，则会被自动替换成 _</span></span><br><span class="line"><span class="string">        - 否则 `sql` 就是可迭代对象， 则值是 SQL，序号（从0开始递增）是相应的工作表名</span></span><br><span class="line"><span class="string">        &gt; 注意：每个 SQL 查询返回的数据量，行数尽量 &lt;= 1048575(==2**20-1，第 1 行是表头)，</span></span><br><span class="line"><span class="string">            列数最好 &lt;= 16384 (==2**14)，否则会被自动拆分</span></span><br><span class="line"><span class="string">    :param con: SQL 查询的服务器连接</span></span><br><span class="line"><span class="string">        SQLAlchemy connectable, str, or sqlite3 connection</span></span><br><span class="line"><span class="string">        Using SQLAlchemy makes it possible to use any DB supported by that</span></span><br><span class="line"><span class="string">        library. If a DBAPI2 object, only sqlite3 is supported. The user is responsible</span></span><br><span class="line"><span class="string">        for engine disposal and connection closure for the SQLAlchemy connectable; str</span></span><br><span class="line"><span class="string">        connections are closed automatically. See</span></span><br><span class="line"><span class="string">        `here &lt;https://docs.sqlalchemy.org/en/13/core/connections.html&gt;`_.</span></span><br><span class="line"><span class="string">    :param read_workers: 并发的查询数</span></span><br><span class="line"><span class="string">        - 如果小于 0 或等于 1，则并发数为 1，即不并发</span></span><br><span class="line"><span class="string">        - 如果等于 0，则用 ThreadPoolExecutor 默认的并发数</span></span><br><span class="line"><span class="string">        - 如果大于 0，则数值就是并发数</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    :return: Excel 文件数据，bytes 形式</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    Example::</span></span><br><span class="line"><span class="string">        可以用 sqllite3 进行测试</span></span><br><span class="line"><span class="string">        &gt;&gt;&gt; sql = &#x27;&#x27;&#x27;\\</span></span><br><span class="line"><span class="string">        ... with recursive range(x) as (</span></span><br><span class="line"><span class="string">        ...     values(0)</span></span><br><span class="line"><span class="string">        ...     union all</span></span><br><span class="line"><span class="string">        ...     select x + 1 from range where x &lt; POW(2, 21)</span></span><br><span class="line"><span class="string">        ... )</span></span><br><span class="line"><span class="string">        ... select * from range;&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">        &gt;&gt;&gt; data = sql_to_excel_bytes([sql]*2, &quot;sqlite:///:memory:&quot;)</span></span><br><span class="line"><span class="string">        ...</span></span><br><span class="line"><span class="string">        &gt;&gt;&gt; import pandas as pd</span></span><br><span class="line"><span class="string">        &gt;&gt;&gt; df0 = pd.read_excel(data, sheet_name=&quot;0^0&quot;)</span></span><br><span class="line"><span class="string">        &gt;&gt;&gt; df1 = pd.read_excel(data, sheet_name=&quot;0^1&quot;)</span></span><br><span class="line"><span class="string">        &gt;&gt;&gt; df2 = pd.read_excel(data, sheet_name=&quot;0^2&quot;)</span></span><br><span class="line"><span class="string">        &gt;&gt;&gt; df = pd.concat([df0, df1, df2], ignore_index=True)</span></span><br><span class="line"><span class="string">        &gt;&gt;&gt; (df.x == range(2 ** 21 + 1)).all()</span></span><br><span class="line"><span class="string">        True</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    dfs = pandas_read_sqls(sqls, con, read_workers)</span><br><span class="line">    <span class="keyword">return</span> df_to_excel_bytes(dfs)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    <span class="keyword">import</span> doctest</span><br><span class="line">    doctest.testmod()</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="扩展阅读"><a href="#扩展阅读" class="headerlink" title="扩展阅读"></a>扩展阅读</h2><h3 id="1-把-pandas-的-DataFrame-导出各种编码格式的字符串"><a href="#1-把-pandas-的-DataFrame-导出各种编码格式的字符串" class="headerlink" title="1. 把 pandas 的 DataFrame 导出各种编码格式的字符串"></a>1. 把 <code>pandas</code> 的 <code>DataFrame</code> 导出各种编码格式的字符串</h3><p>如果每个 <kbd>pandas</kbd> 的 <code>DataFrame</code>，各自导出到不同的目标，那么可以运用<a href="https://www.runoob.com/design-pattern/strategy-pattern.html">策略模式</a>，实现一个特别简单的统一处理函数，返回导出的 <code>bytes</code> 或 <code>str</code>。 </p>
+<div align="center">
+<strong>pandas_df_2_string</strong> 函数的参数和返回值类型
+
+<table>
+<thead>
+<tr>
+<th align="right"></th>
+<th align="left">filetype</th>
+<th align="left">outtype</th>
+<th align="left">RETURN TYPE</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="right">0</td>
+<td align="left"><code>&#39;csv&#39;</code></td>
+<td align="left">bytes</td>
+<td align="left">bytes</td>
+</tr>
+<tr>
+<td align="right">1</td>
+<td align="left"><code>&#39;csv&#39;</code></td>
+<td align="left">str</td>
+<td align="left">str</td>
+</tr>
+<tr>
+<td align="right">2</td>
+<td align="left"><code>&#39;csv&#39;</code></td>
+<td align="left">None</td>
+<td align="left">str</td>
+</tr>
+<tr>
+<td align="right">3</td>
+<td align="left"><code>&#39;excel&#39;</code></td>
+<td align="left">bytes</td>
+<td align="left">bytes</td>
+</tr>
+<tr>
+<td align="right">4</td>
+<td align="left"><code>&#39;excel&#39;</code></td>
+<td align="left">None</td>
+<td align="left">bytes</td>
+</tr>
+<tr>
+<td align="right">5</td>
+<td align="left"><code>&#39;feather&#39;</code></td>
+<td align="left">bytes</td>
+<td align="left">bytes</td>
+</tr>
+<tr>
+<td align="right">6</td>
+<td align="left"><code>&#39;feather&#39;</code></td>
+<td align="left">None</td>
+<td align="left">bytes</td>
+</tr>
+<tr>
+<td align="right">7</td>
+<td align="left"><code>&#39;hdf&#39;</code></td>
+<td align="left">bytes</td>
+<td align="left">bytes</td>
+</tr>
+<tr>
+<td align="right">8</td>
+<td align="left"><code>&#39;hdf&#39;</code></td>
+<td align="left">None</td>
+<td align="left">bytes</td>
+</tr>
+<tr>
+<td align="right">9</td>
+<td align="left"><code>&#39;html&#39;</code></td>
+<td align="left">bytes</td>
+<td align="left">bytes</td>
+</tr>
+<tr>
+<td align="right">10</td>
+<td align="left"><code>&#39;html&#39;</code></td>
+<td align="left">str</td>
+<td align="left">str</td>
+</tr>
+<tr>
+<td align="right">11</td>
+<td align="left"><code>&#39;html&#39;</code></td>
+<td align="left">None</td>
+<td align="left">str</td>
+</tr>
+<tr>
+<td align="right">12</td>
+<td align="left"><code>&#39;json&#39;</code></td>
+<td align="left">bytes</td>
+<td align="left">bytes</td>
+</tr>
+<tr>
+<td align="right">13</td>
+<td align="left"><code>&#39;json&#39;</code></td>
+<td align="left">str</td>
+<td align="left">str</td>
+</tr>
+<tr>
+<td align="right">14</td>
+<td align="left"><code>&#39;json&#39;</code></td>
+<td align="left">None</td>
+<td align="left">str</td>
+</tr>
+<tr>
+<td align="right">15</td>
+<td align="left"><code>&#39;latex&#39;</code></td>
+<td align="left">bytes</td>
+<td align="left">bytes</td>
+</tr>
+<tr>
+<td align="right">16</td>
+<td align="left"><code>&#39;latex&#39;</code></td>
+<td align="left">str</td>
+<td align="left">str</td>
+</tr>
+<tr>
+<td align="right">17</td>
+<td align="left"><code>&#39;latex&#39;</code></td>
+<td align="left">None</td>
+<td align="left">str</td>
+</tr>
+<tr>
+<td align="right">18</td>
+<td align="left"><code>&#39;markdown&#39;</code></td>
+<td align="left">bytes</td>
+<td align="left">bytes</td>
+</tr>
+<tr>
+<td align="right">19</td>
+<td align="left"><code>&#39;markdown&#39;</code></td>
+<td align="left">str</td>
+<td align="left">str</td>
+</tr>
+<tr>
+<td align="right">20</td>
+<td align="left"><code>&#39;markdown&#39;</code></td>
+<td align="left">None</td>
+<td align="left">str</td>
+</tr>
+<tr>
+<td align="right">21</td>
+<td align="left"><code>&#39;parquet&#39;</code></td>
+<td align="left">bytes</td>
+<td align="left">bytes</td>
+</tr>
+<tr>
+<td align="right">22</td>
+<td align="left"><code>&#39;parquet&#39;</code></td>
+<td align="left">None</td>
+<td align="left">bytes</td>
+</tr>
+<tr>
+<td align="right">23</td>
+<td align="left"><code>&#39;pickle&#39;</code></td>
+<td align="left">bytes</td>
+<td align="left">bytes</td>
+</tr>
+<tr>
+<td align="right">24</td>
+<td align="left"><code>&#39;pickle&#39;</code></td>
+<td align="left">None</td>
+<td align="left">bytes</td>
+</tr>
+<tr>
+<td align="right">25</td>
+<td align="left"><code>&#39;stata&#39;</code></td>
+<td align="left">bytes</td>
+<td align="left">bytes</td>
+</tr>
+<tr>
+<td align="right">26</td>
+<td align="left"><code>&#39;stata&#39;</code></td>
+<td align="left">None</td>
+<td align="left">bytes</td>
+</tr>
+<tr>
+<td align="right">27</td>
+<td align="left"><code>&#39;string&#39;</code></td>
+<td align="left">bytes</td>
+<td align="left">bytes</td>
+</tr>
+<tr>
+<td align="right">28</td>
+<td align="left"><code>&#39;string&#39;</code></td>
+<td align="left">str</td>
+<td align="left">str</td>
+</tr>
+<tr>
+<td align="right">29</td>
+<td align="left"><code>&#39;string&#39;</code></td>
+<td align="left">None</td>
+<td align="left">str</td>
+</tr>
+<tr>
+<td align="right">30</td>
+<td align="left"><code>&#39;xml&#39;</code></td>
+<td align="left">bytes</td>
+<td align="left">bytes</td>
+</tr>
+<tr>
+<td align="right">31</td>
+<td align="left"><code>&#39;xml&#39;</code></td>
+<td align="left">str</td>
+<td align="left">str</td>
+</tr>
+<tr>
+<td align="right">32</td>
+<td align="left"><code>&#39;xml&#39;</code></td>
+<td align="left">None</td>
+<td align="left">str</td>
+</tr>
+</tbody></table>
+</div>
+
+<figure class="highlight python"><figcaption><span>pandas_df_2_string.py</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python3</span></span><br><span class="line"><span class="comment"># coding: utf-8</span></span><br><span class="line"></span><br><span class="line">__author__ = <span class="string">&quot;ChenyangGao &lt;https://chenyanggao.github.io/&gt;&quot;</span></span><br><span class="line">__version__ = (<span class="number">0</span>, <span class="number">1</span>)</span><br><span class="line">__all__ = [<span class="string">&quot;pandas_df_2_string&quot;</span>]</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> io <span class="keyword">import</span> BytesIO, StringIO</span><br><span class="line"><span class="keyword">from</span> os <span class="keyword">import</span> remove</span><br><span class="line"><span class="keyword">from</span> tempfile <span class="keyword">import</span> mktemp</span><br><span class="line"><span class="keyword">from</span> uuid <span class="keyword">import</span> uuid4</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">_to_bytes</span>(<span class="params">write, /, **kwds</span>):</span><br><span class="line">    fio = BytesIO()</span><br><span class="line">    write(fio, **kwds)</span><br><span class="line">    fio.seek(<span class="number">0</span>)</span><br><span class="line">    <span class="keyword">return</span> fio.read()</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">_to_str</span>(<span class="params">write, /, **kwds</span>):</span><br><span class="line">    fio = StringIO()</span><br><span class="line">    write(fio, **kwds)</span><br><span class="line">    fio.seek(<span class="number">0</span>)</span><br><span class="line">    <span class="keyword">return</span> fio.read()</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">_to_str_bytes</span>(<span class="params">write, /, **kwds</span>):</span><br><span class="line">    <span class="keyword">return</span> _to_str(write, **kwds).encode(encoding=<span class="string">&quot;utf-8&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">_call_none</span>(<span class="params">write, /, **kwds</span>):</span><br><span class="line">    <span class="keyword">return</span> write(<span class="literal">None</span>, **kwds)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">_to_hdf_bytes</span>(<span class="params">write, /, **kwds</span>):</span><br><span class="line">    kwds.setdefault(<span class="string">&quot;key&quot;</span>, <span class="string">&quot;default&quot;</span>)</span><br><span class="line">    path = mktemp(<span class="built_in">str</span>(uuid4()))</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        write(path, **kwds)</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">open</span>(path, <span class="string">&quot;rb&quot;</span>).read()</span><br><span class="line">    <span class="keyword">finally</span>:</span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            remove(path)</span><br><span class="line">        <span class="keyword">except</span>:</span><br><span class="line">            <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line">MAP = &#123;</span><br><span class="line">    <span class="string">&quot;csv&quot;</span>: &#123;</span><br><span class="line">        <span class="built_in">bytes</span>: _to_bytes,</span><br><span class="line">        <span class="built_in">str</span>: _to_str,</span><br><span class="line">        <span class="literal">None</span>: _call_none,</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="string">&quot;excel&quot;</span>: &#123;</span><br><span class="line">        <span class="built_in">bytes</span>: _to_bytes,</span><br><span class="line">        <span class="literal">None</span>: _to_bytes,</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="string">&quot;feather&quot;</span>: &#123;</span><br><span class="line">        <span class="built_in">bytes</span>: _to_bytes,</span><br><span class="line">        <span class="literal">None</span>: _to_bytes,</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="string">&quot;hdf&quot;</span>: &#123;</span><br><span class="line">        <span class="built_in">bytes</span>: _to_hdf_bytes,</span><br><span class="line">        <span class="literal">None</span>: _to_hdf_bytes,</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="string">&quot;html&quot;</span>: &#123;</span><br><span class="line">        <span class="built_in">bytes</span>: _to_str_bytes,</span><br><span class="line">        <span class="built_in">str</span>: _to_str,</span><br><span class="line">        <span class="literal">None</span>: _call_none,</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="string">&quot;json&quot;</span>: &#123;</span><br><span class="line">        <span class="built_in">bytes</span>: _to_bytes,</span><br><span class="line">        <span class="built_in">str</span>: _to_str,</span><br><span class="line">        <span class="literal">None</span>: _call_none,</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="string">&quot;latex&quot;</span>: &#123;</span><br><span class="line">        <span class="built_in">bytes</span>: _to_str_bytes,</span><br><span class="line">        <span class="built_in">str</span>: _to_str,</span><br><span class="line">        <span class="literal">None</span>: _call_none,</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="string">&quot;markdown&quot;</span>: &#123;</span><br><span class="line">        <span class="built_in">bytes</span>: _to_str_bytes,</span><br><span class="line">        <span class="built_in">str</span>: _to_str,</span><br><span class="line">        <span class="literal">None</span>: _call_none,</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="string">&quot;parquet&quot;</span>: &#123;</span><br><span class="line">        <span class="built_in">bytes</span>: _to_bytes,</span><br><span class="line">        <span class="literal">None</span>: _call_none,</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="string">&quot;pickle&quot;</span>: &#123;</span><br><span class="line">        <span class="built_in">bytes</span>: _to_bytes,</span><br><span class="line">        <span class="literal">None</span>: _to_bytes,</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="string">&quot;stata&quot;</span>: &#123;</span><br><span class="line">        <span class="built_in">bytes</span>: _to_bytes,</span><br><span class="line">        <span class="literal">None</span>: _call_none,</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="string">&quot;string&quot;</span>: &#123;</span><br><span class="line">        <span class="built_in">bytes</span>: _to_str_bytes,</span><br><span class="line">        <span class="built_in">str</span>: _to_str,</span><br><span class="line">        <span class="literal">None</span>: _call_none,</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="string">&quot;xml&quot;</span>: &#123;</span><br><span class="line">        <span class="built_in">bytes</span>: _to_bytes,</span><br><span class="line">        <span class="built_in">str</span>: _to_str,</span><br><span class="line">        <span class="literal">None</span>: _call_none,</span><br><span class="line">    &#125;,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">pandas_df_2_string</span>(<span class="params">df, filetype=<span class="string">&quot;csv&quot;</span>, outtype=<span class="literal">None</span>, **kwds</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;把 dataframe 导出为 bytes 或 str</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    :param df: pandas.DataFrame 对象</span></span><br><span class="line"><span class="string">    :param filetype: 文件格式，可以取值如下：</span></span><br><span class="line"><span class="string">        &#x27;csv&#x27;, &#x27;excel&#x27;, &#x27;feather&#x27;, &#x27;hdf&#x27;, &#x27;html&#x27;, &#x27;json&#x27;, &#x27;latex&#x27;, </span></span><br><span class="line"><span class="string">        &#x27;markdown&#x27;, &#x27;parquet&#x27;, &#x27;pickle&#x27;, &#x27;stata&#x27;, &#x27;string&#x27;, &#x27;xml&#x27;</span></span><br><span class="line"><span class="string">    :param outtype: 输出格式，可以取值如右：bytes, str, None</span></span><br><span class="line"><span class="string">        &gt; 注意：bytes 和 None 都是有效的，但是 str 只对某些 filetype 有效</span></span><br><span class="line"><span class="string">    :param kwds: 调用的方法会落实到 getattr(pandas.DataFrame, &#x27;to_&#x27; + filetype)</span></span><br><span class="line"><span class="string">        ，而 `kwds` 是传给这个方法的其它关键字参数</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    :return: 根据 outtype 的值来决定：</span></span><br><span class="line"><span class="string">        - outtype 是 bytes，输出类型 bytes</span></span><br><span class="line"><span class="string">        - outtype 是 str，输出类型 str</span></span><br><span class="line"><span class="string">        - outtype 是 None，输出类型由具体 filetype 决定</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    submap = MAP.get(filetype)</span><br><span class="line">    <span class="keyword">if</span> submap <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">        <span class="keyword">raise</span> ValueError(<span class="string">f&quot;Invalid filetype, expected value in <span class="subst">&#123;MAP.keys()&#125;</span>, got <span class="subst">&#123;filetype!r&#125;</span>&quot;</span>)</span><br><span class="line">    outm = submap.get(outtype)</span><br><span class="line">    <span class="keyword">if</span> outm <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">        <span class="keyword">raise</span> ValueError(<span class="string">f&quot;Invalid outtype for filetype <span class="subst">&#123;filetype!r&#125;</span>, expected value in <span class="subst">&#123;submap.keys()&#125;</span>, got <span class="subst">&#123;outtype!r&#125;</span>&quot;</span>)</span><br><span class="line">    method = <span class="built_in">getattr</span>(df, <span class="string">&quot;to_&quot;</span> + filetype)</span><br><span class="line">    <span class="keyword">return</span> outm(method, **kwds)</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="2-基于pandas实现一个简单的ETL程序"><a href="#2-基于pandas实现一个简单的ETL程序" class="headerlink" title="2. 基于pandas实现一个简单的ETL程序"></a>2. 基于pandas实现一个简单的ETL程序</h3><p>我用的 <kbd>Python</kbd> 和 <kbd>pandas</kbd> 版本如下</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ python -V</span><br><span class="line">Python 3.9.12</span><br><span class="line">$ python -c <span class="string">&quot;import pandas;print(pandas.__version__)&quot;</span></span><br><span class="line">1.4.2</span><br></pre></td></tr></table></figure>
+
+<p><code>ETL</code> 的 <code>extract</code> 这一步，需要封装所有 <code>pandas.read_*</code> 方法，罗列如下</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd</span><br><span class="line"></span><br><span class="line">df = pd.DataFrame(</span><br><span class="line">    [(</span><br><span class="line">        <span class="string">&quot;pandas.&quot;</span> + f, </span><br><span class="line">        pd.__dict__[f].__doc__.split(<span class="string">&quot;\n&quot;</span>, <span class="number">2</span>)[<span class="number">1</span>].strip()</span><br><span class="line">    ) <span class="keyword">for</span> f <span class="keyword">in</span> <span class="built_in">dir</span>(pd) <span class="keyword">if</span> f.startswith(<span class="string">&quot;read_&quot;</span>)], </span><br><span class="line">    columns=[<span class="string">&quot;读入方法&quot;</span>, <span class="string">&quot;说明&quot;</span>], </span><br><span class="line">)</span><br><span class="line"><span class="built_in">print</span>(df.to_markdown())</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th align="right"></th>
+<th align="left">读入方法</th>
+<th align="left">说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="right">0</td>
+<td align="left">pandas.read_clipboard</td>
+<td align="left">Read text from clipboard and pass to read_csv.</td>
+</tr>
+<tr>
+<td align="right">1</td>
+<td align="left">pandas.read_csv</td>
+<td align="left">Read a comma-separated values (csv) file into DataFrame.</td>
+</tr>
+<tr>
+<td align="right">2</td>
+<td align="left">pandas.read_excel</td>
+<td align="left">Read an Excel file into a pandas DataFrame.</td>
+</tr>
+<tr>
+<td align="right">3</td>
+<td align="left">pandas.read_feather</td>
+<td align="left">Load a feather-format object from the file path.</td>
+</tr>
+<tr>
+<td align="right">4</td>
+<td align="left">pandas.read_fwf</td>
+<td align="left">Read a table of fixed-width formatted lines into DataFrame.</td>
+</tr>
+<tr>
+<td align="right">5</td>
+<td align="left">pandas.read_gbq</td>
+<td align="left">Load data from Google BigQuery.</td>
+</tr>
+<tr>
+<td align="right">6</td>
+<td align="left">pandas.read_hdf</td>
+<td align="left">Read from the store, close it if we opened it.</td>
+</tr>
+<tr>
+<td align="right">7</td>
+<td align="left">pandas.read_html</td>
+<td align="left">Read HTML tables into a <code>list</code> of <code>DataFrame</code> objects.</td>
+</tr>
+<tr>
+<td align="right">8</td>
+<td align="left">pandas.read_json</td>
+<td align="left">Convert a JSON string to pandas object.</td>
+</tr>
+<tr>
+<td align="right">9</td>
+<td align="left">pandas.read_orc</td>
+<td align="left">Load an ORC object from the file path, returning a DataFrame.</td>
+</tr>
+<tr>
+<td align="right">10</td>
+<td align="left">pandas.read_parquet</td>
+<td align="left">Load a parquet object from the file path, returning a DataFrame.</td>
+</tr>
+<tr>
+<td align="right">11</td>
+<td align="left">pandas.read_pickle</td>
+<td align="left">Load pickled pandas object (or any object) from file.</td>
+</tr>
+<tr>
+<td align="right">12</td>
+<td align="left">pandas.read_sas</td>
+<td align="left">Read SAS files stored as either XPORT or SAS7BDAT format files.</td>
+</tr>
+<tr>
+<td align="right">13</td>
+<td align="left">pandas.read_spss</td>
+<td align="left">Load an SPSS file from the file path, returning a DataFrame.</td>
+</tr>
+<tr>
+<td align="right">14</td>
+<td align="left">pandas.read_sql</td>
+<td align="left">Read SQL query or database table into a DataFrame.</td>
+</tr>
+<tr>
+<td align="right">15</td>
+<td align="left">pandas.read_sql_query</td>
+<td align="left">Read SQL query into a DataFrame.</td>
+</tr>
+<tr>
+<td align="right">16</td>
+<td align="left">pandas.read_sql_table</td>
+<td align="left">Read SQL database table into a DataFrame.</td>
+</tr>
+<tr>
+<td align="right">17</td>
+<td align="left">pandas.read_stata</td>
+<td align="left">Read Stata file into DataFrame.</td>
+</tr>
+<tr>
+<td align="right">18</td>
+<td align="left">pandas.read_table</td>
+<td align="left">Read general delimited file into DataFrame.</td>
+</tr>
+<tr>
+<td align="right">19</td>
+<td align="left">pandas.read_xml</td>
+<td align="left">Read XML document into a <code>DataFrame</code> object.</td>
+</tr>
+</tbody></table>
+<p>而做 <code>ETL</code> 的 <code>load</code> 这一步，需要封装所有 <code>pandas.DataFrame.to_*</code> 方法，罗列如下</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd</span><br><span class="line"></span><br><span class="line">df = pd.DataFrame(</span><br><span class="line">    [(</span><br><span class="line">        <span class="string">&quot;pandas.DataFrame.&quot;</span> + f, </span><br><span class="line">        <span class="built_in">getattr</span>(pd.DataFrame, f).__doc__.split(<span class="string">&quot;\n&quot;</span>, <span class="number">2</span>)[<span class="number">1</span>].strip()</span><br><span class="line">    ) <span class="keyword">for</span> f <span class="keyword">in</span> <span class="built_in">dir</span>(pd.DataFrame) <span class="keyword">if</span> f.startswith(<span class="string">&quot;to_&quot;</span>)], </span><br><span class="line">    columns=[<span class="string">&quot;写出方法&quot;</span>, <span class="string">&quot;说明&quot;</span>], </span><br><span class="line">)</span><br><span class="line"><span class="built_in">print</span>(df.to_markdown())</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th align="right"></th>
+<th align="left">写出方法</th>
+<th align="left">说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="right">0</td>
+<td align="left">pandas.DataFrame.to_clipboard</td>
+<td align="left">Copy object to the system clipboard.</td>
+</tr>
+<tr>
+<td align="right">1</td>
+<td align="left">pandas.DataFrame.to_csv</td>
+<td align="left">Write object to a comma-separated values (csv) file.</td>
+</tr>
+<tr>
+<td align="right">2</td>
+<td align="left">pandas.DataFrame.to_dict</td>
+<td align="left">Convert the DataFrame to a dictionary.</td>
+</tr>
+<tr>
+<td align="right">3</td>
+<td align="left">pandas.DataFrame.to_excel</td>
+<td align="left">Write object to an Excel sheet.</td>
+</tr>
+<tr>
+<td align="right">4</td>
+<td align="left">pandas.DataFrame.to_feather</td>
+<td align="left">Write a DataFrame to the binary Feather format.</td>
+</tr>
+<tr>
+<td align="right">5</td>
+<td align="left">pandas.DataFrame.to_gbq</td>
+<td align="left">Write a DataFrame to a Google BigQuery table.</td>
+</tr>
+<tr>
+<td align="right">6</td>
+<td align="left">pandas.DataFrame.to_hdf</td>
+<td align="left">Write the contained data to an HDF5 file using HDFStore.</td>
+</tr>
+<tr>
+<td align="right">7</td>
+<td align="left">pandas.DataFrame.to_html</td>
+<td align="left">Render a DataFrame as an HTML table.</td>
+</tr>
+<tr>
+<td align="right">8</td>
+<td align="left">pandas.DataFrame.to_json</td>
+<td align="left">Convert the object to a JSON string.</td>
+</tr>
+<tr>
+<td align="right">9</td>
+<td align="left">pandas.DataFrame.to_latex</td>
+<td align="left">Render object to a LaTeX tabular, longtable, or nested table&#x2F;tabular.</td>
+</tr>
+<tr>
+<td align="right">10</td>
+<td align="left">pandas.DataFrame.to_markdown</td>
+<td align="left">Print DataFrame in Markdown-friendly format.</td>
+</tr>
+<tr>
+<td align="right">11</td>
+<td align="left">pandas.DataFrame.to_numpy</td>
+<td align="left">Convert the DataFrame to a NumPy array.</td>
+</tr>
+<tr>
+<td align="right">12</td>
+<td align="left">pandas.DataFrame.to_parquet</td>
+<td align="left">Write a DataFrame to the binary parquet format.</td>
+</tr>
+<tr>
+<td align="right">13</td>
+<td align="left">pandas.DataFrame.to_period</td>
+<td align="left">Convert DataFrame from DatetimeIndex to PeriodIndex.</td>
+</tr>
+<tr>
+<td align="right">14</td>
+<td align="left">pandas.DataFrame.to_pickle</td>
+<td align="left">Pickle (serialize) object to file.</td>
+</tr>
+<tr>
+<td align="right">15</td>
+<td align="left">pandas.DataFrame.to_records</td>
+<td align="left">Convert DataFrame to a NumPy record array.</td>
+</tr>
+<tr>
+<td align="right">16</td>
+<td align="left">pandas.DataFrame.to_sql</td>
+<td align="left">Write records stored in a DataFrame to a SQL database.</td>
+</tr>
+<tr>
+<td align="right">17</td>
+<td align="left">pandas.DataFrame.to_stata</td>
+<td align="left">Export DataFrame object to Stata dta format.</td>
+</tr>
+<tr>
+<td align="right">18</td>
+<td align="left">pandas.DataFrame.to_string</td>
+<td align="left">Render a DataFrame to a console-friendly tabular output.</td>
+</tr>
+<tr>
+<td align="right">19</td>
+<td align="left">pandas.DataFrame.to_timestamp</td>
+<td align="left">Cast to DatetimeIndex of timestamps, at <em>beginning</em> of period.</td>
+</tr>
+<tr>
+<td align="right">20</td>
+<td align="left">pandas.DataFrame.to_xarray</td>
+<td align="left">Return an xarray object from the pandas object.</td>
+</tr>
+<tr>
+<td align="right">21</td>
+<td align="left">pandas.DataFrame.to_xml</td>
+<td align="left">Render a DataFrame to an XML document.</td>
+</tr>
+</tbody></table>
+<p>在 <code>ETL</code> 的三个步骤中，最重要的是 <code>T</code> (transform)。我之前的项目，在 <code>transform</code> 这一步，专门开发了一个 <a href="https://en.wikipedia.org/wiki/Domain-specific_language">DSL(Domain-specific language)</a>，会把一种相对简单的语言翻译成 <kbd>Python</kbd> 和 <kbd>pandas</kbd> 操作。但是作为示例来说，这过于复杂了，等下次分享如何<strong>开发脚本语言</strong>时，我再展开这个例子。<br>为了简化，我把 <code>ETL</code> 简化成如下这样一个上下文管理器</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> contextlib <span class="keyword">import</span> contextmanager</span><br><span class="line"><span class="keyword">from</span> typing <span class="keyword">import</span> <span class="type">Any</span>, <span class="type">Callable</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> pandas.core.frame <span class="keyword">import</span> DataFrame</span><br><span class="line"></span><br><span class="line"><span class="meta">@contextmanager</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">ctx_dataframe_as_pipe</span>(<span class="params"></span></span><br><span class="line"><span class="params">    read: <span class="type">Callable</span>[[], DataFrame], </span></span><br><span class="line"><span class="params">    write: <span class="type">Callable</span>[[DataFrame], <span class="type">Any</span>], </span></span><br><span class="line"><span class="params"></span>):</span><br><span class="line">    df = read()</span><br><span class="line">    <span class="keyword">yield</span> df</span><br><span class="line">    write(df)</span><br></pre></td></tr></table></figure>
+
+<p>其中 <code>read</code> 和 <code>write</code> 在调用函数时传入，请确保传入的参数类型正确，必须是两个可调用对象，如果它们各自还有其它参数，请提前用偏函数 <a href="https://docs.python.org/3/library/functools.html#functools.partial">functools.partial</a> 进行捆绑。</p>
+<hr>
+<p>未完待续</p>
+</div><div class="article-licensing box"><div class="licensing-title"><p>Python模块-pandas.DataFrame转Excel格式的bytes数据</p><p><a href="https://chenyanggao.github.io/2022/09/08/13.Python模块-pandas.DataFrame转Excel格式的bytes数据/">https://chenyanggao.github.io/2022/09/08/13.Python模块-pandas.DataFrame转Excel格式的bytes数据/</a></p></div><div class="licensing-meta level is-mobile"><div class="level-left"><div class="level-item is-narrow"><div><h6>作者</h6><p>ChenyangGao</p></div></div><div class="level-item is-narrow"><div><h6>发布于</h6><p>2022-09-08</p></div></div><div class="level-item is-narrow"><div><h6>更新于</h6><p>2025-08-20</p></div></div><div class="level-item is-narrow"><div><h6>许可协议</h6><p><a class="icons" rel="noopener" target="_blank" title="Creative Commons" href="https://creativecommons.org/"><i class="icon fab fa-creative-commons"></i></a><a class="icons" rel="noopener" target="_blank" title="Attribution" href="https://creativecommons.org/licenses/by/4.0/"><i class="icon fab fa-creative-commons-by"></i></a><a class="icons" rel="noopener" target="_blank" title="Noncommercial" href="https://creativecommons.org/licenses/by-nc/4.0/"><i class="icon fab fa-creative-commons-nc"></i></a></p></div></div></div></div></div><div class="article-tags is-size-7 mb-4"><span class="mr-2">#</span><a class="link-muted mr-2" rel="tag" href="/tags/Python/">Python</a><a class="link-muted mr-2" rel="tag" href="/tags/Module/">Module</a></div><!--!--></article></div><div class="card"><div class="card-content"><h3 class="menu-label has-text-centered">喜欢这篇文章？打赏一下作者吧</h3><div class="buttons is-centered"><a class="button donate" href="/" target="_blank" rel="noopener" data-type="buymeacoffee"><span class="icon is-small"><i class="fas fa-coffee"></i></span><span>送我杯咖啡</span></a></div></div></div><nav class="post-navigation mt-4 level is-mobile"><div class="level-start"><a class="article-nav-prev level level-item link-muted" href="/2023/08/02/14.%E5%9C%A8Linux:MacOSX%E4%B8%8A%E9%83%A8%E7%BD%B2AList%E5%92%8Cclouddrive/"><i class="level-item fas fa-chevron-left"></i><span class="level-item">在Linux/MacOSX上部署AList和clouddrive</span></a></div><div class="level-end"><a class="article-nav-next level level-item link-muted" href="/2022/09/01/12.Python%E6%A8%A1%E5%9D%97-%E6%89%93%E5%8C%85%E5%A4%9A%E4%B8%AA%E5%8F%82%E6%95%B0%E4%BA%8E%E4%B8%80%E4%BD%93/"><span class="level-item">Python模块-打包多个参数于一体</span><i class="level-item fas fa-chevron-right"></i></a></div></nav><!--!--></div><div class="column column-left is-4-tablet is-4-desktop is-3-widescreen  order-1"><div class="card widget" data-type="profile"><div class="card-content"><nav class="level"><div class="level-item has-text-centered flex-shrink-1"><div><figure class="image is-128x128 mx-auto mb-2"><img class="avatar" src="https://octodex.github.com/images/hula_loop_octodex03.gif" alt="ChenyangGao"></figure><p class="title is-size-4 is-block" style="line-height:inherit;">ChenyangGao</p><p class="is-size-6 is-block">Thinker</p><p class="is-size-6 is-flex justify-content-center"><i class="fas fa-map-marker-alt mr-1"></i><span>China</span></p></div></div></nav><nav class="level is-mobile"><div class="level-item has-text-centered is-marginless"><div><p class="heading">文章</p><a href="/archives/"><p class="title">15</p></a></div></div><div class="level-item has-text-centered is-marginless"><div><p class="heading">分类</p><a href="/categories/"><p class="title">6</p></a></div></div><div class="level-item has-text-centered is-marginless"><div><p class="heading">标签</p><a href="/tags/"><p class="title">5</p></a></div></div></nav><div class="level"><a class="level-item button is-primary is-rounded" href="https://github.com/ChenyangGao" target="_blank" rel="me noopener">关注我</a></div></div></div><!--!--><div class="card widget" data-type="links"><div class="card-content"><div class="menu"><h3 class="menu-label">链接</h3><ul class="menu-list"><li><a class="level is-mobile" href="https://hexo.io" target="_blank" rel="noopener"><span class="level-left"><span class="level-item">Hexo</span></span><span class="level-right"><span class="level-item tag">hexo.io</span></span></a></li><li><a class="level is-mobile" href="https://bulma.io" target="_blank" rel="noopener"><span class="level-left"><span class="level-item">Bulma</span></span><span class="level-right"><span class="level-item tag">bulma.io</span></span></a></li></ul></div></div></div><div class="card widget" data-type="categories"><div class="card-content"><div class="menu"><h3 class="menu-label">分类</h3><ul class="menu-list"><li><a class="level is-mobile" href="/categories/%E6%95%B0%E5%AD%A6/"><span class="level-start"><span class="level-item">数学</span></span><span class="level-end"><span class="level-item tag">1</span></span></a><ul><li><a class="level is-mobile" href="/categories/%E6%95%B0%E5%AD%A6/%E7%BB%8F%E6%B5%8E%E5%AD%A6/"><span class="level-start"><span class="level-item">经济学</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li></ul></li><li><a class="level is-mobile" href="/categories/%E7%AE%80%E5%8D%95%E8%84%9A%E6%9C%AC/"><span class="level-start"><span class="level-item">简单脚本</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/categories/%E7%BC%96%E7%A8%8B%E6%80%9D%E6%83%B3/"><span class="level-start"><span class="level-item">编程思想</span></span><span class="level-end"><span class="level-item tag">5</span></span></a></li><li><a class="level is-mobile" href="/categories/%E8%84%9A%E6%9C%AC%E5%B7%A5%E5%85%B7/"><span class="level-start"><span class="level-item">脚本工具</span></span><span class="level-end"><span class="level-item tag">6</span></span></a></li><li><a class="level is-mobile" href="/categories/%E9%80%9A%E7%94%A8%E6%A8%A1%E5%9D%97/"><span class="level-start"><span class="level-item">通用模块</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li></ul></div></div></div><div class="card widget" data-type="tags"><div class="card-content"><div class="menu"><h3 class="menu-label">标签</h3><div class="field is-grouped is-grouped-multiline"><div class="control"><a class="tags has-addons" href="/tags/Module/"><span class="tag">Module</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Python/"><span class="tag">Python</span><span class="tag">12</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Script/"><span class="tag">Script</span><span class="tag">7</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Shell/"><span class="tag">Shell</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E5%8D%9A%E5%BC%88%E8%AE%BA/"><span class="tag">博弈论</span><span class="tag">1</span></a></div></div></div></div></div><div class="column-right-shadow is-hidden-widescreen"></div></div><div class="column column-right is-4-tablet is-4-desktop is-3-widescreen is-hidden-touch is-hidden-desktop-only order-3"><div class="card widget" data-type="recent-posts"><div class="card-content"><h3 class="menu-label">最新文章</h3><article class="media"><figure class="media-left"><a class="image" href="/2025/08/20/15.python%E7%9A%84%E5%AD%97%E5%85%B8%E5%92%8C%E9%9B%86%E5%90%88%E7%9A%84%E9%80%80%E5%8C%96/"><img src="https://cdn.pixabay.com/photo/2018/09/28/03/33/python-3708448_1280.jpg" alt="python的字典和集合的退化"></a></figure><div class="media-content"><p class="date"><time dateTime="2025-08-20T08:00:00.000Z">2025-08-20</time></p><p class="title"><a href="/2025/08/20/15.python%E7%9A%84%E5%AD%97%E5%85%B8%E5%92%8C%E9%9B%86%E5%90%88%E7%9A%84%E9%80%80%E5%8C%96/">python的字典和集合的退化</a></p><p class="categories"><a href="/categories/%E7%BC%96%E7%A8%8B%E6%80%9D%E6%83%B3/">编程思想</a></p></div></article><article class="media"><figure class="media-left"><a class="image" href="/2023/08/02/14.%E5%9C%A8Linux:MacOSX%E4%B8%8A%E9%83%A8%E7%BD%B2AList%E5%92%8Cclouddrive/"><img src="https://cdn.pixabay.com/photo/2015/08/21/00/21/library-898333_1280.jpg" alt="在Linux/MacOSX上部署AList和clouddrive"></a></figure><div class="media-content"><p class="date"><time dateTime="2023-08-02T08:00:00.000Z">2023-08-02</time></p><p class="title"><a href="/2023/08/02/14.%E5%9C%A8Linux:MacOSX%E4%B8%8A%E9%83%A8%E7%BD%B2AList%E5%92%8Cclouddrive/">在Linux/MacOSX上部署AList和clouddrive</a></p><p class="categories"><a href="/categories/%E7%AE%80%E5%8D%95%E8%84%9A%E6%9C%AC/">简单脚本</a></p></div></article><article class="media"><figure class="media-left"><a class="image" href="/2022/09/08/13.Python%E6%A8%A1%E5%9D%97-pandas.DataFrame%E8%BD%ACExcel%E6%A0%BC%E5%BC%8F%E7%9A%84bytes%E6%95%B0%E6%8D%AE/"><img src="https://cdn.pixabay.com/photo/2013/12/10/18/22/green-tree-python-226553_1280.jpg" alt="Python模块-pandas.DataFrame转Excel格式的bytes数据"></a></figure><div class="media-content"><p class="date"><time dateTime="2022-09-08T10:00:00.000Z">2022-09-08</time></p><p class="title"><a href="/2022/09/08/13.Python%E6%A8%A1%E5%9D%97-pandas.DataFrame%E8%BD%ACExcel%E6%A0%BC%E5%BC%8F%E7%9A%84bytes%E6%95%B0%E6%8D%AE/">Python模块-pandas.DataFrame转Excel格式的bytes数据</a></p><p class="categories"><a href="/categories/%E9%80%9A%E7%94%A8%E6%A8%A1%E5%9D%97/">通用模块</a></p></div></article><article class="media"><figure class="media-left"><a class="image" href="/2022/09/01/12.Python%E6%A8%A1%E5%9D%97-%E6%89%93%E5%8C%85%E5%A4%9A%E4%B8%AA%E5%8F%82%E6%95%B0%E4%BA%8E%E4%B8%80%E4%BD%93/"><img src="https://cdn.pixabay.com/photo/2014/12/11/22/10/python-564817_1280.jpg" alt="Python模块-打包多个参数于一体"></a></figure><div class="media-content"><p class="date"><time dateTime="2022-09-01T08:00:00.000Z">2022-09-01</time></p><p class="title"><a href="/2022/09/01/12.Python%E6%A8%A1%E5%9D%97-%E6%89%93%E5%8C%85%E5%A4%9A%E4%B8%AA%E5%8F%82%E6%95%B0%E4%BA%8E%E4%B8%80%E4%BD%93/">Python模块-打包多个参数于一体</a></p><p class="categories"><a href="/categories/%E9%80%9A%E7%94%A8%E6%A8%A1%E5%9D%97/">通用模块</a></p></div></article><article class="media"><figure class="media-left"><a class="image" href="/2022/08/30/11.Python%E8%84%9A%E6%9C%AC%E8%AE%BE%E7%BD%AEpip%E7%B4%A2%E5%BC%95%E6%BA%90/"><img src="https://cdn.pixabay.com/photo/2016/02/27/10/26/snake-1225370_1280.jpg" alt="Python脚本设置pip索引源"></a></figure><div class="media-content"><p class="date"><time dateTime="2022-08-30T07:00:00.000Z">2022-08-30</time></p><p class="title"><a href="/2022/08/30/11.Python%E8%84%9A%E6%9C%AC%E8%AE%BE%E7%BD%AEpip%E7%B4%A2%E5%BC%95%E6%BA%90/">Python脚本设置pip索引源</a></p><p class="categories"><a href="/categories/%E8%84%9A%E6%9C%AC%E5%B7%A5%E5%85%B7/">脚本工具</a></p></div></article></div></div><div class="card widget" data-type="archives"><div class="card-content"><div class="menu"><h3 class="menu-label">归档</h3><ul class="menu-list"><li><a class="level is-mobile" href="/archives/2025/08/"><span class="level-start"><span class="level-item">八月 2025</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2023/08/"><span class="level-start"><span class="level-item">八月 2023</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2022/09/"><span class="level-start"><span class="level-item">九月 2022</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/archives/2022/08/"><span class="level-start"><span class="level-item">八月 2022</span></span><span class="level-end"><span class="level-item tag">6</span></span></a></li><li><a class="level is-mobile" href="/archives/2019/07/"><span class="level-start"><span class="level-item">七月 2019</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/archives/2019/05/"><span class="level-start"><span class="level-item">五月 2019</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2019/04/"><span class="level-start"><span class="level-item">四月 2019</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li></ul></div></div></div></div></div></div></section><footer class="footer"><div class="container"><div class="level"><div class="level-start"><a class="footer-logo is-block mb-2" href="/">思考者</a><p class="is-size-7"><span>&copy; 2025 ChenyangGao</span>  Powered by <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a> &amp; <a href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank" rel="noopener">Icarus</a><br><span id="busuanzi_container_site_uv">共<span id="busuanzi_value_site_uv">0</span>个访客</span></p></div><div class="level-end"></div></div></div></footer><script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script><script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script><script>moment.locale("zh-cn");</script><script>var IcarusThemeSettings = {
+            article: {
+                highlight: {
+                    clipboard: true,
+                    fold: 'unfolded'
+                }
+            }
+        };</script><script data-pjax src="/js/column.js"></script><script src="/js/animation.js"></script><a id="back-to-top" title="回到顶端" href="javascript:;"><i class="fas fa-chevron-up"></i></a><script data-pjax src="/js/back_to_top.js" defer></script><!--!--><script src="https://cdn.jsdelivr.net/npm/cookieconsent@3.1.1/build/cookieconsent.min.js" defer></script><script>window.addEventListener("load", () => {
+      window.cookieconsent.initialise({
+        type: "info",
+        theme: "edgeless",
+        static: false,
+        position: "bottom-left",
+        content: {
+          message: "此网站使用Cookie来改善您的体验。",
+          dismiss: "知道了！",
+          allow: "允许使用Cookie",
+          deny: "拒绝",
+          link: "了解更多",
+          policy: "Cookie政策",
+          href: "https://www.cookiesandyou.com/",
+        },
+        palette: {
+          popup: {
+            background: "#edeff5",
+            text: "#838391"
+          },
+          button: {
+            background: "#4b81e8"
+          },
+        },
+      });
+    });</script><script src="https://cdn.jsdelivr.net/npm/lightgallery@1.10.0/dist/js/lightgallery.min.js" defer></script><script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.8.1/dist/js/jquery.justifiedGallery.min.js" defer></script><script>window.addEventListener("load", () => {
+            if (typeof $.fn.lightGallery === 'function') {
+                $('.article').lightGallery({ selector: '.gallery-item' });
+            }
+            if (typeof $.fn.justifiedGallery === 'function') {
+                if ($('.justified-gallery > p > .gallery-item').length) {
+                    $('.justified-gallery > p > .gallery-item').unwrap();
+                }
+                $('.justified-gallery').justifiedGallery();
+            }
+        });</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.css"><script src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.js" defer></script><script src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/contrib/auto-render.min.js" defer></script><script src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/contrib/mhchem.min.js" defer></script><script>window.addEventListener("load", function() {
+            document.querySelectorAll('[role="article"] > .content').forEach(function(element) {
+                renderMathInElement(element);
+            });
+        });</script><script type="text/javascript" id="MathJax-script" async>MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']]
+      },
+      svg: {
+        fontCache: 'global'
+      },
+      chtml: {
+        matchFontHeight: false
+      }
+    };</script><script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js"></script><div id="outdated"><h6>Your browser is out-of-date!</h6><p>Update your browser to view this website correctly.&amp;npsb;<a id="btnUpdateBrowser" href="http://outdatedbrowser.com/">Update my browser now </a></p><p class="last"><a href="#" id="btnCloseUpdateBrowser" title="Close">×</a></p></div><script src="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.js" defer></script><script>window.addEventListener("load", function () {
+            outdatedBrowser({
+                bgColor: '#f25648',
+                color: '#ffffff',
+                lowerThan: 'object-fit' // display on IE11 or below
+            });
+        });</script><script src="https://cdn.jsdelivr.net/npm/pjax@0.2.8/pjax.min.js"></script><script src="/js/pjax.js"></script><!--!--><script data-pjax src="/js/main.js" defer></script><div class="searchbox"><div class="searchbox-container"><div class="searchbox-header"><div class="searchbox-input-container"><input class="searchbox-input" type="text" placeholder="想要查找什么..."></div><a class="searchbox-close" href="javascript:;">×</a></div><div class="searchbox-body"></div></div></div><script data-pjax src="/js/insight.js" defer></script><script data-pjax>document.addEventListener('DOMContentLoaded', function () {
+            loadInsight({"contentUrl":"/content.json"}, {"hint":"想要查找什么...","untitled":"(无标题)","posts":"文章","pages":"页面","categories":"分类","tags":"标签"});
+        });</script></body></html>
